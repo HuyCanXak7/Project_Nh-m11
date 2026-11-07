@@ -1,0 +1,384 @@
+/* ===== Auth card ===== */
+.auth-card {
+    position: relative;
+    flex-shrink: 0;
+    background: var(--white);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+}
+
+.auth-card--login {
+    width: calc(var(--u) * 863);
+    min-height: calc(var(--u) * 732);
+    padding: calc(var(--u) * 132) calc(var(--u) * 85) calc(var(--u) * 66) calc(var(--u) * 68);
+}
+
+.auth-card--register {
+    width: calc(var(--u) * 893);
+    min-height: calc(var(--u) * 792);
+    padding: calc(var(--u) * 70) calc(var(--u) * 70) calc(var(--u) * 70) calc(var(--u) * 64);
+}
+
+/* Tab góc trên-phải (Đăng Ký / Đăng Nhập) */
+.auth-card__tab {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary);
+    color: var(--white);
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 0 var(--radius-card) 0 calc(var(--u) * 42);
+    box-shadow: var(--shadow-tab);
+    transition: background 0.2s;
+}
+
+.auth-card--login .auth-card__tab {
+    width: calc(var(--u) * 231);
+    height: calc(var(--u) * 76);
+    font-size: calc(var(--u) * 29);
+}
+
+.auth-card--register .auth-card__tab {
+    width: calc(var(--u) * 236);
+    height: calc(var(--u) * 84);
+    font-size: calc(var(--u) * 34);
+}
+
+.auth-card__tab:hover {
+    background: var(--primary-hover);
+}
+
+/* Title (register) */
+.auth-card__title {
+    font-size: calc(var(--u) * 62);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text-dark);
+}
+
+.auth-card__desc {
+    font-size: calc(var(--u) * 24);
+    font-weight: 600;
+    color: var(--text-gray);
+    margin-top: calc(var(--u) * 6);
+    margin-bottom: calc(var(--u) * 14);
+}
+
+/* ===== Form ===== */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.auth-form--login { gap: calc(var(--u) * 14); }
+.auth-form--register { gap: calc(var(--u) * 14); }
+
+/* Label (login) */
+.auth-form__label {
+    font-size: calc(var(--u) * 50);
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--text-dark);
+}
+
+.auth-form__label + .input-wrapper { margin-bottom: calc(var(--u) * 12); }
+
+/* Input */
+.input-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-input);
+    background: var(--white);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.auth-form--login .input-group {
+    height: calc(var(--u) * 80);
+    padding: 0 calc(var(--u) * 28) 0 calc(var(--u) * 22);
+}
+
+.auth-form--register .input-group {
+    height: calc(var(--u) * 70);
+    padding: 0 calc(var(--u) * 26) 0 calc(var(--u) * 22);
+    border-radius: calc(var(--u) * 20);
+}
+
+.input-group:focus-within {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.input-group__icon {
+    flex-shrink: 0;
+    width: calc(var(--u) * 38);
+    height: calc(var(--u) * 38);
+    color: var(--text-dark);
+    margin-right: calc(var(--u) * 22);
+}
+
+.input-group__input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: var(--font-main);
+    color: var(--text-dark);
+}
+
+.auth-form--login .input-group__input { font-size: calc(var(--u) * 29); }
+.auth-form--register .input-group__input { font-size: calc(var(--u) * 26); }
+
+.input-group__input::placeholder {
+    color: var(--text-placeholder);
+}
+
+/* Placeholder dạng chấm tròn cho ô mật khẩu login */
+#loginPassword::placeholder {
+    color: #374151;
+    letter-spacing: 0.3em;
+    font-size: 0.75em;
+}
+
+.input-group__toggle {
+    display: flex;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--text-black);
+}
+
+.input-group__toggle svg {
+    width: calc(var(--u) * 38);
+    height: calc(var(--u) * 38);
+}
+
+.input-group__toggle:hover {
+    color: var(--primary);
+}
+
+/* Options row (login) */
+.auth-form__options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: calc(var(--u) * 24);
+    font-weight: 600;
+    margin-top: calc(var(--u) * 6);
+}
+
+.auth-form__remember {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--u) * 8);
+    color: var(--text-link);
+    cursor: pointer;
+}
+
+.auth-form__forgot {
+    color: var(--text-link);
+    text-decoration: none;
+}
+
+.auth-form__forgot:hover {
+    text-decoration: underline;
+}
+
+/* Checkbox custom */
+.auth-form input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    flex-shrink: 0;
+    display: grid;
+    place-content: center;
+    border: 1px solid var(--border);
+    background: var(--white);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.auth-form__remember input[type="checkbox"] {
+    width: calc(var(--u) * 24);
+    height: calc(var(--u) * 24);
+    border-radius: calc(var(--u) * 5);
+}
+
+.auth-form__terms input[type="checkbox"] {
+    width: calc(var(--u) * 30);
+    height: calc(var(--u) * 30);
+    border-radius: calc(var(--u) * 6);
+}
+
+.auth-form input[type="checkbox"]::after {
+    content: '';
+    width: 30%;
+    height: 55%;
+    border: solid var(--white);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) translate(-10%, -10%);
+    opacity: 0;
+}
+
+.auth-form input[type="checkbox"]:checked {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.auth-form input[type="checkbox"]:checked::after {
+    opacity: 1;
+}
+
+.auth-form input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Terms (register) */
+.auth-form__terms {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--u) * 10);
+    font-size: calc(var(--u) * 23);
+    color: var(--text-black);
+    margin-top: calc(var(--u) * 16);
+    cursor: pointer;
+}
+
+.auth-form__terms a {
+    color: var(--text-link);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.auth-form__terms a:hover {
+    text-decoration: underline;
+}
+
+/* Submit */
+.auth-form__submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: calc(var(--u) * 12);
+    width: 100%;
+    border: none;
+    background: var(--primary);
+    color: var(--white);
+    font-family: var(--font-main);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.auth-form__submit:hover { background: var(--primary-hover); }
+.auth-form__submit:active { transform: scale(0.99); }
+
+.auth-form--login .auth-form__submit {
+    width: calc(100% - var(--u) * 18);
+    margin-left: calc(var(--u) * 18);
+    height: calc(var(--u) * 110);
+    margin-top: calc(var(--u) * 42);
+    border: 1px solid #4B5563;
+    border-radius: calc(var(--u) * 36);
+    font-size: calc(var(--u) * 40);
+}
+
+.auth-form--register .auth-form__submit {
+    height: calc(var(--u) * 108);
+    margin-top: calc(var(--u) * 14);
+    border-radius: var(--radius-full);
+    font-size: calc(var(--u) * 32);
+}
+
+.auth-form__submit svg {
+    width: 1.05em;
+    height: 1.05em;
+}
+
+/* ===== Validation ===== */
+.input-error {
+    display: none;
+    font-size: max(12px, calc(var(--u) * 18));
+    color: var(--error);
+    padding: 4px calc(var(--u) * 22) 0;
+}
+
+.input-error.active { display: block; }
+
+.input-group.error { border-color: var(--error); }
+.input-group.error .input-group__icon { color: var(--error); }
+
+/* Mobile: giữ cỡ chữ đọc được */
+@media (max-width: 860px) {
+    .auth-card--login,
+    .auth-card--register {
+        width: 100%;
+        min-height: 0;
+        padding: 80px 20px 28px;
+    }
+
+    .auth-card--register { padding-top: 72px; }
+
+    .auth-card--login .auth-card__tab,
+    .auth-card--register .auth-card__tab {
+        width: 130px;
+        height: 48px;
+        font-size: 16px;
+        border-radius: 0 24px 0 26px;
+    }
+
+    .auth-card { border-radius: 24px; }
+
+    .auth-card__title { font-size: 30px; }
+    .auth-card__desc { font-size: 14px; margin-bottom: 12px; }
+
+    .auth-form--login,
+    .auth-form--register { gap: 10px; }
+
+    .auth-form__label { font-size: 22px; }
+
+    .auth-form--login .input-group,
+    .auth-form--register .input-group {
+        height: 52px;
+        padding: 0 14px;
+        border-radius: 14px;
+    }
+
+    .input-group__icon,
+    .input-group__toggle svg { width: 22px; height: 22px; }
+    .input-group__icon { margin-right: 12px; }
+
+    .auth-form--login .input-group__input,
+    .auth-form--register .input-group__input { font-size: 16px; }
+
+    .auth-form__options { font-size: 14px; }
+    .auth-form__remember input[type="checkbox"] { width: 16px; height: 16px; border-radius: 4px; }
+
+    .auth-form__terms { font-size: 14px; align-items: flex-start; margin-top: 6px; }
+    .auth-form__terms input[type="checkbox"] { width: 18px; height: 18px; border-radius: 4px; margin-top: 1px; }
+
+    .auth-form--login .auth-form__submit,
+    .auth-form--register .auth-form__submit {
+        width: 100%;
+        margin-left: 0;
+        height: 56px;
+        font-size: 18px;
+        margin-top: 12px;
+    }
+
+    .auth-form--login .auth-form__submit { border-radius: 18px; }
+
+    .input-error { font-size: 12px; padding-left: 14px; }
+}

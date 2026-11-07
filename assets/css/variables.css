@@ -1,0 +1,32 @@
+:root {
+    /* Colors — lấy theo design */
+    --primary: #3B82F6;
+    --primary-hover: #2F6FE0;
+    --bg-main: #DCE8FD;
+    --bg-circle: #A9C7FB;
+    --white: #FFFFFF;
+    --text-dark: #1E293B;
+    --text-black: #0B0B0F;
+    --text-gray: #64748B;
+    --text-placeholder: #6B7280;
+    --text-link: #3B82F6;
+    --border: #6B7280;
+    --border-focus: #3B82F6;
+    --error: #E53E3E;
+
+    /* Radius */
+    --radius-input: 22px;
+    --radius-card: 36px;
+    --radius-full: 9999px;
+
+    --shadow-card: 0 6px 8px rgba(30, 41, 59, 0.18);
+    --shadow-tab: 0 5px 6px rgba(30, 41, 59, 0.18);
+
+    --font-main: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
+
+    /*
+     * --u = 1px của design (khung 1512 x 982, MacBook Pro 14").
+     * Màn nhỏ hơn thì cả giao diện tự thu nhỏ theo tỉ lệ, giữ đúng bố cục.
+     */
+    --u: min(1px, calc(100vw / 1512), calc(100vh / 982));
+}
