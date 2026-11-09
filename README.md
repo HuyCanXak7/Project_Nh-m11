@@ -410,7 +410,7 @@ Một card trên Trello chỉ được chuyển sang **Done** khi:
 
 ## 12. Chạy dự án
 
-> ⚠️ **TODO (PB-44):** bổ sung khi hoàn thiện. Mục tiêu: người ngoài nhóm chạy được trong **≤ 10 phút**.
+Ghi đè (Upsert) để sinh viên cập nhập được điểm khi có kết quả thi
 
 ```bash
 git clone <repo-url>
