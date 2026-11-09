@@ -157,6 +157,7 @@ function openCreateCourseModal() {
   openAppModal('courseModal');
 }
 
+// === SỬA VÀ XÓA MÔN HỌC CASCADE (Task: T0694D0 | PB-12, PB-46 / BR-18) ===
 function openEditCourseModal(courseId) {
   const course = StorageService.getCourseById(courseId);
   if (!course) return;
