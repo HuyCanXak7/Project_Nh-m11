@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ cá nhân & Bảo mật - Quản lí chỉ số học tập</title>
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="../assets/css/model.css">
+    <link rel="stylesheet" href="../assets/css/app.css">
+</head>
+<body class="app-body">
+    <div class="bg-decoration" aria-hidden="true">
+        <div class="bg-circle bg-circle--1" style="width: 320px; height: 320px; left: -100px; top: -100px;"></div>
+        <div class="bg-circle bg-circle--2" style="width: 420px; height: 420px; right: -120px; bottom: -180px;"></div>
+    </div>
+
+    <div class="app-wrapper">
+        <!-- TOP NAVBAR -->
+        <header class="app-navbar no-print">
+            <a href="semesters.html" class="app-brand">
+                <div class="app-brand__icon">🎓</div>
+                <div>
+                    <h1 class="app-brand__title">Quản Lý Chỉ Số Học Tập</h1>
+                    <p class="app-brand__sub">Đồ án Nhóm 11 • <strong style="color: var(--primary);">FE: Nghiệp</strong></p>
+                </div>
+            </a>
+
+            <!-- NAVIGATION PILLS -->
+            <nav class="app-nav">
+                <a href="semesters.html" class="app-nav__link">📅 Học kỳ</a>
+                <a href="courses.html" class="app-nav__link">📚 Môn học</a>
+                <a href="dashboard.html" class="app-nav__link">🏠 Dashboard</a>
+                <a href="goals.html" class="app-nav__link">🎯 Mục tiêu</a>
+                <a href="import.html" class="app-nav__link">📥 Nhập CSV</a>
+                <a href="transcript.html" class="app-nav__link">📄 Bảng điểm</a>
+            </nav>
+
+            <!-- USER INFO & LOGOUT -->
+            <div class="app-user">
+                <button type="button" onclick="handleResetData()" class="btn btn-secondary btn-sm" title="Khôi phục dữ liệu mẫu ban đầu">🔄 Khôi phục</button>
+                <a href="profile.html" class="app-user__profile active" title="Xem hồ sơ cá nhân">
+                    <div class="app-user__avatar" id="navStudentAvatar">NN</div>
+                    <div class="app-user__info">
+                        <div class="app-user__name" id="navStudentName">Huỳnh Nhơn Nguyên Nghiệp</div>
+                        <div class="app-user__mssv" id="navStudentId">MSSV: N25DTCN038</div>
+                    </div>
+                </a>
+                <button type="button" onclick="handleLogout()" class="app-user__logout" title="Đăng xuất khỏi hệ thống">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <span>Thoát</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN CARD -->
+        <main class="app-card">
+            <div class="app-header">
+                <div>
+                    <h2 class="app-header__title">👤 Hồ Sơ Cá Nhân & Bảo Mật</h2>
+                    <p class="app-header__desc">Cập nhật thông tin sinh viên in ấn trên bảng điểm và thay đổi mật khẩu (PB-04, PB-05)</p>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 28px;">
+                <!-- Cột 1: Thông tin sinh viên (PB-04) -->
+                <div style="background: var(--bg-main); border-radius: 24px; padding: 26px;">
+                    <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 20px;">
+                        <div class="app-user__avatar" style="width: 52px; height: 52px; font-size: 18px;">NN</div>
+                        <div>
+                            <h3 style="font-size: 17px; font-weight: 800; color: var(--text-black);">Thông Tin Sinh Viên</h3>
+                            <p style="font-size: 12px; color: var(--text-gray);">Đồng bộ lên báo cáo bảng điểm in ấn A4</p>
+                        </div>
+                    </div>
+
+                    <form onsubmit="handleSaveProfile(event)">
+                        <div class="modal-form-group">
+                            <label class="modal-label" for="profileNameInput">Họ và tên *</label>
+                            <input type="text" id="profileNameInput" class="modal-input" required>
+                        </div>
+                        <div class="modal-form-group">
+                            <label class="modal-label" for="profileStudentIdInput">Mã số sinh viên (MSSV) *</label>
+                            <input type="text" id="profileStudentIdInput" class="modal-input" required>
+                        </div>
+                        <div class="modal-form-group">
+                            <label class="modal-label" for="profileEmailInput">Địa chỉ Email</label>
+                            <input type="email" id="profileEmailInput" class="modal-input" readonly style="background: rgba(255,255,255,0.6); cursor: not-allowed;" title="Email do nhà trường cấp">
+                        </div>
+                        <div class="modal-form-group">
+                            <label class="modal-label" for="profileMajorInput">Chuyên ngành</label>
+                            <input type="text" id="profileMajorInput" class="modal-input">
+                        </div>
+                        <div class="modal-form-group">
+                            <label class="modal-label" for="profileClassInput">Lớp sinh hoạt</label>
+                            <input type="text" id="profileClassInput" class="modal-input">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">💾 Cập nhật hồ sơ</button>
+                    </form>
+                </div>
+
+                <!-- Cột 2: Đổi mật khẩu (PB-05) -->
+                <div style="background: #fff; border: 1.5px solid rgba(107, 114, 128, 0.2); border-radius: 24px; padding: 26px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                            <span style="font-size: 26px;">🔒</span>
+                            <div>
+                                <h3 style="font-size: 17px; font-weight: 800; color: var(--text-black);">Đổi Mật Khẩu (PB-05)</h3>
+                                <p style="font-size: 12px; color: var(--text-gray);">Bảo vệ tài khoản và phiên đăng nhập</p>
+                            </div>
+                        </div>
+
+                        <form onsubmit="handleChangePassword(event)">
+                            <div class="modal-form-group">
+                                <label class="modal-label" for="currentPasswordInput">Mật khẩu hiện tại *</label>
+                                <input type="password" id="currentPasswordInput" class="modal-input" required placeholder="Nhập mật khẩu hiện tại">
+                            </div>
+                            <div class="modal-form-group">
+                                <label class="modal-label" for="newPasswordInput">Mật khẩu mới (Tối thiểu 8 ký tự) *</label>
+                                <input type="password" id="newPasswordInput" class="modal-input" minlength="8" required placeholder="Mật khẩu ít nhất 8 ký tự">
+                            </div>
+                            <div class="modal-form-group">
+                                <label class="modal-label" for="confirmPasswordInput">Xác nhận mật khẩu mới *</label>
+                                <input type="password" id="confirmPasswordInput" class="modal-input" minlength="8" required placeholder="Nhập lại mật khẩu mới">
+                            </div>
+                            <button type="submit" class="btn btn-secondary" style="width: 100%; margin-top: 10px;">🔐 Đổi mật khẩu</button>
+                        </form>
+                    </div>
+
+                    <div style="background: var(--bg-main); border-radius: 18px; padding: 14px; margin-top: 20px; font-size: 12.5px; color: var(--text-dark);">
+                        <strong style="color: var(--primary);">🛡️ Tiêu chuẩn bảo mật (PB-05):</strong><br>
+                        Khi đổi mật khẩu thành công, toàn bộ refresh token cũ trên các thiết bị khác sẽ được tự động thu hồi ngay lập tức.
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MOBILE BOTTOM NAVIGATION (PB-34) -->
+    <nav class="mobile-nav no-print">
+        <a href="semesters.html" class="mobile-nav__item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span>Học kỳ</span>
+        </a>
+        <a href="courses.html" class="mobile-nav__item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <span>Môn học</span>
+        </a>
+        <a href="dashboard.html" class="mobile-nav__item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>Dashboard</span>
+        </a>
+        <a href="goals.html" class="mobile-nav__item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            <span>Mục tiêu</span>
+        </a>
+        <a href="transcript.html" class="mobile-nav__item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <span>Bảng điểm</span>
+        </a>
+    </nav>
+
+    <!-- SCRIPTS -->
+    <script src="../assets/js/storageService.js"></script>
+    <script src="../assets/js/gradeCalculator.js"></script>
+    <script src="../assets/js/app_common.js"></script>
+    <script src="../assets/js/profile.js"></script>
+</body>
+</html>

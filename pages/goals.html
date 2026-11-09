@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mục tiêu & Mô phỏng GPA - Quản lí chỉ số học tập</title>
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="../assets/css/model.css">
+    <link rel="stylesheet" href="../assets/css/app.css">
+</head>
+<body class="app-body">
+    <div class="bg-decoration" aria-hidden="true">
+        <div class="bg-circle bg-circle--1" style="width: 320px; height: 320px; left: -100px; top: -100px;"></div>
+        <div class="bg-circle bg-circle--2" style="width: 420px; height: 420px; right: -120px; bottom: -180px;"></div>
+    </div>
+
+    <div class="app-wrapper">
+        <!-- TOP NAVBAR -->
+        <header class="app-navbar no-print">
+            <a href="semesters.html" class="app-brand">
+                <div class="app-brand__icon">🎓</div>
+                <div>
+                    <h1 class="app-brand__title">Quản Lý Chỉ Số Học Tập</h1>
+                    <p class="app-brand__sub">Đồ án Nhóm 11 • <strong style="color: var(--primary);">FE: Nghiệp</strong></p>
+                </div>
+            </a>
+
+            <!-- NAVIGATION PILLS -->
+            <nav class="app-nav">
+                <a href="semesters.html" class="app-nav__link">📅 Học kỳ</a>
+                <a href="courses.html" class="app-nav__link">📚 Môn học</a>
+                <a href="dashboard.html" class="app-nav__link">🏠 Dashboard</a>
+                <a href="goals.html" class="app-nav__link active">🎯 Mục tiêu</a>
+                <a href="import.html" class="app-nav__link">📥 Nhập CSV</a>
+                <a href="transcript.html" class="app-nav__link">📄 Bảng điểm</a>
+            </nav>
+
+            <!-- USER INFO & LOGOUT -->
+            <div class="app-user">
+                <button type="button" onclick="handleResetData()" class="btn btn-secondary btn-sm" title="Khôi phục dữ liệu mẫu ban đầu">🔄 Khôi phục</button>
+                <a href="profile.html" class="app-user__profile" title="Xem hồ sơ cá nhân">
+                    <div class="app-user__avatar" id="navStudentAvatar">NN</div>
+                    <div class="app-user__info">
+                        <div class="app-user__name" id="navStudentName">Huỳnh Nhơn Nguyên Nghiệp</div>
+                        <div class="app-user__mssv" id="navStudentId">MSSV: N25DTCN038</div>
+                    </div>
+                </a>
+                <button type="button" onclick="handleLogout()" class="app-user__logout" title="Đăng xuất khỏi hệ thống">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <span>Thoát</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN CARD -->
+        <main class="app-card">
+            <div class="app-header">
+                <div>
+                    <h2 class="app-header__title">🎯 Thiết Lập Mục Tiêu & Mô Phỏng Điểm</h2>
+                    <p class="app-header__desc">Đặt GPA mục tiêu, tính điểm cần đạt và thử nghiệm các kịch bản cải thiện kết quả (PB-22, PB-23, PB-24)</p>
+                </div>
+            </div>
+
+            <!-- PHẦN 1: MỤC TIÊU & TÍNH ĐIỂM CẦN ĐẠT (PB-22, PB-23) -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 32px;">
+                <!-- Form Mục tiêu -->
+                <div style="background: var(--bg-main); border-radius: 24px; padding: 26px;">
+                    <h3 style="font-size: 17px; font-weight: 800; margin-bottom: 16px; color: var(--text-black);">
+                        🎯 Thiết Lập GPA Mục Tiêu (PB-22)
+                    </h3>
+                    <form onsubmit="handleSaveGoal(event)">
+                        <div class="modal-form-group">
+                            <label class="modal-label" for="inputTargetGpa">GPA mục tiêu (Hệ 4.0) *</label>
+                            <input type="number" step="0.01" min="0" max="4" id="inputTargetGpa" class="modal-input" placeholder="Ví dụ: 3.20" required>
+                        </div>
+                        <div class="modal-form-group">
+                            <label class="modal-label" for="inputTargetDate">Ngày dự kiến hoàn thành</label>
+                            <input type="date" id="inputTargetDate" class="modal-input">
+                        </div>
+                        <div class="modal-form-group">
+                            <label class="modal-label" for="inputRemainingCredits">Số tín chỉ còn lại dự kiến tích lũy *</label>
+                            <input type="number" min="1" max="150" id="inputRemainingCredits" class="modal-input" placeholder="Ví dụ: 30" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">💾 Lưu mục tiêu GPA</button>
+                    </form>
+                </div>
+
+                <!-- Thẻ Điểm Cần Đạt (PB-23) -->
+                <div style="background: #fff; border: 1.5px solid rgba(59, 130, 246, 0.3); border-radius: 24px; padding: 26px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <h3 style="font-size: 17px; font-weight: 800; margin-bottom: 16px; color: var(--text-black);">
+                            🧮 Điểm Hệ 4 Cần Đạt (PB-23)
+                        </h3>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
+                            <div style="background: var(--bg-main); padding: 12px; border-radius: 16px; text-align: center;">
+                                <div style="font-size: 11px; color: var(--text-gray); font-weight: 700; text-transform: uppercase;">GPA Hiện tại</div>
+                                <div id="displayCurrentGpa" style="font-size: 22px; font-weight: 800; color: var(--primary);">0.00</div>
+                            </div>
+                            <div style="background: var(--bg-main); padding: 12px; border-radius: 16px; text-align: center;">
+                                <div style="font-size: 11px; color: var(--text-gray); font-weight: 700; text-transform: uppercase;">Tín chỉ đã đạt</div>
+                                <div id="displayEarnedCredits" style="font-size: 22px; font-weight: 800; color: #10B981;">0 TC</div>
+                            </div>
+                        </div>
+
+                        <div style="background: var(--bg-main); border-radius: 20px; padding: 20px; text-align: center;">
+                            <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-gray); margin-bottom: 4px;">Điểm trung bình cần đạt</div>
+                            <div id="requiredScoreValue" style="font-size: 44px; font-weight: 900; color: var(--primary);">--</div>
+                            <div id="requiredScoreMsg" style="font-size: 13.5px; font-weight: 600; margin-top: 8px; line-height: 1.4;">Đang tính toán...</div>
+                        </div>
+                    </div>
+
+                    <div style="font-size: 11.5px; color: var(--text-gray); font-style: italic; margin-top: 14px;">
+                        * Công thức BR-13: Required = [Target × (Earned + Remaining) - Current × Earned] / Remaining
+                    </div>
+                </div>
+            </div>
+
+            <!-- PHẦN 2: CÔNG CỤ MÔ PHỎNG WHAT-IF (PB-24 / BR-15) -->
+            <div style="background: var(--bg-main); border-radius: 24px; padding: 26px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 18px;">
+                    <div>
+                        <h3 style="font-size: 17px; font-weight: 800; color: var(--text-black);">🧪 Công Cụ Mô Phỏng What-If (PB-24)</h3>
+                        <p style="font-size: 13px; color: var(--text-gray); margin-top: 2px;">
+                            Điều chỉnh điểm giả định ở các môn học để xem kết quả GPA tích lũy dự kiến. <strong>Không làm thay đổi điểm thật trong CSDL.</strong>
+                        </p>
+                    </div>
+                    <button type="button" onclick="resetSimulation()" class="btn btn-secondary btn-sm">🔄 Đặt lại mô phỏng</button>
+                </div>
+
+                <!-- Thống kê kết quả mô phỏng -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px;">
+                    <div style="background: #fff; padding: 14px; border-radius: 18px; text-align: center; border: 1.5px solid var(--primary);">
+                        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--primary);">GPA Mô Phỏng</div>
+                        <div id="simGpaVal" style="font-size: 26px; font-weight: 900; color: var(--primary);">0.00</div>
+                    </div>
+                    <div style="background: #fff; padding: 14px; border-radius: 18px; text-align: center;">
+                        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-gray);">Chênh lệch thực tế</div>
+                        <div id="simDiffVal" style="font-size: 20px; font-weight: 800; margin-top: 4px;">0.00</div>
+                    </div>
+                    <div style="background: #fff; padding: 14px; border-radius: 18px; text-align: center;">
+                        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-gray);">Xếp loại mô phỏng</div>
+                        <div id="simRankVal" style="font-size: 20px; font-weight: 800; color: var(--text-black); margin-top: 4px;">--</div>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="app-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 100px;">Mã môn</th>
+                                <th>Tên môn học</th>
+                                <th style="width: 90px; text-align: center;">Tín chỉ</th>
+                                <th style="width: 130px; text-align: center;">Điểm thật (Hệ 10)</th>
+                                <th style="width: 150px; text-align: center;">Điểm giả định (0..10)</th>
+                                <th style="width: 120px; text-align: center;">Hệ 4 quy đổi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="simulationTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MOBILE BOTTOM NAVIGATION (PB-34) -->
+    <nav class="mobile-nav no-print">
+        <a href="semesters.html" class="mobile-nav__item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span>Học kỳ</span>
+        </a>
+        <a href="courses.html" class="mobile-nav__item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <span>Môn học</span>
+        </a>
+        <a href="dashboard.html" class="mobile-nav__item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>Dashboard</span>
+        </a>
+        <a href="goals.html" class="mobile-nav__item active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            <span>Mục tiêu</span>
+        </a>
+        <a href="transcript.html" class="mobile-nav__item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <span>Bảng điểm</span>
+        </a>
+    </nav>
+
+    <!-- SCRIPTS -->
+    <script src="../assets/js/storageService.js"></script>
+    <script src="../assets/js/gradeCalculator.js"></script>
+    <script src="../assets/js/app_common.js"></script>
+    <script src="../assets/js/goals.js"></script>
+</body>
+</html>
