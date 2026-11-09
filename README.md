@@ -423,4 +423,32 @@ Tài khoản demo: xem mục seed dữ liệu (PB-48, PB-59).
 
 ---
 
-*Nhóm 11 · Phiên bản 1.0 · 06/11/2026*
+*Nhóm 11 · Phiên bản 1.0 · 09/11/2026*
+
+# Hướng dẫn dựng môi trường Dev Backend & Database MySQL (Docker)
+
+Môi trường phát triển đã được đóng gói bằng Docker Compose. Hệ thống sẽ tự động khởi chạy MySQL, Backend và tự động chạy Database Migration (Alembic) chỉ bằng một lệnh duy nhất.
+
+## Yêu cầu
+* Đã cài đặt [Docker](https://www.docker.com/) và Docker Compose trên máy.
+
+## Các bước chạy dự án
+
+**Bước 1: Thiết lập file biến môi trường**
+Copy file `.env.example` và đổi tên thành `.env`:
+```bash
+cp .env.example .env
+```
+*(Lưu ý: Bạn có thể giữ nguyên các giá trị mặc định trong file `.env` này để chạy ở môi trường local).*
+
+**Bước 2: Khởi chạy toàn bộ hệ thống**
+Tại thư mục gốc của dự án (nơi chứa file `docker-compose.yml`), mở terminal và chạy lệnh sau:
+```bash
+docker compose up --build
+```
+
+## Kết quả
+Sau khi Terminal báo quá trình khởi động hoàn tất, hệ thống sẽ có sẵn:
+* **API Backend:** Chạy tại `http://localhost:8000` (Frontend dùng URL này để gọi API).
+* **Tài liệu API (Swagger UI):** Truy cập tại `http://localhost:8000/docs`
+* **Cơ sở dữ liệu MySQL:** Chạy ở port `3306` (Dùng tài khoản user đã cấu hình trong file `.env` để kết nối và kiểm tra dữ liệu qua DBeaver, DataGrip hoặc MySQL Workbench).
