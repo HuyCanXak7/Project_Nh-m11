@@ -1,8 +1,33 @@
-
 const loginForm = document.getElementById('loginForm');
+const loginButton = loginForm.querySelector('.auth-form__submit');
+let lockTimer = null;
 
-loginForm.addEventListener('submit', (e) => {
+// Bị đẩy về đây vì hết phiên / tài khoản bị khóa → báo lý do
+const flash = popFlash();
+if (flash) {
+    showModal({ type: 'error', title: 'Bạn đã bị đăng xuất', message: flash, buttonText: 'Đã hiểu' });
+}
+
+/** Rate limit (429): khóa nút và đếm ngược */
+function lockLogin(seconds) {
+    clearInterval(lockTimer);
+    let left = Math.max(1, Math.ceil(seconds || 60));
+
+    setSubmitting(loginButton, true, `Thử lại sau ${left}s`);
+    lockTimer = setInterval(() => {
+        left -= 1;
+        if (left <= 0) {
+            clearInterval(lockTimer);
+            setSubmitting(loginButton, false);
+            return;
+        }
+        loginButton.textContent = `Thử lại sau ${left}s`;
+    }, 1000);
+}
+
+loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (loginButton.disabled) return;
 
     const fields = [
         ['loginEmail', 'loginEmailError'],
@@ -23,41 +48,46 @@ loginForm.addEventListener('submit', (e) => {
         hasError = true;
     }
 
+    // Màn đăng nhập chỉ kiểm tra không để trống; đúng/sai mật khẩu do BE trả lời
     if (!password) {
         showError('loginPassword', 'loginPasswordError', 'Vui lòng nhập mật khẩu');
-        hasError = true;
-    } else if (password.length < 6) {
-        showError('loginPassword', 'loginPasswordError', 'Mật khẩu phải có ít nhất 6 kí tự');
         hasError = true;
     }
 
     if (hasError) return;
 
-    // const res = await fetch('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password, remember }) });
-    console.log('Login - login.js:37', { email, remember });
+    setSubmitting(loginButton, true, 'Đang đăng nhập...');
 
-    const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-    const user = users.find((u) => u.email === email && u.password === password);
-
-    if (!user) {
+    try {
+        const user = await authApi.login({ email, password, remember });
+        setSubmitting(loginButton, false);
         showModal({
-            type: 'error',
-            title: 'Đăng nhập thất bại!',
-            message: 'Email hoặc mật khẩu không đúng. Vui lòng thử lại.',
-            buttonText: 'Thử lại',
+            type: 'success',
+            title: 'Đăng nhập thành công!',
+            message: `Chào mừng ${user.fullName} quay lại. Cùng xem hôm nay học được gì nhé!`,
+            buttonText: 'Tiếp tục',
+            onConfirm: () => window.location.replace('dashboard.html'),
         });
-        return;
+    } catch (err) {
+        setSubmitting(loginButton, false);
+        document.getElementById('loginPassword').value = '';
+
+        if (err.status === 429) {
+            lockLogin(err.details?.retryAfter);
+            showModal({
+                type: 'error',
+                title: 'Tạm khóa đăng nhập',
+                message: `Bạn đã đăng nhập sai quá nhiều lần. Vui lòng thử lại sau ${err.details?.retryAfter || 60} giây.`,
+                buttonText: 'Đã hiểu',
+            });
+        } else if (err.status === 403) {
+            showModal({ type: 'error', title: 'Tài khoản bị khóa', message: MESSAGES.disabled, buttonText: 'Đóng' });
+        } else if (err.status === 401) {
+            // Lỗi chung: không nói rõ sai email hay sai mật khẩu
+            showModal({ type: 'error', title: 'Đăng nhập thất bại!', message: MESSAGES.invalid, buttonText: 'Thử lại' });
+        } else {
+            showModal({ type: 'error', title: 'Có lỗi xảy ra', message: err.status === 0 ? MESSAGES.network : 'Vui lòng thử lại sau.', buttonText: 'Đóng' });
+            console.error('Login - login.js:90', err);
+        }
     }
-
-    localStorage.setItem('currentUser', JSON.stringify({ email: user.email, fullName: user.username }));
-
-    showModal({
-        type: 'success',
-        title: 'Đăng nhập thành công!',
-        message: `Chào mừng ${user.username} quay lại. Cùng xem hôm nay học được gì nhé!`,
-        buttonText: 'Tiếp tục',
-        onConfirm: () => {
-            window.location.href = 'dashboard.html';
-        },
-    });
 });

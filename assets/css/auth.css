@@ -284,6 +284,11 @@
 
 .auth-form__submit:hover { background: var(--primary-hover); }
 .auth-form__submit:active { transform: scale(0.99); }
+.auth-form__submit:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
 
 .auth-form--login .auth-form__submit {
     width: calc(100% - var(--u) * 18);
