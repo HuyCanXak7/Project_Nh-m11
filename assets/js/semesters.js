@@ -97,6 +97,7 @@ function openCreateSemesterModal() {
   openAppModal('semesterModal');
 }
 
+// === 2. SỬA HỌC KỲ (Task: T0694CC | PB-08) ===
 function openEditSemesterModal(semId) {
   const sem = StorageService.getSemesterById(semId);
   if (!sem) return;
