@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LOGIC QUẢN LÝ MÔN HỌC & ĐIỂM SỐ (COURSES PAGE)
  * Phụ trách: PB-10 (Tạo môn), PB-11 (Xem), PB-12 (Sửa/Xóa Cascade), PB-13 (Tìm kiếm/Lọc),
  *            PB-14 (Trọng số 100%), PB-15 (Nhập điểm 0-10), PB-16 (Tính điểm), PB-17 (Quy đổi Hệ 4), PB-50 (Học lại)
@@ -18,6 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (semIdParam) {
     const filterEl = document.getElementById('filterSemester');
     if (filterEl) filterEl.value = semIdParam;
+    const btnClear = document.getElementById('btnClearFilter');
+    if (btnClear) btnClear.style.display = 'inline-flex';
   }
 
   renderCourses();
@@ -41,8 +43,43 @@ function initSemesterFilterOptions() {
   }
 }
 
+// === BỘ LỌC VÀ TÌM KIẾM MÔN HỌC (Task: T0694D1 | PB-13) ===
+function removeVietnameseTones(str) {
+  if (!str) return '';
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .toLowerCase();
+}
+
 function handleFilterChange() {
+  const searchKey = (document.getElementById('searchCourseInput')?.value || '').trim();
+  const filterSemId = document.getElementById('filterSemester')?.value || '';
+  const filterCategory = document.getElementById('filterCategory')?.value || '';
+  const btnClear = document.getElementById('btnClearFilter');
+
+  if (btnClear) {
+    btnClear.style.display = (searchKey || filterSemId || filterCategory) ? 'inline-flex' : 'none';
+  }
+
   renderCourses();
+}
+
+function handleClearFilter() {
+  const searchInput = document.getElementById('searchCourseInput');
+  const semFilter = document.getElementById('filterSemester');
+  const catFilter = document.getElementById('filterCategory');
+  const btnClear = document.getElementById('btnClearFilter');
+
+  if (searchInput) searchInput.value = '';
+  if (semFilter) semFilter.value = '';
+  if (catFilter) catFilter.value = '';
+  if (btnClear) btnClear.style.display = 'none';
+
+  renderCourses();
+  showToast('Đã xóa điều kiện lọc, danh sách đầy đủ đã được hiển thị!');
 }
 
 // === 2. XEM VÀ QUẢN LÝ DANH SÁCH MÔN HỌC (Task: T0694CF | PB-11, PB-50) ===
@@ -53,29 +90,57 @@ function renderCourses() {
   const allCourses = StorageService.getCourses();
   const semesters = StorageService.getSemesters();
   
-  const searchKey = (document.getElementById('searchCourseInput')?.value || '').trim().toLowerCase();
+  const rawSearch = (document.getElementById('searchCourseInput')?.value || '').trim();
+  const searchKey = rawSearch.toLowerCase();
+  const searchKeyClean = removeVietnameseTones(rawSearch);
   const filterSemId = document.getElementById('filterSemester')?.value || '';
   const filterCategory = document.getElementById('filterCategory')?.value || '';
 
-  // Lọc theo tìm kiếm và bộ lọc (PB-13)
+  // Tiêu chí chấp nhận PB-13: Khớp từ khóa mã/tên môn, lọc theo loại môn (Đại cương/Cơ sở ngành/Chuyên ngành)
   currentCourseList = allCourses.filter(c => {
-    const matchSearch = !searchKey ||
-      c.course_code.toLowerCase().includes(searchKey) ||
-      c.course_name.toLowerCase().includes(searchKey);
+    const code = (c.course_code || '').toLowerCase();
+    const name = (c.course_name || '').toLowerCase();
+    const nameClean = removeVietnameseTones(c.course_name || '');
+
+    const matchSearch = !rawSearch ||
+      code.includes(searchKey) ||
+      name.includes(searchKey) ||
+      nameClean.includes(searchKeyClean);
+
     const matchSem = !filterSemId || c.semester_id === filterSemId;
     const matchCat = !filterCategory || c.category === filterCategory;
+
     return matchSearch && matchSem && matchCat;
   });
 
+  // Hiển thị thống kê số lượng khớp bộ lọc
+  const statsBadge = document.getElementById('filterStatsBadge');
+  if (statsBadge) {
+    if (rawSearch || filterSemId || filterCategory) {
+      statsBadge.innerHTML = `Tìm thấy: <strong style="color: var(--primary);">${currentCourseList.length}</strong>/${allCourses.length} môn`;
+    } else {
+      statsBadge.innerHTML = `Tổng cộng: <strong>${allCourses.length}</strong> môn`;
+    }
+  }
+
+  // Tiêu chí chấp nhận PB-13: Xóa điều kiện lọc thì hiện lại danh sách
   if (currentCourseList.length === 0) {
+    const hasFilter = !!(rawSearch || filterSemId || filterCategory);
     tbody.innerHTML = `
       <tr>
         <td colspan="9">
           <div class="empty-state" style="padding: 40px 16px; margin: 10px 0;">
-            <div class="empty-state__icon">📚</div>
-            <h4 class="empty-state__title">Không tìm thấy môn học nào</h4>
-            <p class="empty-state__desc">Chưa có môn học phù hợp với bộ lọc hiện tại. Bạn có thể thêm môn học mới hoặc đổi điều kiện tìm kiếm.</p>
-            <button type="button" onclick="openCreateCourseModal()" class="btn btn-primary btn-sm">+ Thêm môn học</button>
+            <div class="empty-state__icon">🔍</div>
+            <h4 class="empty-state__title">Không tìm thấy môn học nào phù hợp</h4>
+            <p class="empty-state__desc">
+              ${hasFilter
+                ? 'Không có môn học nào khớp với từ khóa tìm kiếm hoặc bộ lọc loại môn hiện tại. Bạn có thể xóa điều kiện lọc để hiển thị lại toàn bộ môn học.'
+                : 'Chưa có môn học nào trong hệ thống. Hãy thêm môn học đầu tiên để bắt đầu!'}
+            </p>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 12px;">
+              ${hasFilter ? '<button type="button" onclick="handleClearFilter()" class="btn btn-secondary btn-sm">✕ Xóa điều kiện lọc</button>' : ''}
+              <button type="button" onclick="openCreateCourseModal()" class="btn btn-primary btn-sm">+ Thêm môn học</button>
+            </div>
           </div>
         </td>
       </tr>

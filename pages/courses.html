@@ -69,7 +69,7 @@
                 </div>
             </div>
 
-            <!-- BỘ LỌC VÀ TÌM KIẾM MÔN HỌC (PB-13) -->
+            <!-- BỘ LỌC VÀ TÌM KIẾM MÔN HỌC (Task: T0694D1 | PB-13) -->
             <div class="filter-bar">
                 <div class="filter-input-wrap">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -79,11 +79,15 @@
                     <option value="">Tất cả học kỳ</option>
                 </select>
                 <select id="filterCategory" onchange="handleFilterChange()" class="filter-select">
-                    <option value="">Tất cả khối kiến thức</option>
+                    <option value="">Tất cả loại môn</option>
                     <option value="Đại cương">Đại cương</option>
                     <option value="Cơ sở ngành">Cơ sở ngành</option>
                     <option value="Chuyên ngành">Chuyên ngành</option>
                 </select>
+                <button type="button" id="btnClearFilter" onclick="handleClearFilter()" class="btn btn-secondary btn-sm" style="display: none; height: 44px; padding: 0 16px; border-radius: var(--radius-input); white-space: nowrap;" title="Xóa toàn bộ điều kiện tìm kiếm và lọc">
+                    ✕ Xóa điều kiện lọc
+                </button>
+                <span id="filterStatsBadge" style="font-size: 13px; font-weight: 600; color: var(--text-gray); margin-left: auto;"></span>
             </div>
 
             <!-- BẢNG DANH SÁCH MÔN HỌC (Task: T0694CF | PB-11, PB-50) -->
