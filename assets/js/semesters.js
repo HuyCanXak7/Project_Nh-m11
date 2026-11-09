@@ -158,7 +158,7 @@ function hideSemDateError() {
   if (err) err.style.display = 'none';
 }
 
-// === 3. XÓA DÂY CHUYỀN CASCADE (PB-09, PB-46 / BR-17) ===
+// === 3. XÓA DÂY CHUYỀN CASCADE (Task: T0694CD | PB-09, PB-46 / BR-17) ===
 function openDeleteSemesterModal(semId) {
   const sem = StorageService.getSemesterById(semId);
   if (!sem) return;
