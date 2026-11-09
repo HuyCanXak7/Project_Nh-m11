@@ -36,6 +36,12 @@ registerForm.addEventListener('submit', (e) => {
     } else if (!isValidEmail(email)) {
         showError('regEmail', 'regEmailError', 'Email không hợp lệ');
         hasError = true;
+    } else {
+        const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+        if (users.some((u) => u.email === email)) {
+            showError('regEmail', 'regEmailError', 'Email này đã được sử dụng');
+            hasError = true;
+        }
     }
 
     // Username
@@ -79,6 +85,10 @@ registerForm.addEventListener('submit', (e) => {
 
     // TODO: thay bằng gọi API thật
     console.log('Register - register.js:81', { email, username });
+
+    const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+    users.push({ email, username, password });
+    localStorage.setItem('registeredUsers', JSON.stringify(users));
 
     showModal({
         type: 'success',
