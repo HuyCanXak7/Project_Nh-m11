@@ -5,9 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang chủ - Quản lí chỉ số học tập</title>
     <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/app_layout.css">
     <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <!-- Chặn route: chưa đăng nhập thì về trang đăng nhập trước khi vẽ trang -->
+    <script src="../assets/js/session.js"></script>
+    <script>requireAuth();</script>
 </head>
-<body class="page-dashboard">
+<body class="app-page page-dashboard">
     <div class="dash-bg" aria-hidden="true">
         <div class="dash-bg__circle dash-bg__circle--1"></div>
         <div class="dash-bg__circle dash-bg__circle--2"></div>
@@ -29,11 +33,11 @@
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 12 12 3l10 9v10h-7v-7H9v7H2Z"/></svg>
                 Trang chủ
             </a>
-            <a href="#" class="nav-item">
+            <a href="statistics.html" class="nav-item">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 20V12M12 20V7M19 20v-9M3 20h18"/></svg>
                 Thống kê
             </a>
-            <a href="#" class="nav-item">
+            <a href="courses.html" class="nav-item">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 4h8v16H3zM11 4h10v16H11z"/></svg>
                 Môn học
             </a>
@@ -238,6 +242,7 @@
         </section>
     </main>
 
+    <script src="../assets/js/app_shell.js"></script>
     <script src="../assets/js/dashboard.js"></script>
 </body>
 </html>

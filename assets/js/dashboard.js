@@ -3,17 +3,16 @@
  * Khi BE xong, thay hàm loadDashboardData() bằng fetch API thật
  * (giữ nguyên cấu trúc object trả về là các hàm render không phải sửa).
  */
-
 const MOCK_DATA = {
     user: { fullName: 'Nguyễn Văn A' },
     stats: {
-        gpa: 3.42, gpaDelta: 0.12,
-        credits: 78, creditsDelta: 4,
+        gpa: 3.28, gpaDelta: 0.06,
+        credits: 78, creditsDelta: 24,
         passedCourses: 6, totalCourses: 8,
         termAverage: 8.3, termAverageDelta: 0.3,
     },
     chart: {
-        current: { label: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4', 'Tuần 5'], values: [4.0, 5.8, 6.5, 7,4, 8.3] },
+        current:  { labels: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4', 'Tuần 5'], values: [4.0, 5.8, 6.5, 7.4, 8.3] },
         previous: { labels: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4', 'Tuần 5'], values: [6.2, 7.1, 6.8, 7.6, 8.0] },
         all:      { labels: ['HK1', 'HK2', 'HK3', 'HK4', 'HK5'], values: [6.9, 7.3, 7.1, 8.0, 8.3] },
     },
@@ -29,41 +28,13 @@ const MOCK_DATA = {
 };
 
 async function loadDashboardData() {
-    const data = { ...MOCK_DATA };
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
-    if (currentUser && currentUser.fullName) {
-        data.user = { fullName: currentUser.fullName };
-    }
-    return data;
+    // const res = await fetch('/api/dashboard', { headers: { Authorization: `Bearer ${token}` } });
+    // if (!res.ok) throw new Error('Không tải được dữ liệu');
+    // return res.json();
+    return MOCK_DATA;
 }
 
-const $ = (id) => document.getElementById(id);
-
-function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-}
-
-function trendHtml(delta, digits = 2, unit = '') {
-    if (delta === null || delta === undefined) return '';
-    const up = delta >= 0;
-    const sign = up? "+" : "-";
-    const value = Math.abs(delta).toFixed(digits);
-    return  `<span class="trend trend--${up ? 'up' : 'down'}">${up ? '▲' : '▼'} ${sign}${value}${unit}</span>`;
-}
-
-// header
-
-function renderUser(user) {
-    $('userName').textContent = user.fullName;
-    $('userChipName').textContent = user.fullName;
-    const lastWord = user.fullName.trim().split(/\s+/).pop() || '?';
-    $('userAvatar').textContent = lastWord.charAt(0).toUpperCase();
-}
-
-// thong ke
-
+/* ===== Thẻ thống kê ===== */
 function renderStats(s) {
     $('statGpa').textContent = s.gpa.toFixed(2);
     $('statGpaNote').innerHTML = `${trendHtml(s.gpaDelta)} so với kỳ trước`;
@@ -79,17 +50,10 @@ function renderStats(s) {
     $('statTermAvgNote').innerHTML = `${trendHtml(s.termAverageDelta, 1)} so với kỳ trước`;
 }
 
-// Bieu do
-
-const SVG_NS = 'http://www.w3.org/2000/svg';
+/* ===== Biểu đồ (SVG tự vẽ, không cần thư viện) ===== */
 const CHART = { min: 0, max: 10, step: 2, padLeft: 46, padRight: 24, padTop: 30, padBottom: 32 };
 
-function svgEl(tag, attrs = {}) {
-    const el = document.createElementNS(SVG_NS, tag);
-    Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
-    return el;
-}
-
+/** Đường cong mượt qua các điểm (Catmull-Rom → Bézier) */
 function smoothPath(points) {
     if (points.length < 2) return '';
     let d = `M${points[0].x} ${points[0].y}`;
@@ -254,82 +218,17 @@ function renderSchedule(list) {
         </li>`).join('');
 }
 
-/* ===== Sidebar trên mobile ===== */
-function setupSidebar() {
-    const sidebar = $('sidebar');
-    const overlay = $('sidebarOverlay');
-    const toggle = $('menuToggle');
-
-    const setOpen = (open) => {
-        sidebar.classList.toggle('is-open', open);
-        overlay.hidden = !open;
-        toggle.setAttribute('aria-expanded', open);
-    };
-
-    toggle.addEventListener('click', () => setOpen(!sidebar.classList.contains('is-open')));
-    overlay.addEventListener('click', () => setOpen(false));
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
-}
-
-/* ===== Menu tài khoản (Xem thông tin / Đăng xuất) ===== */
-function setupUserMenu() {
-    const menu = $('userMenu');
-    const toggle = $('userMenuToggle');
-    const list = $('userMenuList');
-
-    const setOpen = (open) => {
-        list.hidden = !open;
-        toggle.setAttribute('aria-expanded', open);
-        if (open) list.querySelector('[role="menuitem"]')?.focus();
-    };
-
-    toggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        setOpen(list.hidden);
-    });
-
-    // Click ra ngoài menu thì đóng
-    document.addEventListener('click', (e) => {
-        if (!menu.contains(e.target)) setOpen(false);
-    });
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !list.hidden) {
-            setOpen(false);
-            toggle.focus();
-        }
-    });
-
-    $('logoutBtn').addEventListener('click', logout);
-}
-
-async function logout() {
-    // Khi có API: gọi thu hồi refresh token trước (PB-03)
-    // await fetch('/api/auth/logout', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
-
-    // Xóa token và thông tin phiên phía client
-    ['accessToken', 'refreshToken', 'user'].forEach((key) => {
-        localStorage.removeItem(key);
-        sessionStorage.removeItem(key);
-    });
-
-    // replace(): không cho bấm Back quay lại dashboard
-    window.location.replace('index.html');
-}
-
 /* ===== Khởi chạy ===== */
 async function initDashboard() {
-    setupSidebar();
-    setupUserMenu();
+    if (!initAppShell()) return;
     try {
         const data = await loadDashboardData();
-        renderUser(data.user);
         renderStats(data.stats);
         setupChartTabs(data.chart);
         renderActivities(data.activities);
         renderSchedule(data.schedule);
     } catch (err) {
-        console.error('Dashboard - dashboard.js:327', err);
+        console.error('Dashboard - dashboard.js:231', err);
         $('chart').innerHTML = '<p class="chart__empty">Không tải được dữ liệu. Vui lòng thử lại.</p>';
     }
 }
