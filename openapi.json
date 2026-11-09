@@ -1,0 +1,96 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Nhóm 11 – Academic Tracker API",
+    "version": "1.0.0",
+    "description": "Hợp đồng OpenAPI **dự thảo v1** cho PB-41, đối chiếu với SRS Nhóm 11 ngày 06/11/2026 và README.md. Phạm vi: Auth, Semester, Course, Grade, Goal. Các endpoint thống kê, tính điểm cần đạt, import hàng loạt, Admin và GET /grade-scale thuộc **v1.1 (PB-51)**, không xuất hiện ở v1. What-if và Export xử lý tại FE, không có endpoint. Mọi API phải kiểm tra quyền sở hữu dữ liệu người dùng. Phản hồi thống nhất gồm success, statusCode, message, data, error, timestamp, path. Lưu ý: các đường dẫn, tên trường và cấu trúc payload cụ thể chưa được tài liệu nguồn chốt hoàn toàn; đây là thiết kế đề xuất để FE/BE thống nhất, chưa phải Swagger sinh từ backend đang chạy.",
+    "contact": {
+      "name": "Nhóm 11"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000/api/v1",
+      "description": "Địa chỉ local dự kiến (cần đối chiếu cấu hình FastAPI thực tế)"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Đăng ký, đăng nhập, refresh, đăng xuất (PB-01..03)."
+    },
+    {
+      "name": "Semester",
+      "description": "CRUD học kỳ, xem trước tác động xóa (PB-06..09)."
+    },
+    {
+      "name": "Course",
+      "description": "CRUD môn, tìm kiếm, lọc, học lại (PB-10..13, PB-50)."
+    },
+    {
+      "name": "Grade",
+      "description": "Thành phần điểm, nhập điểm, tính điểm môn, GPA (PB-14..19)."
+    },
+    {
+      "name": "Goal",
+      "description": "Mục tiêu GPA duy nhất (PB-22)."
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Đăng ký tài khoản sinh viên",
+        "operationId": "register",
+        "description": "Tham chiếu PB-01 trong Product Backlog của Nhóm 11.",
+        "x-backlog-id": "PB-01",
+        "requestBody": {
+          "required": true,
+          "description": "Dữ liệu yêu cầu",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tạo tài khoản STUDENT thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "409": {
+            "$ref": "#/components/responses/EmailExists"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Đăng nhập và lấy access/refresh token",
+        "operationId": "login",
+        "description": "Sai email hoặc mật khẩu trả lỗi chung INVALID_CREDENTIALS; không tiết lộ tài khoản tồn tại. Có rate limit; isActive=false bị từ chối. Access token 15 phút, refresh 7 ngày.",
+        "x-backlog-id": "PB-02",
+        "requestBody": {
+          "required": true,
+          "description": "Dữ liệu yêu cầu",
+          "content": {
