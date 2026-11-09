@@ -45,7 +45,7 @@ function handleFilterChange() {
   renderCourses();
 }
 
-// === 2. XEM DANH SÁCH MÔN HỌC (PB-11, PB-50) ===
+// === 2. XEM VÀ QUẢN LÝ DANH SÁCH MÔN HỌC (Task: T0694CF | PB-11, PB-50) ===
 function renderCourses() {
   const tbody = document.getElementById('courseTableBody');
   if (!tbody) return;
