@@ -1,10 +1,8 @@
 /*
- * Khung trang có sidebar (Trang chủ, Thống kê): header, sidebar, menu tài khoản.
- * Thứ tự nạp: session.js → app_shell.js → script riêng của trang.
- * (app_common.js là của trang Học kỳ / Môn học, dùng thanh menu ngang)
+ * Khung trang có sidebar (StudyTrack layout): header, sidebar, menu tài khoản.
+ * Dùng chung cho TOÀN BỘ các trang trong ứng dụng theo thiết kế Figma.
  */
 
-/* ===== Tiện ích ===== */
 const $ = (id) => document.getElementById(id);
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -16,6 +14,7 @@ function svgEl(tag, attrs = {}) {
 }
 
 function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
@@ -33,12 +32,47 @@ function trendHtml(delta, digits = 2, unit = '') {
 /* ===== Header: tên + avatar người dùng đang đăng nhập ===== */
 function renderUser(user) {
     if (!user) return;
-    const name = user.fullName || user.email;
+    const name = user.fullName || user.name || user.email || 'Sinh viên';
+    
     // Trang chủ có lời chào "Xin chào, ...", các trang khác thì không
     if ($('userName')) $('userName').textContent = name;
-    $('userChipName').textContent = name;
-    const lastWord = name.trim().split(/\s+/).pop() || '?';
-    $('userAvatar').textContent = lastWord.charAt(0).toUpperCase();
+    if ($('userChipName')) $('userChipName').textContent = name;
+    
+    // Ảnh đại diện: nếu có upload ảnh thì hiển thị ảnh tròn, nếu chưa có thì hiển thị chữ cái viết tắt
+    const avatarEl = $('userAvatar');
+    if (avatarEl) {
+        let avatarUrl = user.avatar_url;
+        if (!avatarUrl && typeof StorageService !== 'undefined') {
+            const student = StorageService.getStudent();
+            if (student && student.avatar_url) avatarUrl = student.avatar_url;
+        }
+        
+        if (avatarUrl) {
+            avatarEl.innerHTML = `<img src="${avatarUrl}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+        } else {
+            const parts = name.trim().split(/\s+/).filter(Boolean);
+            const initials = parts.length > 1 
+                ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() 
+                : (parts[0] ? parts[0].slice(0, 2).toUpperCase() : 'SV');
+            avatarEl.textContent = initials;
+        }
+    }
+}
+
+/* ===== Tự động đánh dấu mục đang xem trên thanh điều hướng sidebar ===== */
+function highlightActiveSidebar() {
+    const path = window.location.pathname.toLowerCase();
+    const items = document.querySelectorAll('.sidebar__nav .nav-item');
+    items.forEach(item => {
+        const href = item.getAttribute('href')?.toLowerCase() || '';
+        if (href && href !== '#' && (path.endsWith('/' + href) || path.endsWith(href))) {
+            item.classList.add('is-active');
+            item.setAttribute('aria-current', 'page');
+        } else if (href && href !== '#') {
+            item.classList.remove('is-active');
+            item.removeAttribute('aria-current');
+        }
+    });
 }
 
 /* ===== Sidebar trên mobile ===== */
@@ -47,14 +81,16 @@ function setupSidebar() {
     const overlay = $('sidebarOverlay');
     const toggle = $('menuToggle');
 
+    if (!sidebar || !toggle) return;
+
     const setOpen = (open) => {
         sidebar.classList.toggle('is-open', open);
-        overlay.hidden = !open;
+        if (overlay) overlay.hidden = !open;
         toggle.setAttribute('aria-expanded', open);
     };
 
     toggle.addEventListener('click', () => setOpen(!sidebar.classList.contains('is-open')));
-    overlay.addEventListener('click', () => setOpen(false));
+    if (overlay) overlay.addEventListener('click', () => setOpen(false));
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
 }
 
@@ -63,6 +99,8 @@ function setupUserMenu() {
     const menu = $('userMenu');
     const toggle = $('userMenuToggle');
     const list = $('userMenuList');
+
+    if (!menu || !toggle || !list) return;
 
     const setOpen = (open) => {
         list.hidden = !open;
@@ -87,27 +125,115 @@ function setupUserMenu() {
         }
     });
 
-    $('logoutBtn').addEventListener('click', logout); // logout() nằm trong session.js
+    const logoutBtn = $('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
+    }
+}
+
+/* ===== Đăng xuất ===== */
+function handleLogout() {
+    if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?')) {
+        if (typeof logout === 'function') {
+            logout();
+        } else {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('session');
+            sessionStorage.removeItem('session');
+            window.location.replace('index.html');
+        }
+    }
+}
+
+/* ===== Khôi phục dữ liệu mẫu ban đầu ===== */
+function handleResetData() {
+    if (confirm('Khôi phục lại toàn bộ dữ liệu mẫu ban đầu (Học kỳ, Môn học, Điểm số)?')) {
+        if (typeof StorageService !== 'undefined') {
+            StorageService.resetToDefault();
+        }
+        showToast('Đã khôi phục dữ liệu mẫu ban đầu thành công!');
+        setTimeout(() => {
+            window.location.reload();
+        }, 500);
+    }
+}
+
+/* ===== Toast thông báo nhanh ===== */
+function showToast(msg, isError = false) {
+    let toast = document.getElementById('appToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'appToast';
+        toast.style.cssText = `
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 9999;
+            background: #1E293B;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.25s ease;
+            pointer-events: none;
+        `;
+        document.body.appendChild(toast);
+    }
+
+    toast.style.background = isError ? '#DC2626' : '#2563EB';
+    toast.innerHTML = isError ? `⚠️ ${escapeHtml(msg)}` : `✅ ${escapeHtml(msg)}`;
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateY(0)';
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-10px)';
+    }, 2800);
 }
 
 /**
  * Gắn header, sidebar, menu tài khoản; gọi một lần ở đầu mỗi trang.
- * Trả về false nếu chưa đăng nhập (requireAuth() trong <head> đã chuyển trang) để trang dừng lại.
  */
 function initAppShell() {
-    const session = getSession();
-    if (!session) return false;
+    let session = typeof getSession === 'function' ? getSession() : null;
+    let user = session?.user;
+    
+    if (!user && typeof StorageService !== 'undefined') {
+        const student = StorageService.getStudent();
+        if (student) {
+            user = {
+                fullName: student.name || 'Huỳnh Nhơn Nguyên Nghiệp',
+                email: student.email || 'nghiephn25@gmail.com',
+                avatar_url: student.avatar_url || ''
+            };
+        }
+    }
+    
+    if (!user) {
+        user = { fullName: 'Huỳnh Nhơn Nguyên Nghiệp', email: 'nghiephn25@gmail.com' };
+    }
 
-    renderUser(session.user);
+    renderUser(user);
     setupSidebar();
     setupUserMenu();
+    highlightActiveSidebar();
 
-    // Hỏi BE phiên còn hợp lệ không: access hết hạn thì tự refresh,
-    // tài khoản bị khóa (is_active = false) thì bị đăng xuất ngay.
-    const verify = () => authApi.me().then(renderUser).catch(() => {});
-    verify();
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') verify();
-    });
+    // Đồng bộ nếu có authApi
+    if (session && typeof authApi !== 'undefined' && authApi.me) {
+        authApi.me().then(renderUser).catch(() => {});
+    }
     return true;
 }
+
+// Tự động khởi tạo khi DOM sẵn sàng
+document.addEventListener('DOMContentLoaded', () => {
+    initAppShell();
+});

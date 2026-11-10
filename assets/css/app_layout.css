@@ -487,3 +487,31 @@
     .tabs { width: 100%; }
     .tabs__btn { flex: 1; }
 }
+
+
+/* ===== Bổ sung tiện ích cho layout StudyTrack ===== */
+.user-chip__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.btn-outline--sm {
+    height: 38px !important;
+    padding: 0 14px !important;
+    font-size: 13.5px !important;
+    border-radius: 10px !important;
+}
+
+/* In ấn: ẩn thanh điều hướng và nền trang trí */
+@media print {
+    .sidebar, .dash-header, .dash-bg, .sidebar-overlay, .no-print, .mobile-nav {
+        display: none !important;
+    }
+    .dash {
+        margin-left: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+    }
+}
