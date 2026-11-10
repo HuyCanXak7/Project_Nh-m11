@@ -474,3 +474,7 @@ Nếu vừa sửa `.env` khi container đã chạy, chạy lại `docker compose
 Chạy lại script sẽ giữ nguyên tài khoản đã có, kể cả mật khẩu và trạng thái. Nếu một email mẫu đã thuộc vai trò khác, script báo lỗi và hủy giao dịch.
 
 Để kiểm tra, mở Swagger UI tại `http://localhost:8000/docs`. Gọi `POST /api/v1/auth/login` với email và mật khẩu mẫu. Dùng `data.accessToken` để **Authorize**, rồi gọi `GET /api/v1/auth/me` và xem `data.role`. Giao diện HTML hiện dùng đăng nhập giả lập, vì vậy hãy kiểm tra các tài khoản này qua Swagger.
+
+## Dữ liệu GPA (PB-18)
+
+`GET /api/v1/semesters/{semesterId}/gpa` đọc môn từ cơ sở dữ liệu của người dùng đã đăng nhập. Backend tính điểm môn ghi đồng thời `courses.grade10` và `courses.grade4` sau khi đủ điểm, hoặc để cả hai là `NULL` nếu chưa thể tính. GPA được làm tròn đến hai chữ số thập phân trước khi xếp loại.

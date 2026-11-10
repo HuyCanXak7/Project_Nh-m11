@@ -10,13 +10,14 @@ from uuid import uuid4
 import jwt
 import sqlalchemy as sa
 from cachetools import TTLCache
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Path, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field, SecretStr
 
 from database import auth_sessions, get_engine, users
+from gpa import semester_gpa
 from passwords import hash_password, verify_password
 
 ACCESS_SECONDS = 15 * 60
@@ -195,8 +196,7 @@ def logout(payload: RefreshRequest, request: Request):
     return response(request, 200, "Đăng xuất thành công.")
 
 
-@app.get("/api/v1/auth/me", tags=["Auth"])
-def me(request: Request, credentials: HTTPAuthorizationCredentials | None = Depends(bearer)):
+def current_user(request: Request, credentials: HTTPAuthorizationCredentials | None = Depends(bearer)):
     if credentials is None:
         raise session_invalid()
     claims = decode_token(request, credentials.credentials, "access")
@@ -205,8 +205,24 @@ def me(request: Request, credentials: HTTPAuthorizationCredentials | None = Depe
             sa.select(users).join(auth_sessions, users.c.id == auth_sessions.c.user_id)
             .where(session_filter(claims))
         ).mappings().one_or_none()
-    user = get_active_user(user)
+    return get_active_user(user)
+
+
+@app.get("/api/v1/auth/me", tags=["Auth"])
+def me(request: Request, user: sa.RowMapping = Depends(current_user)):
     return response(request, 200, "Thông tin tài khoản.", {
         "id": user["id"], "email": user["email"], "fullName": user["full_name"],
         "role": user["role"], "isActive": user["is_active"],
     })
+
+
+@app.get("/api/v1/semesters/{semesterId}/gpa", tags=["Grades"])
+def get_semester_gpa(
+    request: Request,
+    semesterId: int = Path(gt=0, le=2_147_483_647),
+    user: sa.RowMapping = Depends(current_user),
+):
+    data = semester_gpa(user["id"], semesterId)
+    if data is None:
+        raise auth_error(404, "NOT_FOUND", "Không tìm thấy học kỳ.")
+    return response(request, 200, "Đã tính GPA học kỳ.", data)
