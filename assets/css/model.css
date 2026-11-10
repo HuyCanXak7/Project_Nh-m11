@@ -95,3 +95,53 @@
 }
 
 .modal--error .modal__btn { background: var(--error); }
+
+/* ===== Bảng xác nhận (confirm) 2 nút ===== */
+.modal--confirm .modal__icon {
+    background: #FEF3C7;
+    color: #D97706;
+    box-shadow: 0 0 0 10px rgba(217, 119, 6, 0.08);
+}
+
+.modal--danger .modal__icon {
+    background: #FDE2E2;
+    color: var(--error);
+    box-shadow: 0 0 0 10px rgba(229, 62, 62, 0.08);
+}
+
+.modal__actions {
+    display: flex;
+    gap: 12px;
+}
+
+.modal__actions .modal__btn {
+    flex: 1;
+}
+
+.modal__btn--ghost {
+    background: #F1F5F9;
+    color: var(--text-dark);
+}
+
+.modal__btn--ghost:hover {
+    background: #E2E8F0;
+}
+
+.modal__btn--danger {
+    background: var(--error);
+}
+
+.modal__btn--danger:hover {
+    background: #C53030;
+}
+
+.modal__btn--danger:focus-visible {
+    outline: 3px solid rgba(229, 62, 62, 0.4);
+    outline-offset: 2px;
+}
+
+@media (max-width: 420px) {
+    .modal__actions {
+        flex-direction: column-reverse;
+    }
+}
