@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -59,7 +59,7 @@
             <div class="app-header">
                 <div>
                     <h2 class="app-header__title">📅 Quản Lý Danh Sách Học Kỳ</h2>
-                    <p class="app-header__desc">Xem danh sách học kỳ của bạn, tiến độ tín chỉ và điểm số GPA qua từng giai đoạn (PB-06, PB-07, PB-08, PB-09)</p>
+                    <p class="app-header__desc">Xem danh sách học kỳ của bạn, tiến độ tín chỉ và điểm số GPA qua từng giai đoạn</p>
                 </div>
                 <div class="app-actions">
                     <button type="button" onclick="openCreateSemesterModal()" class="btn btn-primary">
@@ -69,14 +69,14 @@
                 </div>
             </div>
 
-            <!-- DANH SÁCH HỌC KỲ DẠNG THẺ (PB-07) -->
+            <!-- DANH SÁCH HỌC KỲ DẠNG THẺ -->
             <div id="semesterGrid" class="semester-grid">
                 <!-- Render tự động bởi semesters.js -->
             </div>
         </main>
     </div>
 
-    <!-- MODAL TẠO & SỬA HỌC KỲ (PB-06, PB-08) -->
+    <!-- MODAL TẠO & SỬA HỌC KỲ -->
     <div id="semesterModal" class="modal-overlay" style="display: none;">
         <div class="modal" style="max-width: 480px; text-align: left; padding: 32px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -118,7 +118,7 @@
         </div>
     </div>
 
-    <!-- MODAL XÁC NHẬN XÓA DÂY CHUYỀN CASCADE (PB-09, PB-46 / BR-17) -->
+    <!-- MODAL XÁC NHẬN XÓA DÂY CHUYỀN CASCADE -->
     <div id="deleteConfirmModal" class="modal-overlay" style="display: none;">
         <div class="modal modal--error" style="max-width: 480px; text-align: left; padding: 32px;">
             <div class="modal__icon" style="background: #FEE2E2; color: var(--error);">
@@ -148,7 +148,7 @@
         </div>
     </div>
 
-    <!-- MOBILE BOTTOM NAVIGATION (PB-34) -->
+    <!-- MOBILE BOTTOM NAVIGATION -->
     <nav class="mobile-nav no-print">
         <a href="semesters.html" class="mobile-nav__item active">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LOGIC HỒ SƠ SINH VIÊN & ĐỔI MẬT KHẨU (PB-04, PB-05)
  * Phụ trách: Huỳnh Nhơn Nguyên Nghiệp
  */
@@ -147,7 +147,7 @@ function handleChangePassword(e) {
   const confirmPass = document.getElementById('confirmPasswordInput').value;
 
   if (newPass.length < 8) {
-    showToast('Mật khẩu mới phải có ít nhất 8 ký tự theo quy định PB-05!', true);
+    showToast('Mật khẩu mới phải có ít nhất 8 ký tự!', true);
     return;
   }
   if (newPass !== confirmPass) {
