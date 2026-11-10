@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LOGIC QUẢN LÝ DANH SÁCH HỌC KỲ (SEMESTERS PAGE)
  * Phụ trách: PB-06 (Tạo), PB-07 (Xem danh sách), PB-08 (Sửa), PB-09 (Xóa Cascade)
  * Thành viên: FE Huỳnh Nhơn Nguyên Nghiệp (N25DTCN038)
@@ -81,7 +81,7 @@ function renderSemesters() {
   }).join('');
 }
 
-// === 2. TẠO & SỬA HỌC KỲ (PB-06, PB-08) ===
+// === TẠO HỌC KỲ (Task: T0694C9 | PB-06) ===
 function openCreateSemesterModal() {
   document.getElementById('semModalTitle').textContent = 'Tạo học kỳ mới';
   document.getElementById('semIdInput').value = '';
