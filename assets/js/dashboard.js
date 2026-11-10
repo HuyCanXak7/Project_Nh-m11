@@ -1,337 +1,171 @@
-/*
- * Dữ liệu mẫu cho Dashboard.
- * Khi BE xong, thay hàm loadDashboardData() bằng fetch API thật
- * (giữ nguyên cấu trúc object trả về là các hàm render không phải sửa).
+/**
+ * LOGIC DASHBOARD TỔNG QUAN HỌC TẬP
+ * Phụ trách: Huỳnh Nhơn Nguyên Nghiệp
  */
 
-const MOCK_DATA = {
-    user: { fullName: 'Nguyễn Văn A' },
-    stats: {
-        gpa: 3.42, gpaDelta: 0.12,
-        credits: 78, creditsDelta: 4,
-        passedCourses: 6, totalCourses: 8,
-        termAverage: 8.3, termAverageDelta: 0.3,
-    },
-    chart: {
-        current: { label: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4', 'Tuần 5'], values: [4.0, 5.8, 6.5, 7,4, 8.3] },
-        previous: { labels: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4', 'Tuần 5'], values: [6.2, 7.1, 6.8, 7.6, 8.0] },
-        all:      { labels: ['HK1', 'HK2', 'HK3', 'HK4', 'HK5'], values: [6.9, 7.3, 7.1, 8.0, 8.3] },
-    },
-    activities: [
-        { type: 'grade',  text: 'Bạn đã cập nhật điểm môn Toán',   time: '2 giờ trước' },
-        { type: 'course', text: 'Thêm lịch học: Cơ sở dữ liệu',    time: '1 ngày trước' },
-        { type: 'goal',   text: 'Cập nhật mục tiêu: Đạt GPA 3.5',  time: '2 ngày trước' },
-    ],
-    schedule: [
-        { weekday: 'Th 3', date: '11/11', name: 'Lập trình iOS', time: '08:00 - 10:00', color: '#7FA9F7' },
-        { weekday: 'Th 4', date: '12/11', name: 'Cơ sở dữ liệu', time: '13:30 - 15:30', color: '#A989F2' },
-    ],
-};
+document.addEventListener('DOMContentLoaded', () => {
+  renderDashboard();
+});
 
-async function loadDashboardData() {
-    const data = { ...MOCK_DATA };
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
-    if (currentUser && currentUser.fullName) {
-        data.user = { fullName: currentUser.fullName };
-    }
-    return data;
+function renderDashboard() {
+  const courses = StorageService.getCourses();
+  const semesters = StorageService.getSemesters();
+
+  // 1. KPI TÍCH LŨY (Đã tự động giữ điểm cao nhất các môn học lại)
+  const cum = GradeCalculator.calculateCumulativeGPA(courses);
+  const cumEl = document.getElementById('kpiCumulativeGpa');
+  if (cumEl) cumEl.textContent = cum.formattedGPA;
+
+  const passedCreditsEl = document.getElementById('kpiPassedCredits');
+  if (passedCreditsEl) passedCreditsEl.textContent = `${cum.passedCredits} / ${cum.totalCredits} TC`;
+
+  const rankEl = document.getElementById('kpiRank');
+  if (rankEl) rankEl.textContent = cum.rank;
+
+  // 2. GPA KỲ GẦN NHẤT
+  const latestSem = semesters.length > 0 ? semesters[semesters.length - 1] : null;
+  const latestGpaEl = document.getElementById('kpiLatestGpa');
+  const latestSemNameEl = document.getElementById('kpiLatestSemName');
+
+  if (latestSem) {
+    const semCourses = courses.filter(c => c.semester_id === latestSem.id);
+    const semCalc = GradeCalculator.calculateSemesterGPA(semCourses);
+    if (latestGpaEl) latestGpaEl.textContent = semCalc.formattedGPA;
+    if (latestSemNameEl) latestSemNameEl.textContent = `${latestSem.name} (${latestSem.academic_year})`;
+
+    // 3. CẢNH BÁO HỌC VỤ
+    checkAcademicWarning(semCalc.gpa, semCourses);
+  } else {
+    if (latestGpaEl) latestGpaEl.textContent = '0.00';
+    if (latestSemNameEl) latestSemNameEl.textContent = 'Chưa có dữ liệu';
+  }
+
+  // 4. BIỂU ĐỒ XU HƯỚNG GPA
+  renderGpaTrendChart(semesters, courses);
+
+  // 5. PHÂN BỐ ĐIỂM CHỮ
+  renderGradeDistribution(courses);
 }
 
-const $ = (id) => document.getElementById(id);
+function checkAcademicWarning(latestGpa, semCourses) {
+  const banner = document.getElementById('academicWarningBanner');
+  const msgEl = document.getElementById('warningMsg');
+  if (!banner || !msgEl) return;
 
-function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
+  const failedCourses = semCourses.filter(c => {
+    const calc = GradeCalculator.calculateCourseFinalScore(c.components);
+    return calc.isComplete && calc.finalScore10 !== null && calc.finalScore10 < 4.0;
+  });
+
+  const warnings = [];
+  if (latestGpa > 0 && latestGpa < 2.0) {
+    warnings.push(`GPA học kỳ gần nhất đạt ${latestGpa.toFixed(2)} (< 2.0 - Dưới mức chuẩn học lực Trung bình).`);
+  }
+  if (failedCourses.length > 0) {
+    warnings.push(`Bạn có ${failedCourses.length} môn học bị điểm F (rớt môn) cần phải đăng ký học lại.`);
+  }
+
+  if (warnings.length > 0) {
+    banner.style.display = 'flex';
+    msgEl.innerHTML = `<strong>CẢNH BÁO HỌC VỤ:</strong> ${warnings.join(' ')}`;
+  } else {
+    banner.style.display = 'none';
+  }
 }
 
-function trendHtml(delta, digits = 2, unit = '') {
-    if (delta === null || delta === undefined) return '';
-    const up = delta >= 0;
-    const sign = up? "+" : "-";
-    const value = Math.abs(delta).toFixed(digits);
-    return  `<span class="trend trend--${up ? 'up' : 'down'}">${up ? '▲' : '▼'} ${sign}${value}${unit}</span>`;
-}
+function renderGpaTrendChart(semesters, courses) {
+  const container = document.getElementById('gpaTrendChart');
+  if (!container) return;
 
-// header
+  if (semesters.length === 0) {
+    container.innerHTML = '<div style="color: var(--text-gray); font-size: 13px;">Chưa có dữ liệu học kỳ để vẽ biểu đồ</div>';
+    return;
+  }
 
-function renderUser(user) {
-    $('userName').textContent = user.fullName;
-    $('userChipName').textContent = user.fullName;
-    const lastWord = user.fullName.trim().split(/\s+/).pop() || '?';
-    $('userAvatar').textContent = lastWord.charAt(0).toUpperCase();
-}
-
-// thong ke
-
-function renderStats(s) {
-    $('statGpa').textContent = s.gpa.toFixed(2);
-    $('statGpaNote').innerHTML = `${trendHtml(s.gpaDelta)} so với kỳ trước`;
-
-    $('statCredits').textContent = s.credits;
-    $('statCreditsNote').innerHTML = trendHtml(s.creditsDelta, 0, ' tín chỉ');
-
-    $('statPassed').textContent = `${s.passedCourses} / ${s.totalCourses}`;
-    const percent = s.totalCourses ? Math.round((s.passedCourses / s.totalCourses) * 100) : 0;
-    $('statPassedNote').textContent = `${percent}% hoàn thành`;
-
-    $('statTermAvg').textContent = s.termAverage.toFixed(1);
-    $('statTermAvgNote').innerHTML = `${trendHtml(s.termAverageDelta, 1)} so với kỳ trước`;
-}
-
-// Bieu do
-
-const SVG_NS = 'http://www.w3.org/2000/svg';
-const CHART = { min: 0, max: 10, step: 2, padLeft: 46, padRight: 24, padTop: 30, padBottom: 32 };
-
-function svgEl(tag, attrs = {}) {
-    const el = document.createElementNS(SVG_NS, tag);
-    Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
-    return el;
-}
-
-function smoothPath(points) {
-    if (points.length < 2) return '';
-    let d = `M${points[0].x} ${points[0].y}`;
-    for (let i = 0; i < points.length - 1; i++) {
-        const p0 = points[i - 1] || points[i];
-        const p1 = points[i];
-        const p2 = points[i + 1];
-        const p3 = points[i + 2] || p2;
-        const c1x = p1.x + (p2.x - p0.x) / 6;
-        const c1y = p1.y + (p2.y - p0.y) / 6;
-        const c2x = p2.x - (p3.x - p1.x) / 6;
-        const c2y = p2.y - (p3.y - p1.y) / 6;
-        d += ` C${c1x} ${c1y} ${c2x} ${c2y} ${p2.x} ${p2.y}`;
-    }
-    return d;
-}
-
-function renderChart(dataset) {
-    const container = $('chart');
-    container.innerHTML = '';
-
-    if (!dataset || !dataset.values.length) {
-        container.innerHTML = '<p class="chart__empty">Chưa có dữ liệu điểm để hiển thị</p>';
-        return;
-    }
-
-    const width = container.clientWidth;
-    const height = container.clientHeight;
-    const { min, max, step, padLeft, padRight, padTop, padBottom } = CHART;
-    const plotW = width - padLeft - padRight;
-    const plotH = height - padTop - padBottom;
-    const n = dataset.values.length;
-
-    const xAt = (i) => padLeft + (n === 1 ? plotW / 2 : (plotW * i) / (n - 1));
-    const yAt = (v) => padTop + plotH - ((v - min) / (max - min)) * plotH;
-
-    const svg = svgEl('svg', { viewBox: `0 0 ${width} ${height}` });
-
-    const defs = svgEl('defs');
-    const grad = svgEl('linearGradient', { id: 'chartArea', x1: 0, y1: 0, x2: 0, y2: 1 });
-    grad.append(
-        svgEl('stop', { offset: 0, 'stop-color': '#3B6EF5', 'stop-opacity': 0.18 }),
-        svgEl('stop', { offset: 1, 'stop-color': '#3B6EF5', 'stop-opacity': 0 }),
-    );
-    defs.append(grad);
-    svg.append(defs);
-
-    // Nhãn trục Y
-    for (let v = min; v <= max; v += step) {
-        const label = svgEl('text', { x: padLeft - 22, y: yAt(v) + 4, 'text-anchor': 'end', class: 'chart__label' });
-        label.textContent = v;
-        svg.append(label);
-    }
-
-    // Lưới dọc + nhãn trục X
-    dataset.labels.forEach((text, i) => {
-        svg.append(svgEl('line', { x1: xAt(i), x2: xAt(i), y1: padTop, y2: padTop + plotH, class: 'chart__grid' }));
-        const label = svgEl('text', { x: xAt(i), y: height - 6, 'text-anchor': 'middle', class: 'chart__label' });
-        label.textContent = text;
-        svg.append(label);
-    });
-    svg.append(svgEl('line', { x1: padLeft - 5, x2: width - padRight + 18, y1: padTop + plotH, y2: padTop + plotH, class: 'chart__axis' }));
-
-    // Vùng tô + đường
-    const points = dataset.values.map((v, i) => ({ x: xAt(i), y: yAt(v) }));
-    const line = smoothPath(points);
-    const baseY = padTop + plotH;
-    svg.append(svgEl('path', { d: `${line} V${baseY} H${points[0].x} Z`, class: 'chart__area' }));
-    svg.append(svgEl('path', { d: line, class: 'chart__line' }));
-
-    // Điểm + tooltip
-    const tooltip = document.createElement('div');
-    tooltip.className = 'chart__tooltip';
-
-    const dots = points.map((p) => {
-        const dot = svgEl('circle', { cx: p.x, cy: p.y, r: 5.5, class: 'chart__point' });
-        svg.append(dot);
-        return dot;
-    });
-
-    const showTooltip = (i) => {
-        dots.forEach((d, idx) => d.classList.toggle('is-active', idx === i));
-        tooltip.textContent = dataset.values[i].toFixed(1);
-        tooltip.style.left = `${points[i].x}px`;
-        tooltip.style.top = `${points[i].y}px`;
+  const dataPoints = semesters.map(sem => {
+    const semCourses = courses.filter(c => c.semester_id === sem.id);
+    const semCalc = GradeCalculator.calculateSemesterGPA(semCourses);
+    return {
+      label: sem.name,
+      gpa: semCalc.gpa
     };
+  });
 
-    // Vùng bắt chuột rộng hơn chấm tròn cho dễ rê
-    points.forEach((p, i) => {
-        const hit = svgEl('circle', { cx: p.x, cy: p.y, r: 16, class: 'chart__hit' });
-        hit.addEventListener('mouseenter', () => showTooltip(i));
-        hit.addEventListener('click', () => showTooltip(i));
-        svg.append(hit);
-    });
+  const width = 640;
+  const height = 180;
+  const padding = 35;
+  const maxGpa = 4.0;
 
-    container.append(svg, tooltip);
-    showTooltip(n - 1); // mặc định hiện điểm mới nhất như design
+  const points = dataPoints.map((dp, idx) => {
+    const x = padding + (idx * ((width - 2 * padding) / Math.max(dataPoints.length - 1, 1)));
+    const y = height - padding - ((dp.gpa / maxGpa) * (height - 2 * padding));
+    return { x, y, ...dp };
+  });
+
+  let pathD = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 1; i < points.length; i++) {
+    pathD += ` L ${points[i].x} ${points[i].y}`;
+  }
+
+  container.innerHTML = `
+    <svg viewBox="0 0 ${width} ${height}" style="width: 100%; height: auto; max-height: 220px;">
+      <!-- Grid lines -->
+      <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="#E2E8F0" stroke-width="1.5" />
+      <line x1="${padding}" y1="${padding}" x2="${width - padding}" y2="${padding}" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="4" />
+      <text x="${padding - 10}" y="${padding + 4}" font-size="11" fill="#64748B" text-anchor="end">4.0</text>
+      <text x="${padding - 10}" y="${height - padding + 4}" font-size="11" fill="#64748B" text-anchor="end">0.0</text>
+
+      <!-- Trend line -->
+      <path d="${pathD}" fill="none" stroke="#3B82F6" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+
+      <!-- Data dots -->
+      ${points.map(p => `
+        <circle cx="${p.x}" cy="${p.y}" r="6" fill="#3B82F6" stroke="#FFFFFF" stroke-width="2.5" />
+        <text x="${p.x}" y="${p.y - 12}" font-size="12" font-weight="700" fill="#1E293B" text-anchor="middle">${p.gpa.toFixed(2)}</text>
+        <text x="${p.x}" y="${height - 12}" font-size="11" font-weight="600" fill="#64748B" text-anchor="middle">${p.label}</text>
+      `).join('')}
+    </svg>
+  `;
 }
 
-function setupChartTabs(chartData) {
-    const tabs = document.querySelectorAll('.tabs__btn');
-    let currentRange = 'current';
+function renderGradeDistribution(courses) {
+  const container = document.getElementById('gradeDistributionBars');
+  if (!container) return;
 
-    tabs.forEach((tab) => {
-        tab.addEventListener('click', () => {
-            currentRange = tab.dataset.range;
-            tabs.forEach((t) => {
-                const active = t === tab;
-                t.classList.toggle('is-active', active);
-                t.setAttribute('aria-selected', active);
-            });
-            renderChart(chartData[currentRange]);
-        });
-    });
+  const counts = { 'A': 0, 'B+': 0, 'B': 0, 'C+': 0, 'C': 0, 'D+': 0, 'D': 0, 'F': 0 };
+  let totalValid = 0;
 
-    // Vẽ lại khi đổi kích thước màn hình
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => renderChart(chartData[currentRange]), 150);
-    });
-
-    renderChart(chartData[currentRange]);
-}
-
-/* ===== Hoạt động gần đây ===== */
-const ACTIVITY_ICONS = {
-    grade:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>',
-    course: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>',
-    goal:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg>',
-};
-
-function renderActivities(list) {
-    const ul = $('activityList');
-    if (!list.length) {
-        ul.innerHTML = '<li class="list-empty">Chưa có hoạt động nào</li>';
-        return;
+  courses.forEach(c => {
+    const calc = GradeCalculator.calculateCourseFinalScore(c.components);
+    if (calc.isComplete && calc.finalScore10 !== null) {
+      const grade = GradeCalculator.convertScore10(calc.finalScore10);
+      if (counts[grade.letter] !== undefined) {
+        counts[grade.letter]++;
+        totalValid++;
+      }
     }
-    ul.innerHTML = list.map((a) => `
-        <li class="activity">
-            <span class="activity__icon activity__icon--${a.type}">${ACTIVITY_ICONS[a.type] || ACTIVITY_ICONS.grade}</span>
-            <span class="activity__text">${escapeHtml(a.text)}</span>
-            <span class="activity__time">${escapeHtml(a.time)}</span>
-        </li>`).join('');
+  });
+
+  const scaleColors = {
+    'A': '#10B981', 'B+': '#10B981', 'B': '#3B82F6', 'C+': '#3B82F6',
+    'C': '#F59E0B', 'D+': '#F59E0B', 'D': '#F59E0B', 'F': '#EF4444'
+  };
+
+  container.innerHTML = Object.keys(counts).map(letter => {
+    const count = counts[letter];
+    const pct = totalValid > 0 ? Math.round((count / totalValid) * 100) : 0;
+    const color = scaleColors[letter] || '#3B82F6';
+
+    return `
+      <div style="margin-bottom: 12px;">
+        <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 4px;">
+          <span>Điểm ${letter}</span>
+          <span>${count} môn (${pct}%)</span>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" style="width: ${pct}%; background: ${color};"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
-
-/* ===== Lịch học sắp tới ===== */
-function renderSchedule(list) {
-    const ul = $('scheduleList');
-    if (!list.length) {
-        ul.innerHTML = '<li class="list-empty">Không có lịch học sắp tới</li>';
-        return;
-    }
-    ul.innerHTML = list.map((l) => `
-        <li class="lesson">
-            <span class="lesson__date"><span>${escapeHtml(l.weekday)}</span><span>${escapeHtml(l.date)}</span></span>
-            <span class="lesson__bar" style="background:${escapeHtml(l.color)}"></span>
-            <span>
-                <p class="lesson__name">${escapeHtml(l.name)}</p>
-                <p class="lesson__time">${escapeHtml(l.time)}</p>
-            </span>
-        </li>`).join('');
-}
-
-/* ===== Sidebar trên mobile ===== */
-function setupSidebar() {
-    const sidebar = $('sidebar');
-    const overlay = $('sidebarOverlay');
-    const toggle = $('menuToggle');
-
-    const setOpen = (open) => {
-        sidebar.classList.toggle('is-open', open);
-        overlay.hidden = !open;
-        toggle.setAttribute('aria-expanded', open);
-    };
-
-    toggle.addEventListener('click', () => setOpen(!sidebar.classList.contains('is-open')));
-    overlay.addEventListener('click', () => setOpen(false));
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
-}
-
-/* ===== Menu tài khoản (Xem thông tin / Đăng xuất) ===== */
-function setupUserMenu() {
-    const menu = $('userMenu');
-    const toggle = $('userMenuToggle');
-    const list = $('userMenuList');
-
-    const setOpen = (open) => {
-        list.hidden = !open;
-        toggle.setAttribute('aria-expanded', open);
-        if (open) list.querySelector('[role="menuitem"]')?.focus();
-    };
-
-    toggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        setOpen(list.hidden);
-    });
-
-    // Click ra ngoài menu thì đóng
-    document.addEventListener('click', (e) => {
-        if (!menu.contains(e.target)) setOpen(false);
-    });
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !list.hidden) {
-            setOpen(false);
-            toggle.focus();
-        }
-    });
-
-    $('logoutBtn').addEventListener('click', logout);
-}
-
-async function logout() {
-    // Khi có API: gọi thu hồi refresh token trước (PB-03)
-    // await fetch('/api/auth/logout', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
-
-    // Xóa token và thông tin phiên phía client
-    ['accessToken', 'refreshToken', 'user'].forEach((key) => {
-        localStorage.removeItem(key);
-        sessionStorage.removeItem(key);
-    });
-
-    // replace(): không cho bấm Back quay lại dashboard
-    window.location.replace('index.html');
-}
-
-/* ===== Khởi chạy ===== */
-async function initDashboard() {
-    setupSidebar();
-    setupUserMenu();
-    try {
-        const data = await loadDashboardData();
-        renderUser(data.user);
-        renderStats(data.stats);
-        setupChartTabs(data.chart);
-        renderActivities(data.activities);
-        renderSchedule(data.schedule);
-    } catch (err) {
-        console.error('Dashboard - dashboard.js:327', err);
-        $('chart').innerHTML = '<p class="chart__empty">Không tải được dữ liệu. Vui lòng thử lại.</p>';
-    }
-}
-
-initDashboard();
