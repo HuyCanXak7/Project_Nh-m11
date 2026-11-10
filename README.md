@@ -419,7 +419,7 @@ cp .env.example .env      # điền giá trị thật, KHÔNG commit .env
 docker compose up         # khởi chạy FE + BE + PostgreSQL
 ```
 
-Tài khoản demo: xem mục seed dữ liệu (PB-48, PB-59).
+Tài khoản demo: xem [hướng dẫn seed tài khoản PB-48](#seed-tài-khoản-demo-pb-48).
 
 ---
 
@@ -439,10 +439,10 @@ Copy file `.env.example` và đổi tên thành `.env`:
 ```bash
 cp .env.example .env
 ```
-*(Lưu ý: Bạn có thể giữ nguyên các giá trị mặc định trong file `.env` này để chạy ở môi trường local).*
+Giá trị MySQL mẫu dùng được ở local. Đặt `JWT_SECRET` thành chuỗi ngẫu nhiên ít nhất 32 byte. Có thể tạo chuỗi bằng `python -c "import secrets; print(secrets.token_urlsafe(32))"`.
 
 **Bước 2: Khởi chạy toàn bộ hệ thống**
-Tại thư mục gốc của dự án (nơi chứa file `docker-compose.yml`), mở terminal và chạy lệnh sau:
+Tại thư mục gốc của dự án (nơi chứa file `docker-compose.yaml`), mở terminal và chạy lệnh sau:
 ```bash
 docker compose up --build
 ```
@@ -452,3 +452,25 @@ Sau khi Terminal báo quá trình khởi động hoàn tất, hệ thống sẽ 
 * **API Backend:** Chạy tại `http://localhost:8000` (Frontend dùng URL này để gọi API).
 * **Tài liệu API (Swagger UI):** Truy cập tại `http://localhost:8000/docs`
 * **Cơ sở dữ liệu MySQL:** Chạy ở port `3306` (Dùng tài khoản user đã cấu hình trong file `.env` để kết nối và kiểm tra dữ liệu qua DBeaver, DataGrip hoặc MySQL Workbench).
+
+## Seed tài khoản demo (PB-48)
+
+Trong `.env`, điền `SEED_ADMIN_PASSWORD` và `SEED_STUDENT_PASSWORD`. Mỗi mật khẩu cần ít nhất 8 ký tự và tối đa 72 byte UTF-8. Giữ file `.env` trên máy.
+
+Chạy các lệnh từ thư mục gốc của repo. Compose chờ MySQL sẵn sàng và backend áp dụng migration khi khởi động.
+
+```bash
+docker compose up -d --build
+docker compose exec backend python seed_accounts.py
+```
+
+Nếu vừa sửa `.env` khi container đã chạy, chạy lại `docker compose up -d` để nạp cấu hình mới trước khi seed.
+
+| Email | Vai trò | Biến môi trường chứa mật khẩu |
+|---|---|---|
+| `admin@example.com` | `ADMIN` | `SEED_ADMIN_PASSWORD` |
+| `student@example.com` | `STUDENT` | `SEED_STUDENT_PASSWORD` |
+
+Chạy lại script sẽ giữ nguyên tài khoản đã có, kể cả mật khẩu và trạng thái. Nếu một email mẫu đã thuộc vai trò khác, script báo lỗi và hủy giao dịch.
+
+Để kiểm tra, mở Swagger UI tại `http://localhost:8000/docs`. Gọi `POST /api/v1/auth/login` với email và mật khẩu mẫu. Dùng `data.accessToken` để **Authorize**, rồi gọi `GET /api/v1/auth/me` và xem `data.role`. Giao diện HTML hiện dùng đăng nhập giả lập, vì vậy hãy kiểm tra các tài khoản này qua Swagger.
