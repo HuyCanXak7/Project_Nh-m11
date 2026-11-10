@@ -9,7 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initAppUser() {
-  const student = StorageService.getStudent();
+  const student = { ...StorageService.getStudent() };
+  // Ưu tiên tên của tài khoản đang đăng nhập (session.js)
+  const sessionUser = typeof getSession === 'function' ? getSession()?.user : null;
+  if (sessionUser?.fullName) student.name = sessionUser.fullName;
   const nameEl = document.getElementById('navStudentName');
   const idEl = document.getElementById('navStudentId');
   const avatarEl = document.getElementById('navStudentAvatar');
@@ -17,9 +20,13 @@ function initAppUser() {
   if (nameEl) nameEl.textContent = student.name || 'Huỳnh Nhơn Nguyên Nghiệp';
   if (idEl) idEl.textContent = `MSSV: ${student.student_id || 'N25DTCN038'}`;
   if (avatarEl) {
-    const parts = (student.name || 'Nghiệp').trim().split(' ');
-    const initials = parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : 'NN';
-    avatarEl.textContent = initials;
+    if (student.avatar_url) {
+      avatarEl.innerHTML = `<img src="${student.avatar_url}" alt="Avatar" class="app-user__avatar-img">`;
+    } else {
+      const parts = (student.name || 'Huỳnh Nghiệp').trim().split(' ').filter(Boolean);
+      const initials = parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : (parts[0] ? parts[0].slice(0, 2).toUpperCase() : 'HN');
+      avatarEl.innerHTML = initials;
+    }
   }
 }
 
@@ -38,7 +45,7 @@ function highlightActiveNav() {
 
 function handleLogout() {
   if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?')) {
-    window.location.href = 'index.html';
+    logout(); // session.js: thu hồi refresh token, xóa phiên (PB-03)
   }
 }
 

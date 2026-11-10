@@ -1,5 +1,3 @@
-
-
 function showError(inputId, errorId, message) {
     const errorEl = document.getElementById(errorId);
     const inputGroup = document.getElementById(inputId)?.closest('.input-group');
@@ -98,4 +96,16 @@ function showModal({ type = 'success', title, message, buttonText = 'Đóng', on
     document.body.appendChild(overlay);
     requestAnimationFrame(() => overlay.classList.add('is-open'));
     btn.focus();
+}
+
+/* ===== Trạng thái đang xử lý của nút submit ===== */
+function setSubmitting(button, busy, busyText) {
+    if (busy) {
+        button.dataset.label ??= button.innerHTML;
+        button.disabled = true;
+        button.textContent = busyText;
+    } else {
+        button.disabled = false;
+        if (button.dataset.label) button.innerHTML = button.dataset.label;
+    }
 }

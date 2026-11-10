@@ -1,0 +1,344 @@
+/* Phần riêng của trang Thống kê. Khung chung (sidebar, header, card, tabs...) nằm trong app_layout.css */
+
+.page-statistics {
+    --grade-green: #16A34A;
+    --grade-blue: #2563EB;
+    --grade-orange: #F59E0B;
+    --grade-red: #EF4444;
+    --track: #EEF2F7;
+    --purple: #6D4AE8;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* ===== Thanh công cụ ===== */
+.stats-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: -6px;
+}
+
+.tabs--lg .tabs__btn {
+    height: 34px;
+    padding: 0 16px;
+    font-size: 14px;
+    white-space: nowrap;
+    background: #EDF1F7;
+}
+
+.tabs--lg .tabs__btn.is-active { background: var(--dash-primary); }
+
+.stats-toolbar__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.select {
+    position: relative;
+    display: block;
+}
+
+.select select {
+    appearance: none;
+    height: 46px;
+    min-width: 220px;
+    padding: 0 44px 0 16px;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    background: var(--white);
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--dash-text);
+    cursor: pointer;
+}
+
+.select__caret {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    width: 18px;
+    height: 18px;
+    transform: translateY(-50%);
+    color: var(--dash-text-muted);
+    pointer-events: none;
+}
+
+.btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    height: 46px;
+    padding: 0 20px;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    background: var(--white);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--dash-text);
+    white-space: nowrap;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-outline svg { width: 18px; height: 18px; }
+
+.btn-outline:hover {
+    border-color: var(--dash-primary);
+    color: var(--dash-primary);
+}
+
+.select select:focus-visible,
+.btn-outline:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.35);
+    outline-offset: 2px;
+}
+
+/* Ghi chú màu xanh trong thẻ (56% chương trình, Cần 3.60...) */
+.note-strong {
+    font-weight: 600;
+    color: var(--success);
+}
+
+/* ===== Hàng bố cục ===== */
+.stats-row {
+    display: grid;
+    grid-template-columns: minmax(0, 780fr) minmax(0, 400fr);
+    gap: 20px;
+}
+
+.card__meta {
+    font-size: 13px;
+    color: var(--dash-text-muted);
+}
+
+.pill {
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    background: #E6EEFD;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--dash-primary);
+}
+
+/* ===== Biểu đồ GPA ===== */
+.legend {
+    display: flex;
+    gap: 16px;
+    list-style: none;
+}
+
+.legend__item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--dash-text-muted);
+}
+
+.legend__dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+}
+
+.legend__dot--term { background: var(--dash-primary); }
+.legend__dot--cum  { background: var(--grade-orange); }
+
+.gpa-chart {
+    position: relative;
+    width: 100%;
+    height: 220px;
+}
+
+.gpa-chart svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.gpa-chart__grid  { stroke: var(--dash-border); stroke-width: 1; }
+.gpa-chart__label { font-size: 12.5px; fill: var(--dash-text-muted); font-family: var(--font-main); }
+.gpa-chart__value { font-size: 12.5px; font-weight: 600; fill: var(--dash-primary); font-family: var(--font-main); }
+.gpa-chart__bar   { fill: var(--dash-primary); transition: opacity 0.15s; }
+.gpa-chart__bar:hover { opacity: 0.85; }
+
+.gpa-chart__bar--planned {
+    fill: #E6EEFD;
+    stroke: #9DB8F0;
+    stroke-width: 1.2;
+    stroke-dasharray: 4 3;
+}
+
+.gpa-chart__line  { fill: none; stroke: var(--grade-orange); stroke-width: 2; }
+.gpa-chart__point { fill: var(--grade-orange); stroke: var(--white); stroke-width: 2; }
+
+.chart__empty {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    color: var(--dash-text-faint);
+    text-align: center;
+}
+
+/* ===== Phân bố điểm chữ ===== */
+.grade-dist {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    list-style: none;
+}
+
+.grade-row {
+    display: grid;
+    grid-template-columns: 30px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+}
+
+.grade-row__label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--dash-text);
+}
+
+.grade-row__count {
+    font-size: 13px;
+    color: var(--dash-text-muted);
+    text-align: right;
+}
+
+/* Thanh tiến độ dùng chung cho 2 card */
+.bar {
+    display: block;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: var(--track);
+    overflow: hidden;
+}
+
+.bar__fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    transition: width 0.4s ease;
+}
+
+.bar__fill--green  { background: var(--grade-green); }
+.bar__fill--blue   { background: var(--grade-blue); }
+.bar__fill--orange { background: var(--grade-orange); }
+.bar__fill--red    { background: var(--grade-red); }
+.bar__fill--purple { background: var(--purple); }
+
+/* ===== Tiến độ tín chỉ ===== */
+.credit-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    list-style: none;
+}
+
+.credit-row__head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.credit-row__name {
+    font-size: 15px;
+    color: var(--dash-text);
+}
+
+.credit-row__value {
+    font-size: 13px;
+    color: var(--dash-text-muted);
+    white-space: nowrap;
+}
+
+/* ===== Môn học nổi bật ===== */
+.highlight-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    list-style: none;
+}
+
+.highlight {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #F5F7FB;
+}
+
+.highlight__info { flex: 1; min-width: 0; }
+
+.highlight__name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--dash-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.highlight__sub {
+    margin-top: 2px;
+    font-size: 13px;
+    color: var(--dash-text-muted);
+}
+
+.highlight__sub--danger { color: var(--grade-red); }
+
+.highlight__score {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dash-text);
+}
+
+.grade-badge {
+    min-width: 30px;
+    height: 26px;
+    padding: 0 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.grade-badge--green  { background: #DFF4EA; color: var(--grade-green); }
+.grade-badge--blue   { background: #E3EDFD; color: var(--grade-blue); }
+.grade-badge--orange { background: #FEF3C7; color: #B45309; }
+.grade-badge--red    { background: #FDE2E2; color: var(--grade-red); }
+
+/* ===== Responsive ===== */
+@media (max-width: 1080px) {
+    .stats-row { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 600px) {
+    .tabs--lg .tabs__btn { padding: 0 8px; font-size: 13px; }
+
+    .stats-toolbar__actions { width: 100%; flex-wrap: wrap; }
+    .select { flex: 1 1 100%; }
+    .select select { width: 100%; min-width: 0; }
+    .btn-outline { flex: 1 1 100%; justify-content: center; }
+
+    .card__head .legend { width: 100%; }
+}

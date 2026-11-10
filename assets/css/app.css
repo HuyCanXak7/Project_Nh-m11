@@ -1,4 +1,4 @@
-/**
+﻿/**
  * STYLESHEET ỨNG DỤNG CHÍNH - QUẢN LÝ CHỈ SỐ HỌC TẬP (NHÓM 11)
  * Thiết kế đồng bộ theo hệ thống Figma (variables.css, common.css, model.css)
  * Phụ trách: FE Huỳnh Nhơn Nguyên Nghiệp
@@ -111,6 +111,7 @@ body.app-body {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-shrink: 0;
 }
 
 .app-user__profile {
@@ -122,6 +123,7 @@ body.app-body {
     padding: 4px 10px 4px 4px;
     border-radius: var(--radius-full);
     transition: background 0.2s;
+    flex-shrink: 0;
 }
 
 .app-user__profile:hover {
@@ -131,6 +133,12 @@ body.app-body {
 .app-user__avatar {
     width: 38px;
     height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+    max-width: 38px;
+    max-height: 38px;
+    aspect-ratio: 1 / 1;
+    flex-shrink: 0;
     border-radius: 50%;
     background: #3B82F6;
     color: var(--white);
@@ -138,7 +146,106 @@ body.app-body {
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 13.5px;
+    overflow: hidden;
+    position: relative;
+    user-select: none;
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.25);
+}
+
+.app-user__avatar img,
+.app-user__avatar-img {
+    width: 100%;
+    height: 100%;
+    min-width: 100%;
+    min-height: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+}
+
+/* ===== PROFILE AVATAR COMPONENT ===== */
+.profile-avatar-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: #FFFFFF;
+    border: 1.5px solid rgba(59, 130, 246, 0.2);
+    border-radius: 20px;
+    padding: 18px 22px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.08);
+}
+
+.profile-avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.profile-avatar-circle {
+    width: 84px;
+    height: 84px;
+    min-width: 84px;
+    min-height: 84px;
+    max-width: 84px;
+    max-height: 84px;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 28px;
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 6px 18px rgba(59, 130, 246, 0.35);
+    border: 3px solid #FFFFFF;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profile-avatar-circle:hover {
+    transform: scale(1.03);
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.45);
+}
+
+.profile-avatar-circle img {
+    width: 100%;
+    height: 100%;
+    min-width: 100%;
+    min-height: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+}
+
+.profile-avatar-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.65);
+    color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    border-radius: 50%;
+}
+
+.profile-avatar-circle:hover .profile-avatar-overlay {
+    opacity: 1;
+}
+
+.profile-avatar-meta {
+    flex: 1;
 }
 
 .app-user__info {
