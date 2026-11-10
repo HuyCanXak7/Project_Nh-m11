@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -65,11 +65,29 @@
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 28px;">
                 <!-- Cột 1: Thông tin sinh viên (PB-04) -->
                 <div style="background: var(--bg-main); border-radius: 24px; padding: 26px;">
-                    <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 20px;">
-                        <div class="app-user__avatar" style="width: 52px; height: 52px; font-size: 18px;">NN</div>
-                        <div>
-                            <h3 style="font-size: 17px; font-weight: 800; color: var(--text-black);">Thông Tin Sinh Viên</h3>
-                            <p style="font-size: 12px; color: var(--text-gray);">Đồng bộ lên báo cáo bảng điểm in ấn A4</p>
+                    <!-- KHUNG ĐỔI ẢNH ĐẠI DIỆN AVATAR -->
+                    <div class="profile-avatar-card">
+                        <div class="profile-avatar-wrap">
+                            <div class="profile-avatar-circle" id="profileAvatarDisplay" onclick="triggerAvatarUpload()" title="Nhấp để tải ảnh đại diện mới">
+                                <span id="profileAvatarInitials">HN</span>
+                                <div class="profile-avatar-overlay">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                    <span>Đổi ảnh</span>
+                                </div>
+                            </div>
+                            <input type="file" id="avatarFileInput" accept="image/png, image/jpeg, image/webp" style="display: none;" onchange="handleAvatarUpload(event)">
+                        </div>
+                        <div class="profile-avatar-meta">
+                            <h3 style="font-size: 16px; font-weight: 800; color: var(--text-black); margin-bottom: 4px;">Ảnh Đại Diện Sinh Viên</h3>
+                            <p style="font-size: 12px; color: var(--text-gray); margin-bottom: 10px;">Hỗ trợ JPG, PNG, WEBP (tự động cắt vuông & tối ưu nhẹ)</p>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button type="button" onclick="triggerAvatarUpload()" class="btn btn-primary btn-sm" style="font-size: 12px; padding: 6px 14px;">
+                                    📷 Tải ảnh lên
+                                </button>
+                                <button type="button" onclick="handleRemoveAvatar()" id="btnRemoveAvatar" class="btn btn-secondary btn-sm" style="display: none; font-size: 12px; padding: 6px 12px; color: var(--error);">
+                                    🗑️ Xóa ảnh
+                                </button>
+                            </div>
                         </div>
                     </div>
 
