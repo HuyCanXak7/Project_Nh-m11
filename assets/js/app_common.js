@@ -9,7 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initAppUser() {
-  const student = StorageService.getStudent();
+  const student = { ...StorageService.getStudent() };
+  // Ưu tiên tên của tài khoản đang đăng nhập (session.js)
+  const sessionUser = typeof getSession === 'function' ? getSession()?.user : null;
+  if (sessionUser?.fullName) student.name = sessionUser.fullName;
   const nameEl = document.getElementById('navStudentName');
   const idEl = document.getElementById('navStudentId');
   const avatarEl = document.getElementById('navStudentAvatar');
@@ -42,7 +45,7 @@ function highlightActiveNav() {
 
 function handleLogout() {
   if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?')) {
-    window.location.href = 'index.html';
+    logout(); // session.js: thu hồi refresh token, xóa phiên (PB-03)
   }
 }
 

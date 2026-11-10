@@ -55,7 +55,7 @@
                             <rect x="4" y="11" width="16" height="10.5" rx="2.5"/>
                             <path d="M8 11V7.5a4 4 0 0 1 8 0V11"/>
                         </svg>
-                        <input type="password" class="input-group__input" placeholder="Mật khẩu có ít nhất 6 kí tự" id="regPassword" minlength="6" autocomplete="new-password" required>
+                        <input type="password" class="input-group__input" placeholder="Mật khẩu có ít nhất 8 kí tự" id="regPassword" minlength="8" autocomplete="new-password" required>
                         <button type="button" class="input-group__toggle" data-toggle-password="regPassword" aria-label="Hiện/ẩn mật khẩu">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
@@ -138,6 +138,8 @@
     </main>
 
     <script src="../assets/js/auth_common.js"></script>
+    <script src="../assets/js/session.js"></script>
+    <script>redirectIfLoggedIn();</script>
     <script src="../assets/js/register.js"></script>
 </body>
 </html>
