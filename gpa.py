@@ -51,3 +51,24 @@ def semester_gpa(user_id, semester_id):
         "semesterId": semester_id,
         **summarize_gpa(row for row in rows if row.grade4 is not None),
     }
+
+
+def cumulative_gpa(user_id):
+    query = (
+        sa.select(courses.c.code, courses.c.credits, courses.c.grade4, courses.c.grade10)
+        .join(semesters, courses.c.semester_id == semesters.c.id)
+        .where(semesters.c.user_id == user_id, courses.c.grade4.is_not(None))
+        .order_by(courses.c.id)
+    )
+    best_attempts = {}
+    with get_engine().connect() as connection:
+        for attempt in connection.execute(query):
+            code = attempt.code.strip().upper()
+            best = best_attempts.get(code)
+            if best is None or (attempt.grade4, attempt.grade10) > (best.grade4, best.grade10):
+                best_attempts[code] = attempt
+
+    return {
+        **summarize_gpa(best_attempts.values()),
+        "retakePolicy": "HIGHEST_GRADE_BY_COURSE_CODE",
+    }

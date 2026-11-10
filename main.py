@@ -17,7 +17,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field, SecretStr
 
 from database import auth_sessions, get_engine, users
-from gpa import semester_gpa
+from gpa import cumulative_gpa, semester_gpa
 from passwords import hash_password, verify_password
 
 ACCESS_SECONDS = 15 * 60
@@ -226,3 +226,8 @@ def get_semester_gpa(
     if data is None:
         raise auth_error(404, "NOT_FOUND", "Không tìm thấy học kỳ.")
     return response(request, 200, "Đã tính GPA học kỳ.", data)
+
+
+@app.get("/api/v1/gpa/cumulative", tags=["Grades"])
+def get_cumulative_gpa(request: Request, user: sa.RowMapping = Depends(current_user)):
+    return response(request, 200, "Đã tính GPA tích lũy.", cumulative_gpa(user["id"]))

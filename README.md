@@ -475,6 +475,8 @@ Chạy lại script sẽ giữ nguyên tài khoản đã có, kể cả mật kh
 
 Để kiểm tra, mở Swagger UI tại `http://localhost:8000/docs`. Gọi `POST /api/v1/auth/login` với email và mật khẩu mẫu. Dùng `data.accessToken` để **Authorize**, rồi gọi `GET /api/v1/auth/me` và xem `data.role`. Giao diện HTML hiện dùng đăng nhập giả lập, vì vậy hãy kiểm tra các tài khoản này qua Swagger.
 
-## Dữ liệu GPA (PB-18)
+## Dữ liệu GPA (PB-18, PB-19)
 
 `GET /api/v1/semesters/{semesterId}/gpa` đọc môn từ cơ sở dữ liệu của người dùng đã đăng nhập. Backend tính điểm môn ghi đồng thời `courses.grade10` và `courses.grade4` sau khi đủ điểm, hoặc để cả hai là `NULL` nếu chưa thể tính. GPA được làm tròn đến hai chữ số thập phân trước khi xếp loại.
+
+`GET /api/v1/gpa/cumulative` gộp các lần học theo mã môn đã bỏ khoảng trắng hai đầu và quy về chữ hoa. Mỗi mã lấy lần có điểm hệ 4 cao nhất, sau đó so điểm hệ 10 nếu bằng nhau. Nếu cả hai điểm bằng nhau, giữ bản ghi có ID nhỏ nhất. Môn rớt vẫn tính vào GPA, còn tín chỉ đạt chỉ cộng các môn có điểm hệ 10 từ 4.0.
