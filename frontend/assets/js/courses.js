@@ -130,7 +130,7 @@ function renderCourses() {
       <tr>
         <td colspan="9">
           <div class="empty-state" style="padding: 40px 16px; margin: 10px 0;">
-            <div class="empty-state__icon">🔍</div>
+            <div class="empty-state__icon"></div>
             <h4 class="empty-state__title">Không tìm thấy môn học nào phù hợp</h4>
             <p class="empty-state__desc">
               ${hasFilter
@@ -166,14 +166,14 @@ function renderCourses() {
         </td>
         <td>
           <div style="font-weight: 700; color: var(--text-black);">${escapeHtml(c.course_name)}</div>
-          ${c.is_retake ? '<span class="badge badge-orange" style="margin-top: 4px;">🔁 Học lại</span>' : ''}
+          ${c.is_retake ? '<span class="badge badge-orange" style="margin-top: 4px;">Học lại</span>' : ''}
         </td>
         <td><span class="badge badge-gray">${escapeHtml(semName)}</span></td>
         <td style="text-align: center; font-weight: 700;">${c.credits} TC</td>
         <td><span class="badge ${catBadge}">${escapeHtml(c.category)}</span></td>
         <td>
           <button type="button" onclick="openComponentsModal('${c.id}')" class="btn btn-secondary btn-sm" style="font-size: 11.5px; padding: 4px 10px;">
-            ⚙️ ${(c.components || []).length} cột điểm
+            ${(c.components || []).length} cột điểm
           </button>
         </td>
         <td style="text-align: center; font-weight: 800; font-size: 15px;">
@@ -184,13 +184,13 @@ function renderCourses() {
         </td>
         <td style="text-align: right; white-space: nowrap;">
           <button type="button" onclick="openScoreModal('${c.id}')" class="btn btn-primary btn-sm" title="Nhập / Sửa điểm thành phần">
-            📝 Điểm
+            Điểm
           </button>
           <button type="button" onclick="openEditCourseModal('${c.id}')" class="btn btn-secondary btn-sm" title="Chỉnh sửa thông tin môn học">
-            ✏️
+            
           </button>
           <button type="button" onclick="openDeleteCourseModal('${c.id}')" class="btn btn-danger btn-sm" title="Xóa môn học">
-            🗑️
+            
           </button>
         </td>
       </tr>
@@ -372,12 +372,12 @@ function updateTotalWeightBar() {
 
   if (total === 100) {
     barEl.style.background = '#10B981';
-    msgEl.textContent = '✅ Chuẩn! Tổng trọng số đã đạt đúng 100%.';
+    msgEl.textContent = 'Chuẩn! Tổng trọng số đã đạt đúng 100%.';
     msgEl.style.color = '#059669';
     btnSave.disabled = false;
   } else {
     barEl.style.background = total > 100 ? 'var(--error)' : 'var(--primary)';
-    msgEl.textContent = `⚠️ Tổng trọng số hiện tại là ${total}%. Bắt buộc phải đúng 100% mới được lưu.`;
+    msgEl.textContent = `Tổng trọng số hiện tại là ${total}%. Bắt buộc phải đúng 100% mới được lưu.`;
     msgEl.style.color = total > 100 ? 'var(--error)' : '#D97706';
     btnSave.disabled = true;
   }

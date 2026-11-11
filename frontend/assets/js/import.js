@@ -100,7 +100,7 @@ function renderPreview(res, fileName) {
         <td style="text-align: center;">${r.weight_percent ? r.weight_percent + '%' : '--'}</td>
         <td style="text-align: center; font-weight: 800;">${r.score !== undefined ? r.score : '--'}</td>
         <td style="color: ${r.isError ? 'var(--error)' : '#10B981'}; font-weight: 600; font-size: 12.5px;">
-          ${r.isError ? `❌ ${escapeHtml(r.errorMsg)}` : '✅ Hợp lệ'}
+          ${r.isError ? `${escapeHtml(r.errorMsg)}` : 'Hợp lệ'}
         </td>
       </tr>
     `;

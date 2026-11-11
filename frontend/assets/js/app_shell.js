@@ -258,7 +258,7 @@ function showToast(msg, isError = false) {
     }
 
     toast.style.background = isError ? '#DC2626' : '#2563EB';
-    toast.innerHTML = isError ? `⚠️ ${escapeHtml(msg)}` : `✅ ${escapeHtml(msg)}`;
+    toast.innerHTML = isError ? `${escapeHtml(msg)}` : `${escapeHtml(msg)}`;
     toast.style.opacity = '1';
     toast.style.transform = 'translateY(0)';
 

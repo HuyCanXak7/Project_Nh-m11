@@ -21,7 +21,7 @@ function renderSemesters() {
   if (semesters.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <div class="empty-state__icon">📅</div>
+        <div class="empty-state__icon"></div>
         <h3 class="empty-state__title">Chưa có học kỳ nào</h3>
         <p class="empty-state__desc">Hệ thống chưa ghi nhận học kỳ của bạn. Hãy tạo học kỳ đầu tiên để bắt đầu thêm môn học và theo dõi chỉ số điểm nhé!</p>
         <button type="button" onclick="openCreateSemesterModal()" class="btn btn-primary">+ Tạo học kỳ đầu tiên</button>
@@ -67,13 +67,13 @@ function renderSemesters() {
 
         <div class="semester-card__actions">
           <a href="courses.html?semId=${sem.id}" class="btn btn-primary btn-sm" style="flex: 1;">
-            📚 Quản lý môn
+            Quản lý môn
           </a>
           <button type="button" onclick="openEditSemesterModal('${sem.id}')" class="btn btn-secondary btn-sm" title="Sửa thông tin học kỳ">
-            ✏️ Sửa
+            Sửa
           </button>
           <button type="button" onclick="openDeleteSemesterModal('${sem.id}')" class="btn btn-danger btn-sm" title="Xóa học kỳ">
-            🗑️ Xóa
+            Xóa
           </button>
         </div>
       </article>
@@ -148,7 +148,7 @@ function handleSaveSemester(e) {
 function showSemDateError(msg) {
   const err = document.getElementById('semDateError');
   if (err) {
-    err.textContent = `⚠️ ${msg}`;
+    err.textContent = `${msg}`;
     err.style.display = 'block';
   }
 }

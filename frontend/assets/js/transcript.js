@@ -35,7 +35,7 @@ function renderTranscript() {
   if (semesters.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <div class="empty-state__icon">📄</div>
+        <div class="empty-state__icon"></div>
         <h3 class="empty-state__title">Chưa có bảng điểm</h3>
         <p class="empty-state__desc">Hệ thống chưa ghi nhận môn học nào có điểm. Hãy thêm môn học hoặc nhập điểm từ CSV để xem bảng điểm nhé!</p>
       </div>

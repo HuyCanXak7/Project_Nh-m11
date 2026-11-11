@@ -49,11 +49,11 @@ function calculateRequiredScore(cum, goal) {
   if (roundedRequired > 4.0) {
     scoreEl.textContent = roundedRequired.toFixed(2);
     scoreEl.style.color = 'var(--error)';
-    msgEl.innerHTML = '❌ <strong>MỤC TIÊU KHÔNG KHẢ THI!</strong> Điểm trung bình cần đạt vượt quá thang 4.0 tối đa.';
+    msgEl.innerHTML = '<strong>MỤC TIÊU KHÔNG KHẢ THI!</strong> Điểm trung bình cần đạt vượt quá thang 4.0 tối đa.';
   } else if (roundedRequired <= 0) {
     scoreEl.textContent = '0.00';
     scoreEl.style.color = '#10B981';
-    msgEl.innerHTML = '🎉 <strong>XIN CHÚC MỪNG!</strong> Bạn đã hoàn thành vượt mục tiêu GPA từ các môn đã tích lũy!';
+    msgEl.innerHTML = '<strong>XIN CHÚC MỪNG!</strong> Bạn đã hoàn thành vượt mục tiêu GPA từ các môn đã tích lũy!';
   } else {
     scoreEl.textContent = roundedRequired.toFixed(2);
     scoreEl.style.color = 'var(--primary)';
