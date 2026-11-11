@@ -13,8 +13,8 @@ from alembic.config import Config
 from fastapi.testclient import TestClient
 
 from database import courses, get_engine, semesters, users
-from gpa import summarize_gpa
-from main import app
+from backend.app.services.gpa import summarize_gpa
+from backend.app.main import app
 from passwords import hash_password
 
 

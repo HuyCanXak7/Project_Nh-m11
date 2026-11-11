@@ -2,7 +2,7 @@ from decimal import Decimal, ROUND_HALF_UP
 
 import sqlalchemy as sa
 
-from database import courses, get_engine, semesters
+from backend.app.db.database import courses, get_engine, semesters
 
 RANKINGS = (
     (Decimal("3.60"), "Xuất sắc"),

@@ -1,6 +1,6 @@
 from alembic import context
 
-from database import get_engine, metadata
+from backend.app.db.database import get_engine, metadata
 
 engine = get_engine()
 

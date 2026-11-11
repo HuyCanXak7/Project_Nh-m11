@@ -16,8 +16,8 @@ from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field, SecretStr
 
-from database import auth_sessions, get_engine, users
-from gpa import cumulative_gpa, semester_gpa
+from backend.app.db.database import auth_sessions, get_engine, users
+from backend.app.services.gpa import cumulative_gpa, semester_gpa
 from passwords import hash_password, verify_password
 
 ACCESS_SECONDS = 15 * 60
