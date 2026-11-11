@@ -1,6 +1,6 @@
 """Create account and login-session tables."""
 
-import sqlalchemy as sa
+from sqlalchemy import BigInteger, Boolean, CheckConstraint, Column, ForeignKey, Integer, String, UniqueConstraint, true
 from alembic import op
 
 revision = "0001_auth_accounts"
@@ -12,20 +12,20 @@ depends_on = None
 def upgrade():
     op.create_table(
         "users",
-        sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("email", sa.String(254), nullable=False),
-        sa.Column("full_name", sa.String(150), nullable=False),
-        sa.Column("password_hash", sa.String(60), nullable=False),
-        sa.Column("role", sa.String(7), nullable=False),
-        sa.Column("is_active", sa.Boolean, nullable=False, server_default=sa.true()),
-        sa.UniqueConstraint("email", name="uq_users_email"),
-        sa.CheckConstraint("role IN ('ADMIN', 'STUDENT')", name="ck_users_role"),
+        Column("id", Integer, primary_key=True),
+        Column("email", String(254), nullable=False),
+        Column("full_name", String(150), nullable=False),
+        Column("password_hash", String(60), nullable=False),
+        Column("role", String(7), nullable=False),
+        Column("is_active", Boolean, nullable=False, server_default=true()),
+        UniqueConstraint("email", name="uq_users_email"),
+        CheckConstraint("role IN ('ADMIN', 'STUDENT')", name="ck_users_role"),
     )
     op.create_table(
         "auth_sessions",
-        sa.Column("id", sa.String(32), primary_key=True),
-        sa.Column("user_id", sa.Integer, sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
-        sa.Column("expires_at", sa.BigInteger, nullable=False),
+        Column("id", String(32), primary_key=True),
+        Column("user_id", Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
+        Column("expires_at", BigInteger, nullable=False),
     )
 
 
