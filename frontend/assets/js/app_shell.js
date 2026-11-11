@@ -209,7 +209,7 @@ function handleLogout() {
                 localStorage.removeItem('refreshToken');
                 localStorage.removeItem('session');
                 sessionStorage.removeItem('session');
-                window.location.replace('index.html');
+                window.location.replace('../index.html');
             }
         },
     });
