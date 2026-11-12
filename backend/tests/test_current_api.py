@@ -44,6 +44,27 @@ def test_auth_semester_and_gpa_flow():
         assert created.status_code == 201
         semester_id = created.json()["data"]["id"]
 
+        course = client.post(
+            f"/api/v1/semesters/{semester_id}/courses",
+            headers=headers,
+            json={
+                "code": "it001",
+                "name": "Nhập môn Công nghệ thông tin",
+                "credits": 3,
+                "category": "GENERAL",
+            },
+        )
+        assert course.status_code == 201
+        assert course.json()["data"] == {
+            "id": course.json()["data"]["id"],
+            "semester_id": semester_id,
+            "code": "IT001",
+            "name": "Nhập môn Công nghệ thông tin",
+            "credits": 3,
+            "category": "GENERAL",
+            "is_retake": False,
+        }
+
         assert client.get("/api/v1/semesters", headers=headers).status_code == 200
         assert client.get(f"/api/v1/semesters/{semester_id}", headers=headers).status_code == 200
         assert client.put(
@@ -115,6 +136,36 @@ def test_semester_ownership_and_validation():
             },
         )
         semester_id = created.json()["data"]["id"]
+        assert client.post(
+            f"/api/v1/semesters/{semester_id}/courses",
+            headers=other_headers,
+            json={
+                "code": "PRIVATE01",
+                "name": "Môn không được phép thêm",
+                "credits": 3,
+                "category": "SPECIALIZED",
+            },
+        ).status_code == 404
+        assert client.post(
+            f"/api/v1/semesters/{semester_id}/courses",
+            headers=owner_headers,
+            json={
+                "code": "INVALID01",
+                "name": "Môn sai tín chỉ",
+                "credits": 0,
+                "category": "GENERAL",
+            },
+        ).status_code == 400
+        assert client.post(
+            f"/api/v1/semesters/{semester_id}/courses",
+            headers=owner_headers,
+            json={
+                "code": "INVALID02",
+                "name": "Môn sai loại",
+                "credits": 3,
+                "category": "OTHER",
+            },
+        ).status_code == 400
         assert client.get(
             f"/api/v1/semesters/{semester_id}", headers=other_headers
         ).status_code == 404
