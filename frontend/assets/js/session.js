@@ -89,6 +89,13 @@ function popFlash() {
  * Chặn route
  * ========================================================= */
 
+/* Trang đăng nhập (index.html) nằm ở gốc frontend/, các trang còn lại nằm trong
+ * frontend/pages/. session.js được dùng chung cho cả hai mức nên phải tự tính
+ * đường dẫn điều hướng theo vị trí trang hiện tại. */
+const inPagesDir = () => /\/pages\//.test(window.location.pathname);
+const loginPath = () => (inPagesDir() ? '../index.html' : 'index.html');
+const dashboardPath = () => (inPagesDir() ? 'dashboard.html' : 'pages/dashboard.html');
+
 /** Gọi ở đầu các trang cần đăng nhập. Trả về user, hoặc null (đã chuyển về trang đăng nhập). */
 function requireAuth() {
     const session = getSession();
@@ -96,7 +103,7 @@ function requireAuth() {
 
     if (session) setFlash(MESSAGES.expired);
     clearSession();
-    window.location.replace('index.html');
+    window.location.replace(loginPath());
     return null;
 }
 
@@ -104,7 +111,7 @@ function requireAuth() {
 function redirectIfLoggedIn() {
     const session = getSession();
     if (session && session.refreshExpiresAt > Date.now()) {
-        window.location.replace('dashboard.html');
+        window.location.replace(dashboardPath());
     }
 }
 
@@ -112,7 +119,7 @@ function redirectIfLoggedIn() {
 function endSession(message) {
     clearSession();
     if (message) setFlash(message);
-    window.location.replace('index.html');
+    window.location.replace(loginPath());
     throw new ApiError(401, 'SESSION_ENDED', message);
 }
 
@@ -224,7 +231,7 @@ async function logout() {
         }
     }
     clearSession();
-    window.location.replace('index.html'); // replace: bấm Back không quay lại được
+    window.location.replace(loginPath()); // replace: bấm Back không quay lại được
 }
 
 /* =========================================================

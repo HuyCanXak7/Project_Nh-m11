@@ -89,7 +89,7 @@ registerForm.addEventListener('submit', async (e) => {
             message: `Tài khoản ${username} đã được tạo. Đăng nhập để bắt đầu hành trình của bạn nhé!`,
             buttonText: 'Đăng nhập ngay',
             onConfirm: () => {
-                window.location.href = 'index.html';
+                window.location.href = '../index.html';
             },
         });
     } catch (err) {

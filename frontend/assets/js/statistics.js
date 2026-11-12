@@ -343,7 +343,6 @@ function exportReport(data, semesters) {
 
 /* ===== Khởi chạy ===== */
 async function initStatistics() {
-    if (!initAppShell()) return;
     try {
         const data = await loadStatisticsData();
         const semesters = withCumulative(data.semesters);
@@ -360,7 +359,7 @@ async function initStatistics() {
 
         $('exportBtn').addEventListener('click', () => exportReport(data, semesters));
     } catch (err) {
-        console.error('Statistics - statistics.js:363', err);
+        console.error('Statistics - statistics.js:362', err);
         $('gpaChart').innerHTML = '<p class="chart__empty">Không tải được dữ liệu. Vui lòng thử lại.</p>';
     }
 }

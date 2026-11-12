@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập - Quản lí chỉ số học tập</title>
-    <link rel="stylesheet" href="../assets/css/variables.css">
-    <link rel="stylesheet" href="../assets/css/common.css">
-    <link rel="stylesheet" href="../assets/css/auth.css">
-    <link rel="stylesheet" href="../assets/css/model.css">
+    <link rel="stylesheet" href="assets/css/variables.css">
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/auth.css">
+    <link rel="stylesheet" href="assets/css/model.css">
 </head>
 <body class="page-login">
     <div class="bg-decoration" aria-hidden="true">
@@ -16,10 +16,10 @@
         <div class="bg-circle bg-circle--3"></div>
     </div>
 
-    <main class="auth-container">
+    <main class="auth-container"> 
         <!-- Login Card -->
         <section class="auth-card auth-card--login">
-            <a href="register.html" class="auth-card__tab">Đăng Ký</a>
+            <a href="pages/register.html" class="auth-card__tab">Đăng Ký</a>
 
             <form class="auth-form auth-form--login" id="loginForm" novalidate>
                 <label class="auth-form__label" for="loginEmail">Tài khoản</label>
@@ -60,7 +60,7 @@
                         Nhớ tài khoản
                         <input type="checkbox" id="rememberMe">
                     </label>
-                    <a href="forgot-password.html" class="auth-form__forgot">Bạn quên mật khẩu?</a>
+                    <a href="pages/forgot-password.html" class="auth-form__forgot">Bạn quên mật khẩu?</a>
                 </div>
 
                 <button type="submit" class="auth-form__submit">
@@ -87,9 +87,9 @@
         </aside>
     </main>
 
-    <script src="../assets/js/auth_common.js"></script>
-    <script src="../assets/js/session.js"></script>
+    <script src="assets/js/auth_common.js"></script>
+    <script src="assets/js/session.js"></script>
     <script>redirectIfLoggedIn();</script>
-    <script src="../assets/js/login.js"></script>
+    <script src="assets/js/login.js"></script>
 </body>
 </html>

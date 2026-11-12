@@ -66,7 +66,7 @@ loginForm.addEventListener('submit', async (e) => {
             title: 'Đăng nhập thành công!',
             message: `Chào mừng ${user.fullName} quay lại. Cùng xem hôm nay học được gì nhé!`,
             buttonText: 'Tiếp tục',
-            onConfirm: () => window.location.replace('dashboard.html'),
+            onConfirm: () => window.location.replace('pages/dashboard.html'),
         });
     } catch (err) {
         setSubmitting(loginButton, false);
