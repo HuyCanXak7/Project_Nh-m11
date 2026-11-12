@@ -25,6 +25,53 @@ Tài liệu này **chốt các nguyên tắc làm việc và quy tắc nghiệp 
 
 ---
 
+
+## Cấu trúc thư mục
+
+```text
+Project_Nh-m11/
+├── backend/
+│   ├── app/
+│   │   ├── main.py          # Khởi tạo ứng dụng và đăng ký router
+│   │   ├── core/           # Cấu hình, mật khẩu, response và xử lý lỗi
+│   │   ├── db/             # Kết nối và định nghĩa bảng SQLAlchemy
+│   │   ├── schemas/        # Schema đầu vào/đầu ra API
+│   │   ├── routers/        # Endpoint xác thực và GPA
+│   │   ├── services/       # Xác thực, phiên đăng nhập và tính GPA
+│   │   └── repositories/   # Truy vấn dữ liệu GPA
+│   ├── migrations/         # Alembic và các phiên bản schema
+│   ├── scripts/            # Seed tài khoản demo
+│   ├── tests/              # Kiểm thử API, xác thực và GPA
+│   ├── alembic.ini
+│   ├── requirements.txt
+│   ├── requirements-test.txt
+│   ├── .dockerignore
+│   └── Dockerfile
+├── frontend/
+│   ├── index.html          # Điểm vào, chuyển tới pages/index.html
+│   ├── pages/              # Giao diện HTML
+│   ├── assets/
+│   │   ├── css/
+│   │   └── js/
+│   │       └── pages/      # JavaScript riêng của từng trang
+│   └── tests/              # Kiểm tra đường dẫn trang và tài nguyên
+├── docs/
+│   ├── api/openapi.json
+│   └── guides/development.md
+├── design/                 # Ảnh thiết kế giao diện
+├── .github/workflows/ci.yml # Kiểm tra Python, JavaScript và chạy test
+├── .env.example
+├── .gitignore
+├── .dockerignore
+├── docker-compose.yaml
+└── README.md
+```
+
+Hướng dẫn chạy local, kiểm thử và vị trí các file cũ: [docs/guides/development.md](docs/guides/development.md).
+Các thư mục chức năng được bổ sung khi có mã triển khai tương ứng. JavaScript dùng chung nằm trực tiếp trong `frontend/assets/js/`; mã riêng từng trang nằm trong `frontend/assets/js/pages/`.
+
+Cấu hình Docker hiện dùng **MySQL 8.0**. Các mục bên dưới đề cập PostgreSQL là định hướng trong đặc tả ban đầu; việc tổ chức lại thư mục giữ nguyên MySQL đang triển khai.
+
 ## 1. Thành viên và phân công
 
 | Thành viên | Vai trò chính | Phạm vi |
@@ -416,7 +463,7 @@ Ghi đè (Upsert) để sinh viên cập nhập được điểm khi có kết q
 git clone <repo-url>
 cd <repo>
 cp .env.example .env      # điền giá trị thật, KHÔNG commit .env
-docker compose up         # khởi chạy FE + BE + PostgreSQL
+docker compose up --build # khởi chạy frontend + backend + MySQL
 ```
 
 Tài khoản demo: xem [hướng dẫn seed tài khoản PB-48](#seed-tài-khoản-demo-pb-48).
@@ -449,6 +496,7 @@ docker compose up --build
 
 ## Kết quả
 Sau khi Terminal báo quá trình khởi động hoàn tất, hệ thống sẽ có sẵn:
+* **Frontend:** Truy cập tại `http://localhost:8080` (giao diện hiện dùng dữ liệu giả lập).
 * **API Backend:** Chạy tại `http://localhost:8000` (Frontend dùng URL này để gọi API).
 * **Tài liệu API (Swagger UI):** Truy cập tại `http://localhost:8000/docs`
 * **Cơ sở dữ liệu MySQL:** Chạy ở port `3306` (Dùng tài khoản user đã cấu hình trong file `.env` để kết nối và kiểm tra dữ liệu qua DBeaver, DataGrip hoặc MySQL Workbench).
@@ -461,7 +509,7 @@ Chạy các lệnh từ thư mục gốc của repo. Compose chờ MySQL sẵn s
 
 ```bash
 docker compose up -d --build
-docker compose exec backend python seed_accounts.py
+docker compose exec backend python -m scripts.seed_accounts
 ```
 
 Nếu vừa sửa `.env` khi container đã chạy, chạy lại `docker compose up -d` để nạp cấu hình mới trước khi seed.
