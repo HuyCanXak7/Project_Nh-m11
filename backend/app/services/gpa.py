@@ -1,8 +1,10 @@
-from decimal import Decimal, ROUND_HALF_UP
+"""Các hàm tính GPA sử dụng ORM Session."""
 
-import sqlalchemy as sa
+from decimal import ROUND_HALF_UP, Decimal
 
-from backend.app.db.database import courses, get_engine, semesters
+from sqlalchemy.orm import Session
+
+from app.models import Course, Semester
 
 RANKINGS = (
     (Decimal("3.60"), "Xuất sắc"),
@@ -24,7 +26,9 @@ def summarize_gpa(completed_courses):
 
     gpa = ranking = None
     if included_credits:
-        gpa = (weighted_points / included_credits).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        gpa = (weighted_points / included_credits).quantize(
+            Decimal("0.01"), rounding=ROUND_HALF_UP
+        )
         ranking = next(label for threshold, label in RANKINGS if gpa >= threshold)
     return {
         "gpa4": float(gpa) if gpa is not None else None,
@@ -34,39 +38,43 @@ def summarize_gpa(completed_courses):
     }
 
 
-def semester_gpa(user_id, semester_id):
-    completed = semesters.outerjoin(
-        courses, (courses.c.semester_id == semesters.c.id) & courses.c.grade4.is_not(None),
+def semester_gpa(db: Session, user_id: int, semester_id: int):
+    """Tính GPA của một học kỳ và kiểm tra học kỳ thuộc đúng user."""
+    semester = (
+        db.query(Semester)
+        .filter(Semester.id == semester_id, Semester.user_id == user_id)
+        .first()
     )
-    query = (
-        sa.select(courses.c.credits, courses.c.grade4, courses.c.grade10)
-        .select_from(completed)
-        .where(semesters.c.id == semester_id, semesters.c.user_id == user_id)
-    )
-    with get_engine().connect() as connection:
-        rows = connection.execute(query).all()
-    if not rows:
+    if semester is None:
         return None
-    return {
-        "semesterId": semester_id,
-        **summarize_gpa(row for row in rows if row.grade4 is not None),
-    }
 
-
-def cumulative_gpa(user_id):
-    query = (
-        sa.select(courses.c.code, courses.c.credits, courses.c.grade4, courses.c.grade10)
-        .join(semesters, courses.c.semester_id == semesters.c.id)
-        .where(semesters.c.user_id == user_id, courses.c.grade4.is_not(None))
-        .order_by(courses.c.id)
+    completed_courses = (
+        db.query(Course)
+        .filter(Course.semester_id == semester_id, Course.grade4.is_not(None))
+        .all()
     )
+    return {"semesterId": semester_id, **summarize_gpa(completed_courses)}
+
+
+def cumulative_gpa(db: Session, user_id: int):
+    """Tính GPA tích lũy, mỗi mã môn chỉ giữ lần học có điểm cao nhất."""
+    completed_courses = (
+        db.query(Course)
+        .join(Semester)
+        .filter(Semester.user_id == user_id, Course.grade4.is_not(None))
+        .order_by(Course.id)
+        .all()
+    )
+
     best_attempts = {}
-    with get_engine().connect() as connection:
-        for attempt in connection.execute(query):
-            code = attempt.code.strip().upper()
-            best = best_attempts.get(code)
-            if best is None or (attempt.grade4, attempt.grade10) > (best.grade4, best.grade10):
-                best_attempts[code] = attempt
+    for course in completed_courses:
+        code = course.code.strip().upper()
+        best = best_attempts.get(code)
+        if best is None or (course.grade4, course.grade10) > (
+            best.grade4,
+            best.grade10,
+        ):
+            best_attempts[code] = course
 
     return {
         **summarize_gpa(best_attempts.values()),
