@@ -1,5 +1,7 @@
 """Kiểm thử PB-11, PB-12 và PB-13 cho API quản lý môn học."""
 
+from uuid import uuid4
+
 from fastapi.testclient import TestClient
 
 from app.db.database import SessionLocal
@@ -8,6 +10,9 @@ from app.models import GradeComponent
 
 
 def register_and_login(client: TestClient, email: str) -> dict:
+    # Thêm chuỗi ngẫu nhiên để test có thể chạy lặp lại trên cùng test database.
+    local_part, domain = email.split("@", maxsplit=1)
+    email = f"{local_part}.{uuid4().hex}@{domain}"
     register_response = client.post(
         "/api/v1/auth/register",
         json={"email": email, "full_name": "Sinh viên", "password": "password123"},
