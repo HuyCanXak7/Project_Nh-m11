@@ -355,22 +355,27 @@ body.app-body {
 }
 
 .btn-secondary {
-    background: var(--bg-main);
-    color: var(--text-dark);
+    background: #F1F5F9;
+    color: #1E293B;
+    border: 1px solid #CBD5E1;
 }
 
 .btn-secondary:hover {
-    background: #cbdcfb;
+    background: #E2E8F0;
+    color: #0F172A;
+    border-color: #94A3B8;
 }
 
 .btn-danger {
-    background: rgba(229, 62, 62, 0.1);
-    color: var(--error);
+    background: #FEE2E2;
+    color: #DC2626;
+    border: 1px solid #FECACA;
 }
 
 .btn-danger:hover {
-    background: var(--error);
+    background: #DC2626;
     color: var(--white);
+    border-color: #DC2626;
 }
 
 .btn-success {
@@ -386,6 +391,84 @@ body.app-body {
 .btn-sm {
     padding: 6px 14px;
     font-size: 12.5px;
+}
+
+/* ===== BẢNG NÚT THAO TÁC (ĐIỂM, SỬA, XÓA) ===== */
+.btn-action-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: flex-end;
+}
+
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-family: var(--font-main);
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.btn-action svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+}
+
+/* 1. Nút Điểm: Xanh dương nổi bật */
+.btn-action--score {
+    background: #2563EB;
+    color: #FFFFFF;
+    border-color: #2563EB;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+}
+
+.btn-action--score:hover {
+    background: #1D4ED8;
+    border-color: #1D4ED8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
+}
+
+/* 2. Nút Sửa: Rõ ràng, nền sáng viền sắc nét, chữ slate đậm, không bị chìm */
+.btn-action--edit {
+    background: #F1F5F9;
+    color: #1E293B;
+    border-color: #CBD5E1;
+}
+
+.btn-action--edit:hover {
+    background: #E2E8F0;
+    color: #0F172A;
+    border-color: #94A3B8;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* 3. Nút Xóa: Tương phản cao, nền đỏ nhạt cao cấp, viền đỏ, hover nền đỏ đậm chữ trắng */
+.btn-action--delete {
+    background: #FEF2F2;
+    color: #DC2626;
+    border-color: #FECACA;
+}
+
+.btn-action--delete:hover {
+    background: #DC2626;
+    color: #FFFFFF;
+    border-color: #DC2626;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(220, 38, 38, 0.3);
 }
 
 /* ===== BỘ LỌC VÀ TÌM KIẾM ===== */

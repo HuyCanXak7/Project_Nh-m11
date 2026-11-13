@@ -219,10 +219,10 @@ function handleLogout() {
 function handleResetData() {
     showConfirm({
         danger: true,
-        tittle: "Khôi phục dự án",
+        title: "Khôi phục dữ liệu mẫu",
         message: "Bạn có chắc là muốn khôi phục dữ liệu về ban đầu?",
         confirmText: "Khôi phục",
-        canelText: "Hủy",
+        cancelText: "Hủy",
         onConfirm: () => {
             if (typeof StorageService !== 'undefined') {
                 StorageService.resetToDefault();
@@ -232,8 +232,47 @@ function handleResetData() {
                 window.location.reload();
             }, 1200);
         }
-    })
+    });
 }
+
+/* ===== Quản lý Modal dùng chung (openAppModal & closeAppModal) ===== */
+function openAppModal(modalId) {
+    const el = document.getElementById(modalId);
+    if (!el) return;
+    el.style.display = 'flex';
+    requestAnimationFrame(() => {
+        el.classList.add('is-open');
+    });
+}
+
+function closeAppModal(modalId) {
+    const el = document.getElementById(modalId);
+    if (!el) return;
+    el.classList.remove('is-open');
+    setTimeout(() => {
+        if (!el.classList.contains('is-open')) {
+            el.style.display = 'none';
+        }
+    }, 200);
+}
+
+// Đóng modal khi bấm vào vùng phủ (backdrop) hoặc phím Escape
+document.addEventListener('click', (e) => {
+    if (e.target && e.target.classList && e.target.classList.contains('modal-overlay')) {
+        if (e.target.id) {
+            closeAppModal(e.target.id);
+        }
+    }
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const openModal = document.querySelector('.modal-overlay.is-open');
+        if (openModal && openModal.id) {
+            closeAppModal(openModal.id);
+        }
+    }
+});
 
 /* ===== Toast thông báo nhanh ===== */
 function showToast(msg, isError = false) {
