@@ -32,6 +32,12 @@ class CourseCreate(BaseModel):
         return value.upper()
 
 
+class CourseUpdate(CourseCreate):
+    """Dữ liệu hợp lệ được phép cập nhật cho môn học."""
+
+    pass
+
+
 class CourseResponse(BaseModel):
     id: int
     semester_id: int

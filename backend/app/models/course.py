@@ -32,7 +32,7 @@ class Course(Base):
     code: Mapped[str] = mapped_column(String(50), nullable=False)
     name: Mapped[str] = mapped_column(String(150), nullable=False)
     credits: Mapped[int] = mapped_column(nullable=False)
-    category: Mapped[str | None] = mapped_column(String(50))
+    category: Mapped[str] = mapped_column(String(50), nullable=False)
     is_retake: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     # Hai cột này chỉ có giá trị khi môn đã đủ điểm thành phần.
     grade10: Mapped[Decimal | None] = mapped_column(Numeric(3, 1))
