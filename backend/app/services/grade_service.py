@@ -1,6 +1,6 @@
 """Nghiệp vụ cấu hình thành phần và trọng số điểm theo PB-14."""
 
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -63,23 +63,51 @@ def calculate_total(components: list[GradeComponent]) -> Decimal:
     )
 
 
+def calculate_course_grade(components: list[GradeComponent]) -> dict:
+    """Tính điểm hệ 10 khi đủ điểm và tổng trọng số bằng đúng 100%."""
+    total = calculate_total(components)
+    if total != MAX_TOTAL_WEIGHT:
+        return {
+            "canCalculateCourseGrade": False,
+            "courseGrade10": None,
+            "calculationMessage": (
+                "Chưa thể tính điểm môn vì tổng trọng số chưa bằng 100%."
+            ),
+        }
+
+    if not components or any(component.score is None for component in components):
+        return {
+            "canCalculateCourseGrade": False,
+            "courseGrade10": None,
+            "calculationMessage": (
+                "Chưa thể tính điểm môn vì chưa nhập đủ điểm thành phần."
+            ),
+        }
+
+    # Công thức PB-16: tổng điểm thành phần nhân trọng số phần trăm.
+    weighted_grade = sum(
+        (
+            Decimal(str(component.score))
+            * Decimal(str(component.weight_percent))
+            / MAX_TOTAL_WEIGHT
+            for component in components
+        ),
+        Decimal("0.00"),
+    )
+    rounded_grade = weighted_grade.quantize(
+        Decimal("0.1"), rounding=ROUND_HALF_UP
+    )
+    return {
+        "canCalculateCourseGrade": True,
+        "courseGrade10": float(rounded_grade),
+        "calculationMessage": None,
+    }
+
+
 def serialize_configuration(components: list[GradeComponent]) -> dict:
     """Trả danh sách cùng tổng hiện tại và trạng thái hoàn tất cho frontend."""
     total = calculate_total(components)
-    # Chỉ tính điểm tạm khi cấu hình trọng số đã đủ 100%.
-    # Thành phần chưa nhập điểm không được tự hiểu là điểm 0.
-    temporary_score = None
-    entered_components = [item for item in components if item.score is not None]
-    if total == MAX_TOTAL_WEIGHT and entered_components:
-        weighted_score = sum(
-            (
-                Decimal(str(item.score)) * Decimal(str(item.weight_percent))
-                / MAX_TOTAL_WEIGHT
-                for item in entered_components
-            ),
-            Decimal("0.00"),
-        )
-        temporary_score = float(weighted_score.quantize(Decimal("0.01")))
+    grade_result = calculate_course_grade(components)
 
     return {
         "components": [
@@ -94,9 +122,11 @@ def serialize_configuration(components: list[GradeComponent]) -> dict:
         ],
         "totalWeightPercent": float(total),
         "isComplete": total == MAX_TOTAL_WEIGHT,
-        "temporaryCourseScore": temporary_score,
+        # Giữ tên cũ để FE của PB-15 không bị hỏng khi nối sang PB-16.
+        "temporaryCourseScore": grade_result["courseGrade10"],
         "hasAllScores": bool(components)
         and all(component.score is not None for component in components),
+        **grade_result,
     }
 
 

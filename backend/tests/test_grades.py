@@ -188,7 +188,7 @@ def test_enter_edit_scores_validation_and_ownership():
             },
         )
         assert saved.status_code == 200
-        assert saved.json()["data"]["temporaryCourseScore"] == 7.55
+        assert saved.json()["data"]["temporaryCourseScore"] == 7.6
         assert saved.json()["data"]["hasAllScores"] is True
 
         # Cùng endpoint được dùng để sửa một điểm đã nhập trước đó.
@@ -198,7 +198,7 @@ def test_enter_edit_scores_validation_and_ownership():
             json={"scores": [{"component_id": first["id"], "score": 10}]},
         )
         assert edited.status_code == 200
-        assert edited.json()["data"]["temporaryCourseScore"] == 9.55
+        assert edited.json()["data"]["temporaryCourseScore"] == 9.6
 
         # Component tồn tại nhưng thuộc môn khác vẫn phải bị từ chối.
         assert client.put(
@@ -275,3 +275,72 @@ def test_enter_edit_scores_validation_and_ownership():
             headers=other_headers,
             json={"scores": [{"component_id": first["id"], "score": 5}]},
         ).status_code == 404
+
+
+def test_calculate_course_grade_only_when_configuration_is_complete():
+    """PB-16: đủ điểm mới tính, làm tròn 1 số và báo lý do khi chưa thể tính."""
+    with TestClient(app) as client:
+        headers = register_and_login(client)
+        course_id = create_course(client, headers, "16")
+        first = add_component(client, headers, course_id, "Giữa kỳ", 50)
+        second = add_component(client, headers, course_id, "Cuối kỳ", 50)
+
+        # Mới có một điểm thì không được coi thành phần còn thiếu là điểm 0.
+        incomplete_scores = client.put(
+            f"/api/v1/courses/{course_id}/scores",
+            headers=headers,
+            json={"scores": [{"component_id": first["id"], "score": 8.4}]},
+        )
+        assert incomplete_scores.status_code == 200
+        incomplete_data = incomplete_scores.json()["data"]
+        assert incomplete_data["canCalculateCourseGrade"] is False
+        assert incomplete_data["courseGrade10"] is None
+        assert incomplete_data["calculationMessage"] == (
+            "Chưa thể tính điểm môn vì chưa nhập đủ điểm thành phần."
+        )
+
+        # (8.4 x 50% + 8.5 x 50%) = 8.45, làm tròn HALF_UP thành 8.5.
+        completed_scores = client.put(
+            f"/api/v1/courses/{course_id}/scores",
+            headers=headers,
+            json={"scores": [{"component_id": second["id"], "score": 8.5}]},
+        )
+        assert completed_scores.status_code == 200
+        completed_data = completed_scores.json()["data"]
+        assert completed_data["canCalculateCourseGrade"] is True
+        assert completed_data["courseGrade10"] == 8.5
+        assert completed_data["temporaryCourseScore"] == 8.5
+        assert completed_data["calculationMessage"] is None
+
+        # GET tính lại từ dữ liệu đã lưu và phải cho cùng kết quả.
+        viewed = client.get(
+            f"/api/v1/courses/{course_id}/grade-components", headers=headers
+        )
+        assert viewed.status_code == 200
+        assert viewed.json()["data"]["courseGrade10"] == 8.5
+
+        # Dù mọi thành phần hiện có đã có điểm, tổng 90% vẫn chưa được tính.
+        invalid_weight_course = create_course(client, headers, "16WEIGHT")
+        component_40 = add_component(
+            client, headers, invalid_weight_course, "Giữa kỳ", 40
+        )
+        component_50 = add_component(
+            client, headers, invalid_weight_course, "Cuối kỳ", 50
+        )
+        invalid_weight_result = client.put(
+            f"/api/v1/courses/{invalid_weight_course}/scores",
+            headers=headers,
+            json={
+                "scores": [
+                    {"component_id": component_40["id"], "score": 8},
+                    {"component_id": component_50["id"], "score": 9},
+                ]
+            },
+        )
+        assert invalid_weight_result.status_code == 200
+        invalid_weight_data = invalid_weight_result.json()["data"]
+        assert invalid_weight_data["canCalculateCourseGrade"] is False
+        assert invalid_weight_data["courseGrade10"] is None
+        assert invalid_weight_data["calculationMessage"] == (
+            "Chưa thể tính điểm môn vì tổng trọng số chưa bằng 100%."
+        )
