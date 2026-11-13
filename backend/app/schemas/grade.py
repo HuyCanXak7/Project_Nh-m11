@@ -25,3 +25,16 @@ class GradeComponentUpdate(GradeComponentCreate):
     """PB-14 cho phép sửa cả tên và trọng số của thành phần."""
 
     pass
+
+
+class GradeScoreItem(BaseModel):
+    """Điểm của một thành phần; component_id giúp lưu đúng thành phần."""
+
+    component_id: int = Field(gt=0)
+    score: Decimal = Field(ge=0, le=10, max_digits=4, decimal_places=2)
+
+
+class CourseScoresUpdate(BaseModel):
+    """Cho phép FE gửi một hoặc nhiều điểm trong cùng một lần cập nhật."""
+
+    scores: list[GradeScoreItem] = Field(min_length=1)

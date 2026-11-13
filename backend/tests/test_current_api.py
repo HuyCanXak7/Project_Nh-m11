@@ -1,5 +1,7 @@
 """Smoke test cho toàn bộ API hiện được liên kết trong app.main."""
 
+from uuid import uuid4
+
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -21,9 +23,14 @@ def login(client, email):
     return response.json()["data"]
 
 
+def unique_email(prefix: str) -> str:
+    """Tránh dữ liệu của lần chạy trước làm test đăng ký nhận lỗi 409."""
+    return f"{prefix}.{uuid4().hex}@example.com"
+
+
 def test_auth_semester_and_gpa_flow():
     with TestClient(app) as client:
-        email = "student.api@example.com"
+        email = unique_email("student.api")
         assert register(client, email).status_code == 201
         assert register(client, email).status_code == 409
 
@@ -106,10 +113,12 @@ def test_auth_semester_and_gpa_flow():
 
 def test_semester_ownership_and_validation():
     with TestClient(app) as client:
-        register(client, "owner@example.com")
-        register(client, "other@example.com")
-        owner = login(client, "owner@example.com")
-        other = login(client, "other@example.com")
+        owner_email = unique_email("owner")
+        other_email = unique_email("other")
+        register(client, owner_email)
+        register(client, other_email)
+        owner = login(client, owner_email)
+        other = login(client, other_email)
         owner_headers = {"Authorization": f"Bearer {owner['accessToken']}"}
         other_headers = {"Authorization": f"Bearer {other['accessToken']}"}
 

@@ -6,7 +6,11 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.models import Course, GradeComponent, Semester
-from app.schemas.grade import GradeComponentCreate, GradeComponentUpdate
+from app.schemas.grade import (
+    CourseScoresUpdate,
+    GradeComponentCreate,
+    GradeComponentUpdate,
+)
 from app.services.course import get_owned_course
 
 
@@ -62,6 +66,21 @@ def calculate_total(components: list[GradeComponent]) -> Decimal:
 def serialize_configuration(components: list[GradeComponent]) -> dict:
     """Trả danh sách cùng tổng hiện tại và trạng thái hoàn tất cho frontend."""
     total = calculate_total(components)
+    # Chỉ tính điểm tạm khi cấu hình trọng số đã đủ 100%.
+    # Thành phần chưa nhập điểm không được tự hiểu là điểm 0.
+    temporary_score = None
+    entered_components = [item for item in components if item.score is not None]
+    if total == MAX_TOTAL_WEIGHT and entered_components:
+        weighted_score = sum(
+            (
+                Decimal(str(item.score)) * Decimal(str(item.weight_percent))
+                / MAX_TOTAL_WEIGHT
+                for item in entered_components
+            ),
+            Decimal("0.00"),
+        )
+        temporary_score = float(weighted_score.quantize(Decimal("0.01")))
+
     return {
         "components": [
             {
@@ -69,11 +88,15 @@ def serialize_configuration(components: list[GradeComponent]) -> dict:
                 "courseId": component.course_id,
                 "name": component.name,
                 "weightPercent": float(component.weight_percent),
+                "score": float(component.score) if component.score is not None else None,
             }
             for component in components
         ],
         "totalWeightPercent": float(total),
         "isComplete": total == MAX_TOTAL_WEIGHT,
+        "temporaryCourseScore": temporary_score,
+        "hasAllScores": bool(components)
+        and all(component.score is not None for component in components),
     }
 
 
@@ -164,3 +187,36 @@ def complete_grade_configuration(db: Session, course_id: int, user_id: int) -> d
             "Chỉ có thể hoàn tất khi tổng trọng số bằng đúng 100%.",
         )
     return result
+
+
+def update_course_scores(
+    db: Session, course_id: int, user_id: int, data: CourseScoresUpdate
+) -> dict:
+    """Nhập/sửa điểm thành phần và chỉ commit khi toàn bộ request hợp lệ."""
+    get_owned_course(db, course_id, user_id)
+    components = get_components(db, course_id)
+    components_by_id = {component.id: component for component in components}
+
+    # Không cho cùng một thành phần xuất hiện hai lần vì kết quả sẽ không rõ ràng.
+    requested_ids = [item.component_id for item in data.scores]
+    if len(requested_ids) != len(set(requested_ids)):
+        raise grade_error(
+            "DUPLICATE_COMPONENT", "Mỗi thành phần chỉ được gửi một lần."
+        )
+
+    # Tất cả component_id phải thuộc đúng course_id trên URL.
+    if any(component_id not in components_by_id for component_id in requested_ids):
+        raise HTTPException(
+            status_code=404,
+            detail={
+                "code": "COMPONENT_NOT_FOUND",
+                "message": "Không tìm thấy thành phần điểm trong môn học này.",
+            },
+        )
+
+    # Pydantic đã kiểm tra điểm từ 0 đến 10 trước khi service được gọi.
+    for item in data.scores:
+        components_by_id[item.component_id].score = item.score
+
+    db.commit()
+    return serialize_configuration(get_components(db, course_id))

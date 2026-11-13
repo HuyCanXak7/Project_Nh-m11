@@ -6,12 +6,17 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.dependencies import get_current_user
 from app.models import User
-from app.schemas.grade import GradeComponentCreate, GradeComponentUpdate
+from app.schemas.grade import (
+    CourseScoresUpdate,
+    GradeComponentCreate,
+    GradeComponentUpdate,
+)
 from app.services.grade_service import (
     complete_grade_configuration,
     create_grade_component,
     delete_grade_component,
     list_grade_components,
+    update_course_scores,
     update_grade_component,
 )
 from app.utils.responses import api_response
@@ -77,3 +82,16 @@ def complete_course_grade_configuration(
 ):
     result = complete_grade_configuration(db, course_id, user.id)
     return api_response(request, 200, "Cấu hình trọng số đã hoàn tất.", result)
+
+
+@router.put("/courses/{course_id}/scores")
+def enter_or_edit_course_scores(
+    course_id: int,
+    data: CourseScoresUpdate,
+    request: Request,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """PB-15: nhập hoặc sửa điểm, còn tính điểm chính thức thuộc PB-16."""
+    result = update_course_scores(db, course_id, user.id, data)
+    return api_response(request, 200, "Lưu điểm thành phần thành công.", result)
