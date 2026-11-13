@@ -14,6 +14,7 @@ from app.models import AuthSession, Course, GradeComponent, Semester, User
 from app.routers.auth import router as auth_router
 from app.routers.courses import router as course_router
 from app.routers.gpa import router as gpa_router
+from app.routers.grades import router as grade_router
 from app.routers.semesters import router as semester_router
 from app.utils.responses import api_response
 
@@ -75,4 +76,5 @@ async def handle_database_error(request: Request, error: SQLAlchemyError):
 app.include_router(auth_router)
 app.include_router(semester_router)
 app.include_router(course_router)
+app.include_router(grade_router)
 app.include_router(gpa_router)
