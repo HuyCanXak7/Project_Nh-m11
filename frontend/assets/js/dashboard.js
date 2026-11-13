@@ -47,8 +47,8 @@ async function loadDashboardData() {
 
         if (courses && courses.length > 0) {
             const cum = GradeCalculator.calculateCumulativeGPA(courses);
-            data.stats.gpa = cum.gpa || 3.42;
-            data.stats.credits = cum.totalCredits || 78;
+            data.stats.gpa = cum.cumulativeGPA;
+            data.stats.credits = cum.passedCredits;
             
             // Tính số môn đạt
             let passedCount = 0;
