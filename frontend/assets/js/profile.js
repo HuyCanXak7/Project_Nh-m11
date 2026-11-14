@@ -8,14 +8,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function renderProfile() {
-  const student = StorageService.getStudent();
-  document.getElementById('profileNameInput').value = student.name || 'Huỳnh Nhơn Nguyên Nghiệp';
-  document.getElementById('profileEmailInput').value = student.email || 'nghiephn25@gmail.com';
-  document.getElementById('profileStudentIdInput').value = student.student_id || 'N25DTCN038';
-  document.getElementById('profileMajorInput').value = student.major || 'Công nghệ thông tin';
-  document.getElementById('profileClassInput').value = student.class_name || 'K25-CNTT5';
+const user = getSession()?.user || {};
+const student = StorageService.getStudent();
+document.getElementById('profileNameInput').value = student.name || user.fullName || '';
+document.getElementById('profileEmailInput').value = user.email || '';   
+document.getElementById('profileStudentIdInput').value = student.student_id || '';
+document.getElementById('profileMajorInput').value = student.major || '';
+document.getElementById('profileClassInput').value = student.class_name || '';
+updateProfileAvatarDisplay({ ...student, name: student.name || user.fullName });
 
-  updateProfileAvatarDisplay(student);
 }
 
 function updateProfileAvatarDisplay(student) {
@@ -112,7 +113,6 @@ function handleRemoveAvatar() {
   if (fileInput) fileInput.value = '';
 
   updateProfileAvatarDisplay(student);
-  initAppUser();
   showToast('Đã xóa ảnh đại diện!');
 }
 
@@ -136,7 +136,6 @@ function handleSaveProfile(e) {
 
   StorageService.saveStudent(student);
   updateProfileAvatarDisplay(student);
-  initAppUser();
   showToast('Cập nhật thông tin hồ sơ sinh viên thành công!');
 }
 
