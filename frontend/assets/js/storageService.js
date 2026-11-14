@@ -14,11 +14,11 @@ const STORAGE_KEYS = {
 
 const StorageService = {
   DEFAULT_STUDENT: {
-    student_id: 'N25DTCN038',
-    name: 'Huỳnh Nhơn Nguyên Nghiệp',
-    email: 'nghiephn25@gmail.com',
-    major: 'Công nghệ thông tin',
-    class_name: 'K25-CNTT5'
+    student_id: '',
+    name: '',
+    email: '',
+    major: '',
+    class_name: ''
   },
 
   DEFAULT_SEMESTERS: [
@@ -93,9 +93,6 @@ const StorageService = {
     if (!localStorage.getItem(STORAGE_KEYS.COURSES)) {
       localStorage.setItem(STORAGE_KEYS.COURSES, JSON.stringify(this.DEFAULT_COURSES));
     }
-    if (!localStorage.getItem(STORAGE_KEYS.STUDENT)) {
-      localStorage.setItem(STORAGE_KEYS.STUDENT, JSON.stringify(this.DEFAULT_STUDENT));
-    }
     if (!localStorage.getItem(STORAGE_KEYS.GOAL)) {
       localStorage.setItem(STORAGE_KEYS.GOAL, JSON.stringify({
         target_gpa: 3.2,
@@ -108,7 +105,6 @@ const StorageService = {
   resetToDefault() {
     localStorage.setItem(STORAGE_KEYS.SEMESTERS, JSON.stringify(this.DEFAULT_SEMESTERS));
     localStorage.setItem(STORAGE_KEYS.COURSES, JSON.stringify(this.DEFAULT_COURSES));
-    localStorage.setItem(STORAGE_KEYS.STUDENT, JSON.stringify(this.DEFAULT_STUDENT));
     localStorage.setItem(STORAGE_KEYS.GOAL, JSON.stringify({
       target_gpa: 3.2,
       target_date: '2026-12-31',
@@ -310,17 +306,15 @@ const StorageService = {
   },
 
   // Profile & Goals
+  studentKey() { return STORAGE_KEYS.STUDENT + '_' + (getSession()?.user?.id ?? 'guest'); },
+
   getStudent() {
-    this.init();
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEYS.STUDENT)) || this.DEFAULT_STUDENT;
-    } catch {
-      return this.DEFAULT_STUDENT;
-    }
+    try { return JSON.parse(localStorage.getItem(this.studentKey())) || { ...this.DEFAULT_STUDENT }; }
+    catch { return { ...this.DEFAULT_STUDENT }; }
   },
 
   saveStudent(student) {
-    localStorage.setItem(STORAGE_KEYS.STUDENT, JSON.stringify(student));
+    localStorage.setItem(this.studentKey(), JSON.stringify(student));
   },
 
   getGoal() {
