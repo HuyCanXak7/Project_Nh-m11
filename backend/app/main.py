@@ -10,11 +10,12 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.security import hash_password
 from app.db.database import Base, engine
-from app.models import AuthSession, Course, GradeComponent, Semester, User
+from app.models import AuthSession, Course, GradeComponent, GradeScale, Semester, User
 from app.routers.auth import router as auth_router
 from app.routers.courses import router as course_router
 from app.routers.gpa import router as gpa_router
 from app.routers.grades import router as grade_router
+from app.routers.grade_scale import router as grade_scale_router
 from app.routers.semesters import router as semester_router
 from app.utils.responses import api_response
 
@@ -77,4 +78,5 @@ app.include_router(auth_router)
 app.include_router(semester_router)
 app.include_router(course_router)
 app.include_router(grade_router)
+app.include_router(grade_scale_router)
 app.include_router(gpa_router)

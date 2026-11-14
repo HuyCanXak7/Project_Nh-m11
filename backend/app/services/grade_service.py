@@ -12,6 +12,7 @@ from app.schemas.grade import (
     GradeComponentUpdate,
 )
 from app.services.course import get_owned_course
+from app.services.grade_scale import convert_grade
 
 
 MAX_TOTAL_WEIGHT = Decimal("100.00")
@@ -104,10 +105,40 @@ def calculate_course_grade(components: list[GradeComponent]) -> dict:
     }
 
 
-def serialize_configuration(components: list[GradeComponent]) -> dict:
+def calculate_course_result(db: Session, components: list[GradeComponent]) -> dict:
+    """Ghép điểm hệ 10 với kết quả quy đổi đọc từ bảng grade_scale."""
+    result = calculate_course_grade(components)
+    if not result["canCalculateCourseGrade"]:
+        return {
+            **result,
+            "letterGrade": None,
+            "grade4": None,
+            "isPassed": None,
+        }
+
+    conversion = convert_grade(db, Decimal(str(result["courseGrade10"])))
+    return {**result, **conversion}
+
+
+def sync_course_result(
+    db: Session, course: Course, components: list[GradeComponent]
+) -> dict:
+    """Đồng bộ điểm hoàn chỉnh vào môn để các API GPA sử dụng đúng dữ liệu."""
+    result = calculate_course_result(db, components)
+    if result["canCalculateCourseGrade"]:
+        course.grade10 = Decimal(str(result["courseGrade10"]))
+        course.grade4 = Decimal(str(result["grade4"]))
+    else:
+        # Khi cấu hình/điểm không còn đủ, không giữ kết quả cũ gây sai GPA.
+        course.grade10 = None
+        course.grade4 = None
+    return result
+
+
+def serialize_configuration(db: Session, components: list[GradeComponent]) -> dict:
     """Trả danh sách cùng tổng hiện tại và trạng thái hoàn tất cho frontend."""
     total = calculate_total(components)
-    grade_result = calculate_course_grade(components)
+    grade_result = calculate_course_result(db, components)
 
     return {
         "components": [
@@ -153,14 +184,14 @@ def ensure_total_not_exceeded(total: Decimal) -> None:
 def list_grade_components(db: Session, course_id: int, user_id: int) -> dict:
     """Xem cấu hình của môn thuộc người dùng; chưa có thì trả danh sách rỗng."""
     get_owned_course(db, course_id, user_id)
-    return serialize_configuration(get_components(db, course_id))
+    return serialize_configuration(db, get_components(db, course_id))
 
 
 def create_grade_component(
     db: Session, course_id: int, user_id: int, data: GradeComponentCreate
 ) -> dict:
     """Thêm thành phần và bảo đảm tổng mới không vượt quá 100%."""
-    get_owned_course(db, course_id, user_id)
+    course = get_owned_course(db, course_id, user_id)
     components = get_components(db, course_id)
     ensure_unique_name(components, data.name)
     ensure_total_not_exceeded(calculate_total(components) + data.weight_percent)
@@ -172,8 +203,11 @@ def create_grade_component(
         score=None,
     )
     db.add(component)
+    db.flush()
+    components = get_components(db, course_id)
+    sync_course_result(db, course, components)
     db.commit()
-    return serialize_configuration(get_components(db, course_id))
+    return serialize_configuration(db, get_components(db, course_id))
 
 
 def update_grade_component(
@@ -191,8 +225,10 @@ def update_grade_component(
 
     component.name = data.name
     component.weight_percent = data.weight_percent
+    db.flush()
+    sync_course_result(db, component.course, get_components(db, component.course_id))
     db.commit()
-    return serialize_configuration(get_components(db, component.course_id))
+    return serialize_configuration(db, get_components(db, component.course_id))
 
 
 def delete_grade_component(
@@ -201,16 +237,19 @@ def delete_grade_component(
     """Xóa thành phần thuộc người dùng và trả cấu hình còn lại."""
     component = get_owned_component(db, component_id, user_id)
     course_id = component.course_id
+    course = get_owned_course(db, course_id, user_id)
     db.delete(component)
+    db.flush()
+    sync_course_result(db, course, get_components(db, course_id))
     db.commit()
-    return serialize_configuration(get_components(db, course_id))
+    return serialize_configuration(db, get_components(db, course_id))
 
 
 def complete_grade_configuration(db: Session, course_id: int, user_id: int) -> dict:
     """Chỉ xác nhận cấu hình hợp lệ khi tổng trọng số bằng đúng 100%."""
     get_owned_course(db, course_id, user_id)
     components = get_components(db, course_id)
-    result = serialize_configuration(components)
+    result = serialize_configuration(db, components)
     if not result["isComplete"]:
         raise grade_error(
             "WEIGHT_TOTAL_NOT_100",
@@ -223,7 +262,7 @@ def update_course_scores(
     db: Session, course_id: int, user_id: int, data: CourseScoresUpdate
 ) -> dict:
     """Nhập/sửa điểm thành phần và chỉ commit khi toàn bộ request hợp lệ."""
-    get_owned_course(db, course_id, user_id)
+    course = get_owned_course(db, course_id, user_id)
     components = get_components(db, course_id)
     components_by_id = {component.id: component for component in components}
 
@@ -248,5 +287,7 @@ def update_course_scores(
     for item in data.scores:
         components_by_id[item.component_id].score = item.score
 
+    db.flush()
+    sync_course_result(db, course, components)
     db.commit()
-    return serialize_configuration(get_components(db, course_id))
+    return serialize_configuration(db, get_components(db, course_id))
