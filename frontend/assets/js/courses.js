@@ -123,22 +123,26 @@ function renderCourses() {
     }
   }
 
-  // Tiêu chí chấp nhận PB-13: Xóa điều kiện lọc thì hiện lại danh sách
+  // Tiêu chí chấp nhận PB-13 & PB-40: Trạng thái rỗng và xóa điều kiện lọc
   if (currentCourseList.length === 0) {
     const hasFilter = !!(rawSearch || filterSemId || filterCategory);
     tbody.innerHTML = `
       <tr>
         <td colspan="9">
           <div class="empty-state" style="padding: 40px 16px; margin: 10px 0;">
-            <div class="empty-state__icon"></div>
-            <h4 class="empty-state__title">Không tìm thấy môn học nào phù hợp</h4>
+            <div class="empty-state__icon">
+              <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto;">
+                <path d="M3 4h8v16H3zM11 4h10v16H11z"/>
+              </svg>
+            </div>
+            <h4 class="empty-state__title">${hasFilter ? 'Không tìm thấy môn học nào phù hợp' : 'Chưa có môn học nào'}</h4>
             <p class="empty-state__desc">
               ${hasFilter
-                ? 'Không có môn học nào khớp với từ khóa tìm kiếm hoặc bộ lọc loại môn hiện tại. Bạn có thể xóa điều kiện lọc để hiển thị lại toàn bộ môn học.'
-                : 'Chưa có môn học nào trong hệ thống. Hãy thêm môn học đầu tiên để bắt đầu!'}
+                ? 'Không có môn học nào khớp với từ khóa tìm kiếm hoặc bộ lọc hiện tại. Bạn có thể xóa điều kiện lọc để hiển thị lại toàn bộ môn học.'
+                : 'Tài khoản của bạn chưa có môn học nào. Hãy thêm môn học đầu tiên, nhập từ CSV/Excel hoặc nạp dữ liệu mẫu để bắt đầu!'}
             </p>
-            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 12px;">
-              ${hasFilter ? '<button type="button" onclick="handleClearFilter()" class="btn btn-secondary btn-sm">✕ Xóa điều kiện lọc</button>' : ''}
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 12px;">
+              ${hasFilter ? '<button type="button" onclick="handleClearFilter()" class="btn btn-secondary btn-sm">✕ Xóa điều kiện lọc</button>' : '<button type="button" onclick="handleResetData()" class="btn btn-secondary btn-sm">Nạp dữ liệu mẫu</button>'}
               <button type="button" onclick="openCreateCourseModal()" class="btn btn-primary btn-sm">+ Thêm môn học</button>
             </div>
           </div>
@@ -173,14 +177,20 @@ function renderCourses() {
         <td><span class="badge ${catBadge}">${escapeHtml(c.category)}</span></td>
         <td>
           <button type="button" onclick="openComponentsModal('${c.id}')" class="btn btn-secondary btn-sm" style="font-size: 11.5px; padding: 4px 10px;">
-            ${(c.components || []).length} cột điểm
+            ${(c.components || []).length} cột điểm (${scoreCalc.totalWeight}%)
           </button>
         </td>
         <td style="text-align: center; font-weight: 800; font-size: 15px;">
-          ${scoreCalc.isComplete ? scoreCalc.finalScore10 : '<span style="color: var(--text-gray); font-size: 12px; font-weight: 500;">Chưa đủ</span>'}
+          ${scoreCalc.isComplete
+            ? scoreCalc.finalScore10.toFixed(1)
+            : (!scoreCalc.isValidWeight
+                ? '<span style="color: var(--error); font-size: 12px; font-weight: 700;">Sai trọng số</span>'
+                : '<span style="color: var(--text-gray); font-size: 12px; font-weight: 500;">Chưa đủ</span>')}
         </td>
         <td style="text-align: center;">
-          <span class="badge ${grade.colorClass}">${grade.letter} (${grade.scale4})</span>
+          ${scoreCalc.isComplete
+            ? `<span class="badge ${grade.colorClass}">${grade.letter} (${grade.scale4.toFixed(1)})</span>`
+            : `<span class="badge ${!scoreCalc.isValidWeight ? 'badge-red' : 'badge-gray'}">${!scoreCalc.isValidWeight ? 'Lỗi TS' : '--'}</span>`}
         </td>
         <td style="text-align: right; white-space: nowrap;">
           <div class="btn-action-group">

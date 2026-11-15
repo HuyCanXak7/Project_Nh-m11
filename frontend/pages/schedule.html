@@ -134,99 +134,18 @@
 
         <!-- MAIN CARD -->
         <div class="app-card" style="margin-top: 0; box-shadow: var(--shadow-soft); border-radius: var(--radius-lg);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <span style="font-size: 15px; font-weight: 700; color: var(--text-black);">Tuần học:</span>
-                    <span class="badge badge-blue" style="font-size: 13.5px; padding: 6px 14px;">Tuần 10 (10/11/2026 - 16/11/2026)</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <span style="font-size: 14.5px; font-weight: 700; color: var(--text-black);">Học kỳ hiển thị:</span>
+                    <select id="scheduleSemSelect" class="filter-select" onchange="renderScheduleBoard()" aria-label="Chọn học kỳ xem thời khóa biểu"></select>
                 </div>
-                <div style="display: flex; gap: 10px;">
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="showToast('Đang ở tuần học hiện tại')">← Tuần trước</button>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="showToast('Chưa có lịch cho tuần tới')">Tuần sau →</button>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <a href="courses.html" class="btn btn-primary btn-sm" style="text-decoration: none;">+ Quản lý môn học</a>
                 </div>
             </div>
 
             <!-- LƯỚI THỜI KHÓA BIỂU CÁC NGÀY TRONG TUẦN -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;">
-                <!-- Thứ 2 -->
-                <div style="background: var(--bg-main); border-radius: 18px; padding: 16px;">
-                    <div style="font-weight: 800; font-size: 14.5px; color: var(--text-black); margin-bottom: 12px; border-bottom: 2px solid var(--border); padding-bottom: 6px;">
-                        Thứ Hai <span style="font-size: 12px; font-weight: 500; color: var(--text-gray);">(10/11)</span>
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <div style="background: #fff; border-left: 4px solid #3B82F6; border-radius: 12px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-                            <div style="font-size: 11px; font-weight: 700; color: #2563EB;">07:30 - 09:30</div>
-                            <div style="font-size: 13.5px; font-weight: 700; color: var(--text-black); margin: 3px 0;">Nhập môn lập trình</div>
-                            <div style="font-size: 11.5px; color: var(--text-gray);">Phòng: B2-301 • Giảng viên: TS. Nguyễn A</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Thứ 3 -->
-                <div style="background: var(--bg-main); border-radius: 18px; padding: 16px;">
-                    <div style="font-weight: 800; font-size: 14.5px; color: var(--text-black); margin-bottom: 12px; border-bottom: 2px solid var(--border); padding-bottom: 6px;">
-                        Thứ Ba <span style="font-size: 12px; font-weight: 500; color: var(--text-gray);">(11/11)</span>
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <div style="background: #fff; border-left: 4px solid #10B981; border-radius: 12px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-                            <div style="font-size: 11px; font-weight: 700; color: #059669;">08:00 - 10:00</div>
-                            <div style="font-size: 13.5px; font-weight: 700; color: var(--text-black); margin: 3px 0;">Lập trình iOS</div>
-                            <div style="font-size: 11.5px; color: var(--text-gray);">Phòng: Lab 402 • Giảng viên: ThS. Trần B</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Thứ 4 -->
-                <div style="background: var(--bg-main); border-radius: 18px; padding: 16px;">
-                    <div style="font-weight: 800; font-size: 14.5px; color: var(--text-black); margin-bottom: 12px; border-bottom: 2px solid var(--border); padding-bottom: 6px;">
-                        Thứ Tư <span style="font-size: 12px; font-weight: 500; color: var(--text-gray);">(12/11)</span>
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <div style="background: #fff; border-left: 4px solid #8B5CF6; border-radius: 12px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-                            <div style="font-size: 11px; font-weight: 700; color: #7C3AED;">13:30 - 15:30</div>
-                            <div style="font-size: 13.5px; font-weight: 700; color: var(--text-black); margin: 3px 0;">Cơ sở dữ liệu</div>
-                            <div style="font-size: 11.5px; color: var(--text-gray);">Phòng: C1-105 • Giảng viên: PGS. Lê C</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Thứ 5 -->
-                <div style="background: var(--bg-main); border-radius: 18px; padding: 16px;">
-                    <div style="font-weight: 800; font-size: 14.5px; color: var(--text-black); margin-bottom: 12px; border-bottom: 2px solid var(--border); padding-bottom: 6px;">
-                        Thứ Năm <span style="font-size: 12px; font-weight: 500; color: var(--text-gray);">(13/11)</span>
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <div style="background: #fff; border-left: 4px solid #F59E0B; border-radius: 12px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-                            <div style="font-size: 11px; font-weight: 700; color: #D97706;">09:30 - 11:30</div>
-                            <div style="font-size: 13.5px; font-weight: 700; color: var(--text-black); margin: 3px 0;">Giải tích 1</div>
-                            <div style="font-size: 11.5px; color: var(--text-gray);">Phòng: A3-204 • Giảng viên: TS. Phạm D</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Thứ 6 -->
-                <div style="background: var(--bg-main); border-radius: 18px; padding: 16px;">
-                    <div style="font-weight: 800; font-size: 14.5px; color: var(--text-black); margin-bottom: 12px; border-bottom: 2px solid var(--border); padding-bottom: 6px;">
-                        Thứ Sáu <span style="font-size: 12px; font-weight: 500; color: var(--text-gray);">(14/11)</span>
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <div style="background: #fff; border-left: 4px solid #06B6D4; border-radius: 12px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-                            <div style="font-size: 11px; font-weight: 700; color: #0891B2;">13:30 - 16:30</div>
-                            <div style="font-size: 13.5px; font-weight: 700; color: var(--text-black); margin: 3px 0;">Cấu trúc DL & Giải thuật</div>
-                            <div style="font-size: 11.5px; color: var(--text-gray);">Phòng: Lab 201 • Giảng viên: ThS. Hoàng E</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Thứ 7 -->
-                <div style="background: var(--bg-main); border-radius: 18px; padding: 16px;">
-                    <div style="font-weight: 800; font-size: 14.5px; color: var(--text-black); margin-bottom: 12px; border-bottom: 2px solid var(--border); padding-bottom: 6px;">
-                        Thứ Bảy <span style="font-size: 12px; font-weight: 500; color: var(--text-gray);">(15/11)</span>
-                    </div>
-                    <div style="text-align: center; color: var(--text-gray); font-size: 13px; padding: 30px 0;">
-                        Nghỉ học / Hoạt động ngoại khóa
-                    </div>
-                </div>
-            </div>
+            <div id="scheduleBoardContainer"></div>
         </div>
     </main>
 
@@ -234,5 +153,123 @@
     <script src="../assets/js/storageService.js"></script>
     <script src="../assets/js/session.js"></script>
     <script src="../assets/js/app_shell.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initSchedulePage();
+        });
+
+        function initSchedulePage() {
+            const container = document.getElementById('scheduleBoardContainer');
+            const semSelect = document.getElementById('scheduleSemSelect');
+            if (!container) return;
+
+            container.innerHTML = '<div class="empty-state"><p class="empty-state__desc">Đang tải thời khóa biểu...</p></div>';
+
+            try {
+                const semesters = StorageService.getSemesters();
+                if (semSelect) {
+                    semSelect.innerHTML = '<option value="ALL">Tất cả học kỳ</option>' +
+                        semesters.map(s => `<option value="${s.id}">${s.name} (${s.academic_year || ''})</option>`).join('');
+                    if (semesters.length > 0) {
+                        semSelect.value = semesters[semesters.length - 1].id;
+                    }
+                }
+                renderScheduleBoard();
+            } catch (err) {
+                console.error('Lỗi tải thời khóa biểu:', err);
+                container.innerHTML = `
+                    <div class="empty-state" style="border-color: rgba(239, 68, 68, 0.45); background: #FEF2F2;">
+                        <h3 class="empty-state__title" style="color: #991B1B;">Không thể tải thời khóa biểu</h3>
+                        <p class="empty-state__desc">Đã xảy ra lỗi khi đọc dữ liệu cục bộ. Vui lòng thử tải lại.</p>
+                        <button type="button" onclick="initSchedulePage()" class="btn btn-primary btn-sm">Thử tải lại</button>
+                    </div>
+                `;
+            }
+        }
+
+        function renderScheduleBoard() {
+            const container = document.getElementById('scheduleBoardContainer');
+            const semSelect = document.getElementById('scheduleSemSelect');
+            if (!container) return;
+
+            const allCourses = StorageService.getCourses();
+            const semesters = StorageService.getSemesters();
+            const selectedSem = semSelect?.value || 'ALL';
+
+            const courses = selectedSem === 'ALL'
+                ? allCourses
+                : allCourses.filter(c => c.semester_id === selectedSem);
+
+            if (courses.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state__icon">
+                            <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" style="margin: 0 auto;">
+                                <rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/>
+                            </svg>
+                        </div>
+                        <h3 class="empty-state__title">Chưa có lịch học trong kỳ này</h3>
+                        <p class="empty-state__desc">Tài khoản của bạn chưa có môn học nào được đăng ký cho học kỳ đã chọn. Hãy thêm môn học hoặc nạp dữ liệu mẫu để xem thời khóa biểu tuần học.</p>
+                        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                            <a href="courses.html" class="btn btn-primary btn-sm" style="text-decoration: none;">+ Thêm môn học</a>
+                            <button type="button" onclick="handleResetData()" class="btn btn-secondary btn-sm">Nạp dữ liệu mẫu</button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const days = [
+                { name: 'Thứ Hai', items: [] },
+                { name: 'Thứ Ba', items: [] },
+                { name: 'Thứ Tư', items: [] },
+                { name: 'Thứ Năm', items: [] },
+                { name: 'Thứ Sáu', items: [] },
+                { name: 'Thứ Bảy', items: [] }
+            ];
+            const slots = ['07:30 - 09:30', '09:45 - 11:45', '13:30 - 15:30', '15:45 - 17:45'];
+            const colors = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#06B6D4'];
+            const rooms = ['B2-301', 'Lab 402', 'C1-105', 'A3-204', 'Lab 201'];
+
+            courses.forEach((c, idx) => {
+                const dayIdx = idx % 5;
+                const sem = semesters.find(s => s.id === c.semester_id);
+                days[dayIdx].items.push({
+                    code: c.course_code,
+                    name: c.course_name,
+                    credits: c.credits,
+                    semName: sem ? sem.name : '',
+                    slot: slots[idx % slots.length],
+                    color: colors[idx % colors.length],
+                    room: rooms[idx % rooms.length]
+                });
+            });
+
+            container.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 14px;">
+                    ${days.map(d => `
+                        <div style="background: var(--bg-main); border-radius: 18px; padding: 16px;">
+                            <div style="font-weight: 800; font-size: 14.5px; color: var(--text-black); margin-bottom: 12px; border-bottom: 2px solid var(--border); padding-bottom: 6px;">
+                                ${d.name}
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                ${d.items.length === 0 ? `
+                                    <div style="text-align: center; color: var(--text-gray); font-size: 12.5px; padding: 24px 0;">
+                                        Không có lịch học
+                                    </div>
+                                ` : d.items.map(it => `
+                                    <div style="background: #fff; border-left: 4px solid ${it.color}; border-radius: 12px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                                        <div style="font-size: 11px; font-weight: 700; color: ${it.color};">${it.slot}</div>
+                                        <div style="font-size: 13.5px; font-weight: 700; color: var(--text-black); margin: 3px 0;">${it.name}</div>
+                                        <div style="font-size: 11.5px; color: var(--text-gray);">Mã: ${it.code} (${it.credits} TC) • Phòng: ${it.room}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+    </script>
 </body>
 </html>

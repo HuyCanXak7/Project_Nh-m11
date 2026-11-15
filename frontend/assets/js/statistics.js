@@ -39,100 +39,115 @@ const MOCK_STATS = {
 };
 
 async function loadStatisticsData(/* cohortId */) {
+    const blockRequirements = {
+        'Đại cương': { req: 35, color: 'green' },
+        'Cơ sở ngành': { req: 45, color: 'blue' },
+        'Chuyên ngành': { req: 45, color: 'purple' },
+        'Tự chọn & Thực tập': { req: 15, color: 'orange' }
+    };
+
+    const gradeCounts = { 'A+': 0, 'A': 0, 'B+': 0, 'B': 0, 'C+': 0, 'C': 0, 'D': 0, 'F': 0 };
+
     if (typeof StorageService !== 'undefined' && typeof GradeCalculator !== 'undefined') {
         const rawSemesters = StorageService.getSemesters();
         const rawCourses = StorageService.getCourses();
 
-        if (rawSemesters.length > 0 && rawCourses.length > 0) {
-            const semesters = rawSemesters.map(s => {
-                const semCourses = rawCourses.filter(c => c.semester_id === s.id);
-                const semCalc = GradeCalculator.calculateSemesterGPA(semCourses);
-                const credits = semCourses.reduce((sum, c) => sum + (Number(c.credits) || 0), 0);
-                return {
-                    name: s.name.replace('Học kỳ ', 'HK'),
-                    year: s.academic_year || '2025-2026',
-                    gpa: semCalc.gpa !== null ? semCalc.gpa : 0,
-                    credits: credits
-                };
-            });
-
-            // Phân bố điểm chữ
-            const gradeCounts = { 'A+': 0, 'A': 0, 'B+': 0, 'B': 0, 'C+': 0, 'C': 0, 'D': 0, 'F': 0 };
-            rawCourses.forEach(c => {
-                const calc = GradeCalculator.calculateCourseFinalScore(c.components || []);
-                if (calc.isComplete && calc.finalScore10 !== null) {
-                    const letter = GradeCalculator.getGradeScale(calc.finalScore10).letter;
-                    if (gradeCounts[letter] !== undefined) gradeCounts[letter]++;
-                }
-            });
-            const gradeDistribution = Object.entries(gradeCounts).map(([grade, count]) => ({ grade, count }));
-
-            // Khối kiến thức
-            const blockRequirements = {
-                'Đại cương': { req: 35, color: 'green' },
-                'Cơ sở ngành': { req: 45, color: 'blue' },
-                'Chuyên ngành': { req: 45, color: 'purple' },
-                'Tự chọn & Thực tập': { req: 15, color: 'orange' }
-            };
-            const blockEarned = { 'Đại cương': 0, 'Cơ sở ngành': 0, 'Chuyên ngành': 0, 'Tự chọn & Thực tập': 0 };
-            rawCourses.forEach(c => {
-                const calc = GradeCalculator.calculateCourseFinalScore(c.components || []);
-                if (calc.isComplete && calc.finalScore10 !== null && calc.finalScore10 >= 4.0) {
-                    const cat = c.category || 'Đại cương';
-                    if (blockEarned[cat] !== undefined) {
-                        blockEarned[cat] += Number(c.credits) || 0;
-                    } else {
-                        blockEarned['Tự chọn & Thực tập'] += Number(c.credits) || 0;
-                    }
-                }
-            });
-            const creditBlocks = Object.entries(blockRequirements).map(([name, conf]) => ({
-                name,
-                earned: blockEarned[name] || 0,
-                required: conf.req,
-                color: conf.color
-            }));
-
-            // Môn học nổi bật
-            const evaluatedCourses = rawCourses.map(c => {
-                const calc = GradeCalculator.calculateCourseFinalScore(c.components || []);
-                const scale = calc.finalScore10 !== null ? GradeCalculator.getGradeScale(calc.finalScore10) : { letter: 'F' };
-                const sem = rawSemesters.find(s => s.id === c.semester_id);
-                return {
-                    name: c.course_name,
-                    semester: sem ? `${sem.name} · ${sem.academic_year}` : '',
-                    score: calc.finalScore10 !== null ? calc.finalScore10 : 0,
-                    grade: scale.letter
-                };
-            }).filter(c => c.score > 0);
-            evaluatedCourses.sort((a, b) => b.score - a.score);
-            const highlights = evaluatedCourses.slice(0, 3);
-
-            const uniqueYears = Array.from(new Set(rawSemesters.map(s => s.academic_year).filter(Boolean)));
-            if (uniqueYears.length === 0) uniqueYears.push('2025-2026');
-
-            const cum = GradeCalculator.calculateCumulativeGPA(rawCourses);
-            const avg10 = cum.totalCredits > 0
-                ? rawCourses.reduce((sum, c) => {
-                    const calc = GradeCalculator.calculateCourseFinalScore(c.components || []);
-                    return sum + (calc.finalScore10 || 0) * (Number(c.credits) || 0);
-                }, 0) / cum.totalCredits
-                : 0;
-
+        const semesters = rawSemesters.map(s => {
+            const semCourses = rawCourses.filter(c => c.semester_id === s.id);
+            const semCalc = GradeCalculator.calculateSemesterGPA(semCourses);
+            const credits = semCalc.totalCredits || 0;
             return {
-                cohorts: [{ id: 'k2025', name: 'Khóa 2025 - 2030' }],
-                programCredits: 140,
-                average10: Number(avg10.toFixed(2)),
-                average10Delta: 0.10,
-                semesters,
-                programYears: uniqueYears.length >= 5 ? uniqueYears : ['2025-2026', '2026-2027', '2027-2028', '2028-2029', '2029-2030'],
-                gradeDistribution,
-                creditBlocks,
-                highlights: highlights.length > 0 ? highlights : MOCK_STATS.highlights
+                name: s.name.replace('Học kỳ ', 'HK'),
+                year: s.academic_year || '2025-2026',
+                gpa: semCalc.gpa !== null && credits > 0 ? semCalc.gpa : 0,
+                credits: credits,
+                planned: credits === 0
             };
+        });
+
+        rawCourses.forEach(c => {
+            const calc = GradeCalculator.calculateCourseFinalScore(c.components || []);
+            if (calc.isComplete && calc.finalScore10 !== null) {
+                const letter = GradeCalculator.getGradeScale(calc.finalScore10).letter;
+                if (gradeCounts[letter] !== undefined) gradeCounts[letter]++;
+            }
+        });
+        const gradeDistribution = Object.entries(gradeCounts).map(([grade, count]) => ({ grade, count }));
+
+        const blockEarned = { 'Đại cương': 0, 'Cơ sở ngành': 0, 'Chuyên ngành': 0, 'Tự chọn & Thực tập': 0 };
+        rawCourses.forEach(c => {
+            const calc = GradeCalculator.calculateCourseFinalScore(c.components || []);
+            if (calc.isComplete && calc.finalScore10 !== null && calc.finalScore10 >= 4.0) {
+                const cat = c.category || 'Đại cương';
+                if (blockEarned[cat] !== undefined) {
+                    blockEarned[cat] += Number(c.credits) || 0;
+                } else {
+                    blockEarned['Tự chọn & Thực tập'] += Number(c.credits) || 0;
+                }
+            }
+        });
+        const creditBlocks = Object.entries(blockRequirements).map(([name, conf]) => ({
+            name,
+            earned: blockEarned[name] || 0,
+            required: conf.req,
+            color: conf.color
+        }));
+
+        const evaluatedCourses = rawCourses.map(c => {
+            const calc = GradeCalculator.calculateCourseFinalScore(c.components || []);
+            if (!calc.isComplete || calc.finalScore10 === null) return null;
+            const scale = GradeCalculator.getGradeScale(calc.finalScore10);
+            const sem = rawSemesters.find(s => s.id === c.semester_id);
+            return {
+                name: c.course_name,
+                semester: sem ? `${sem.name} · ${sem.academic_year || ''}` : '',
+                score: calc.finalScore10,
+                grade: scale.letter
+            };
+        }).filter(Boolean);
+        evaluatedCourses.sort((a, b) => b.score - a.score);
+        const highlights = evaluatedCourses.slice(0, 3);
+
+        const uniqueYears = Array.from(new Set(rawSemesters.map(s => s.academic_year).filter(Boolean)));
+        if (uniqueYears.length === 0) uniqueYears.push('2025-2026');
+
+        const cum = GradeCalculator.calculateCumulativeGPA(rawCourses);
+        const avg10 = cum.avg10 || 0;
+
+        // Tính chênh lệch hệ 10 giữa kỳ mới nhất và kỳ liền trước
+        let avg10Delta = 0;
+        if (rawSemesters.length >= 2) {
+            const lastSemCourses = rawCourses.filter(c => c.semester_id === rawSemesters[rawSemesters.length - 1].id);
+            const prevSemCourses = rawCourses.filter(c => c.semester_id === rawSemesters[rawSemesters.length - 2].id);
+            const lastCalc = GradeCalculator.calculateSemesterGPA(lastSemCourses);
+            const prevCalc = GradeCalculator.calculateSemesterGPA(prevSemCourses);
+            avg10Delta = Number(((lastCalc.avg10 || 0) - (prevCalc.avg10 || 0)).toFixed(2));
         }
+
+        return {
+            cohorts: [{ id: 'k2025', name: 'Khóa 2025 - 2030' }],
+            programCredits: 140,
+            average10: Number(avg10.toFixed(2)),
+            average10Delta,
+            semesters,
+            programYears: uniqueYears.length >= 5 ? uniqueYears : ['2025-2026', '2026-2027', '2027-2028', '2028-2029', '2029-2030'],
+            gradeDistribution,
+            creditBlocks,
+            highlights
+        };
     }
-    return MOCK_STATS;
+
+    return {
+        cohorts: [{ id: 'k2025', name: 'Khóa 2025 - 2030' }],
+        programCredits: 140,
+        average10: 0,
+        average10Delta: 0,
+        semesters: [],
+        programYears: ['2025-2026', '2026-2027', '2027-2028', '2028-2029', '2029-2030'],
+        gradeDistribution: Object.entries(gradeCounts).map(([grade, count]) => ({ grade, count })),
+        creditBlocks: Object.entries(blockRequirements).map(([name, conf]) => ({ name, earned: 0, required: conf.req, color: conf.color })),
+        highlights: []
+    };
 }
 
 /* ===== Tính toán ===== */
@@ -433,6 +448,11 @@ function exportReport(data, semesters) {
 
 /* ===== Khởi chạy ===== */
 async function initStatistics() {
+    const chartBox = $('gpaChart');
+    if (chartBox) {
+        chartBox.innerHTML = '<p class="chart__empty">Đang tải dữ liệu thống kê...</p>';
+    }
+
     try {
         const data = await loadStatisticsData();
         const semesters = withCumulative(data.semesters);
@@ -447,10 +467,21 @@ async function initStatistics() {
         renderCreditProgress(data.creditBlocks, earned, data.programCredits);
         renderHighlights(data.highlights);
 
-        $('exportBtn').addEventListener('click', () => exportReport(data, semesters));
+        const expBtn = $('exportBtn');
+        if (expBtn && !expBtn.dataset.bound) {
+            expBtn.dataset.bound = 'true';
+            expBtn.addEventListener('click', () => exportReport(data, semesters));
+        }
     } catch (err) {
-        console.error('Statistics - statistics.js:362', err);
-        $('gpaChart').innerHTML = '<p class="chart__empty">Không tải được dữ liệu. Vui lòng thử lại.</p>';
+        console.error('Statistics error:', err);
+        if (chartBox) {
+            chartBox.innerHTML = `
+                <div class="chart__empty" style="text-align: center; color: var(--error);">
+                    <p style="margin-bottom: 8px;">Không tải được dữ liệu thống kê. Vui lòng thử lại.</p>
+                    <button type="button" onclick="initStatistics()" class="btn btn-primary btn-sm">Thử tải lại</button>
+                </div>
+            `;
+        }
     }
 }
 

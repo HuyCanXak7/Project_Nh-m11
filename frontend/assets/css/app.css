@@ -486,7 +486,7 @@ body.app-body {
 .filter-input-wrap {
     position: relative;
     flex: 2;
-    min-width: 240px;
+    min-width: min(100%, 220px);
 }
 
 .filter-input-wrap svg {
@@ -529,14 +529,14 @@ body.app-body {
     color: var(--text-dark);
     outline: none;
     cursor: pointer;
-    min-width: 170px;
+    min-width: min(100%, 160px);
     flex: 1;
 }
 
 /* ===== LƯỚI THẺ HỌC KỲ (SEMESTER GRID) ===== */
 .semester-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 310px), 1fr));
     gap: 20px;
 }
 
@@ -828,12 +828,77 @@ body.app-body {
     background: var(--bg-main);
 }
 
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
 @media (max-width: 900px) {
     .app-nav { display: none; }
     .mobile-nav { display: flex; }
-    .app-card { padding: 22px; border-radius: 24px; }
+    .app-card { padding: 20px; border-radius: 22px; }
     .app-header__title { font-size: 22px; }
     .modal-form-row { flex-direction: column; gap: 0; }
+}
+
+@media (max-width: 600px) {
+    .app-card {
+        padding: 16px 14px;
+        border-radius: 18px;
+    }
+    .app-card__header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    .app-card__header .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    .filter-bar {
+        padding: 12px;
+        gap: 10px;
+        border-radius: 16px;
+    }
+    .filter-input-wrap,
+    .filter-select {
+        min-width: 100%;
+        flex: 1 1 100%;
+    }
+    .semester-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+    }
+    .semester-card {
+        padding: 18px 16px;
+        border-radius: 20px;
+    }
+    .semester-card__actions {
+        flex-wrap: wrap;
+    }
+    .empty-state {
+        padding: 36px 16px;
+        border-radius: 20px;
+    }
+    .empty-state__title {
+        font-size: 17px;
+    }
+    .empty-state__desc {
+        font-size: 13px;
+    }
+    .profile-avatar-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 16px;
+    }
+    .profile-avatar-meta div {
+        justify-content: center;
+    }
+    .modal {
+        padding: 24px 18px 20px !important;
+        border-radius: 22px;
+        max-height: 92vh;
+        overflow-y: auto;
+    }
 }
 
 /* ===== BẢN IN A4 CHUẨN (PB-28) ===== */

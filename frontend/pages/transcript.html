@@ -107,18 +107,21 @@
 
             <div class="dash-header__greeting">
                 <h1 class="dash-header__title">Bảng Điểm Tổng Hợp & In Ấn</h1>
-                <p class="dash-header__subtitle">Tra cứu chi tiết điểm số từng học kỳ, xuất file CSV bảo mật và in bản cứng chuẩn khổ A4</p>
+                <p class="dash-header__subtitle">Tra cứu bảng điểm tổng hợp theo từng học kỳ, xuất tệp CSV / Excel (.xlsx) an toàn và in chuẩn khổ A4</p>
             </div>
 
             <div class="dash-header__actions">
-                <button type="button" onclick="CSVHelper.exportTranscriptCSV()" class="btn-outline btn-outline--sm" title="Xuất file CSV bảng điểm">
+                <button type="button" onclick="CSVHelper.exportTranscriptCSV()" class="btn-outline btn-outline--sm" title="Xuất tệp CSV bảng điểm">
                     Xuất CSV
+                </button>
+                <button type="button" onclick="CSVHelper.exportTranscriptExcel()" class="btn-outline btn-outline--sm" title="Xuất tệp Excel (.xlsx) bảng điểm">
+                    Xuất Excel (.xlsx)
                 </button>
                 <button type="button" onclick="window.print()" class="btn btn-primary" style="height: 38px; padding: 0 16px; font-size: 13.5px; border-radius: 10px;" title="In bảng điểm khổ A4">
                     In A4
                 </button>
-                <button type="button" onclick="handleResetData()" class="btn-reset" title="Khôi phục dữ liệu mẫu ban đầu">
-                     Khôi phục
+                <button type="button" onclick="handleResetData()" class="btn-reset" title="Nạp dữ liệu mẫu để trải nghiệm">
+                     Dữ liệu mẫu
                 </button>
                 <!-- Menu tài khoản -->
                 <div class="user-menu" id="userMenu">
@@ -149,23 +152,48 @@
         <!-- MAIN CARD -->
         <div class="app-card" style="margin-top: 0; box-shadow: var(--shadow-soft); border-radius: var(--radius-lg);">
             <!-- TÓM TẮT TÍCH LŨY -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+            <div class="transcript-summary-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 16px; margin-bottom: 20px;">
                 <div style="background: var(--bg-main); padding: 18px; border-radius: 20px; text-align: center;">
-                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-gray);">GPA Tích Lũy Toàn Khóa</div>
-                    <div id="cumGpaDisplay" style="font-size: 32px; font-weight: 800; color: var(--primary); margin-top: 4px;">0.00</div>
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-gray);">GPA Tích Lũy (Hệ 4)</div>
+                    <div id="cumGpaDisplay" style="font-size: 30px; font-weight: 800; color: var(--primary); margin-top: 4px;">0.00</div>
                     <div style="font-size: 11px; color: var(--text-gray);">Thang 4.0 chuẩn Thông tư 08</div>
                 </div>
 
                 <div style="background: var(--bg-main); padding: 18px; border-radius: 20px; text-align: center;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-gray);">ĐTB Tích Lũy (Hệ 10)</div>
+                    <div id="cumAvg10Display" style="font-size: 30px; font-weight: 800; color: #2563EB; margin-top: 4px;">0.00</div>
+                    <div style="font-size: 11px; color: var(--text-gray);">Trung bình có trọng số tín chỉ</div>
+                </div>
+
+                <div style="background: var(--bg-main); padding: 18px; border-radius: 20px; text-align: center;">
                     <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-gray);">Tổng Tín Chỉ Đạt</div>
-                    <div id="cumCreditsDisplay" style="font-size: 32px; font-weight: 800; color: #10B981; margin-top: 4px;">0 / 0 TC</div>
+                    <div id="cumCreditsDisplay" style="font-size: 30px; font-weight: 800; color: #10B981; margin-top: 4px;">0 / 0 TC</div>
                     <div style="font-size: 11px; color: var(--text-gray);">Tín chỉ môn đạt (A..D)</div>
                 </div>
 
                 <div style="background: var(--bg-main); padding: 18px; border-radius: 20px; text-align: center;">
                     <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-gray);">Xếp Loại Học Lực</div>
-                    <div id="cumRankDisplay" style="font-size: 26px; font-weight: 800; color: var(--text-black); margin-top: 8px;">--</div>
-                    <div style="font-size: 11px; color: var(--text-gray);">Quy chế tín chỉ</div>
+                    <div id="cumRankDisplay" style="font-size: 24px; font-weight: 800; color: var(--text-black); margin-top: 8px;">--</div>
+                    <div style="font-size: 11px; color: var(--text-gray);">Quy chế đào tạo tín chỉ</div>
+                </div>
+            </div>
+
+            <!-- BỘ LỌC HỌC KỲ & TÌM KIẾM MÔN HỌC (Ẩn khi in A4) -->
+            <div class="filter-bar no-print" id="transcriptFilterBar" style="margin-bottom: 20px;">
+                <div class="filter-input-wrap">
+                    <span class="filter-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    </span>
+                    <input type="text" id="transcriptSearchInput" class="filter-input" placeholder="Tìm theo mã môn hoặc tên môn trong bảng điểm..." oninput="renderTranscript()">
+                </div>
+
+                <select id="transcriptSemesterFilter" class="filter-select" aria-label="Lọc theo học kỳ" onchange="renderTranscript()">
+                    <option value="ALL">Tất cả học kỳ</option>
+                </select>
+
+                <div style="margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button type="button" onclick="CSVHelper.exportTranscriptCSV()" class="btn btn-secondary btn-sm">Xuất .CSV</button>
+                    <button type="button" onclick="CSVHelper.exportTranscriptExcel()" class="btn btn-primary btn-sm">Xuất .XLSX</button>
                 </div>
             </div>
 

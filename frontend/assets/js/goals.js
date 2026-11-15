@@ -102,21 +102,46 @@ function renderSimulationTable() {
   const tbody = document.getElementById('simulationTableBody');
   if (!tbody) return;
 
+  if (simulationCourses.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6">
+          <div class="empty-state" style="padding: 32px 16px; margin: 8px 0;">
+            <div class="empty-state__icon">
+              <svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" style="margin: 0 auto;">
+                <circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>
+              </svg>
+            </div>
+            <h4 class="empty-state__title">Chưa có môn học để mô phỏng</h4>
+            <p class="empty-state__desc">Hãy thêm môn học hoặc nạp dữ liệu mẫu để thử nghiệm công cụ dự phóng điểm What-If GPA.</p>
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+              <a href="courses.html" class="btn btn-primary btn-sm" style="text-decoration: none;">+ Thêm môn học</a>
+              <button type="button" onclick="handleResetData()" class="btn btn-secondary btn-sm">Nạp dữ liệu mẫu</button>
+            </div>
+          </div>
+        </td>
+      </tr>
+    `;
+    recalculateSimulatedGPA();
+    return;
+  }
+
   tbody.innerHTML = simulationCourses.map((c, idx) => {
-    const grade = GradeCalculator.convertScore10(c.simulatedScore);
+    const isValid = c.simulatedScore !== null && !isNaN(c.simulatedScore) && c.simulatedScore >= 0 && c.simulatedScore <= 10;
+    const grade = isValid ? GradeCalculator.convertScore10(c.simulatedScore) : { letter: 'Lỗi', scale4: '--', colorClass: 'badge-red' };
     return `
       <tr>
-        <td style="font-family: monospace; font-weight: 800; color: var(--primary);">${c.course_code}</td>
-        <td style="font-weight: 700;">${c.course_name}</td>
+        <td style="font-family: monospace; font-weight: 800; color: var(--primary);">${escapeHtml(c.course_code)}</td>
+        <td style="font-weight: 700;">${escapeHtml(c.course_name)}</td>
         <td style="text-align: center; font-weight: 700;">${c.credits} TC</td>
         <td style="text-align: center; color: var(--text-gray);">${c.originalScore !== null ? c.originalScore : 'Chưa có'}</td>
         <td style="width: 140px; text-align: center;">
-          <input type="number" step="0.1" min="0" max="10" value="${c.simulatedScore}"
+          <input type="number" step="0.1" min="0" max="10" value="${c.simulatedScore !== null ? c.simulatedScore : ''}"
                  oninput="updateSimScore(${idx}, this.value)"
                  class="modal-input" style="height: 38px; text-align: center; font-weight: 800;">
         </td>
         <td style="text-align: center;">
-          <span class="badge ${grade.colorClass}">${grade.letter} (${grade.scale4})</span>
+          <span class="badge ${grade.colorClass}">${isValid ? `${grade.letter} (${grade.scale4})` : 'Điểm 0-10'}</span>
         </td>
       </tr>
     `;
@@ -126,11 +151,23 @@ function renderSimulationTable() {
 }
 
 function updateSimScore(idx, val) {
-  const num = Number(val);
-  if (!isNaN(num) && num >= 0 && num <= 10) {
-    simulationCourses[idx].simulatedScore = num;
+  const trimmed = String(val).trim();
+  const num = Number(trimmed);
+  if (trimmed === '' || isNaN(num) || num < 0 || num > 10) {
+    simulationCourses[idx].simulatedScore = null;
+  } else {
+    simulationCourses[idx].simulatedScore = Math.round(num * 10) / 10;
   }
   recalculateSimulatedGPA();
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 function recalculateSimulatedGPA() {
