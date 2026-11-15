@@ -39,9 +39,99 @@ const MOCK_STATS = {
 };
 
 async function loadStatisticsData(/* cohortId */) {
-    // const res = await fetch(`/api/statistics?cohort=${cohortId}`, { headers: { Authorization: `Bearer ${token}` } });
-    // if (!res.ok) throw new Error('Không tải được thống kê');
-    // return res.json();
+    if (typeof StorageService !== 'undefined' && typeof GradeCalculator !== 'undefined') {
+        const rawSemesters = StorageService.getSemesters();
+        const rawCourses = StorageService.getCourses();
+
+        if (rawSemesters.length > 0 && rawCourses.length > 0) {
+            const semesters = rawSemesters.map(s => {
+                const semCourses = rawCourses.filter(c => c.semester_id === s.id);
+                const semCalc = GradeCalculator.calculateSemesterGPA(semCourses);
+                const credits = semCourses.reduce((sum, c) => sum + (Number(c.credits) || 0), 0);
+                return {
+                    name: s.name.replace('Học kỳ ', 'HK'),
+                    year: s.academic_year || '2025-2026',
+                    gpa: semCalc.gpa !== null ? semCalc.gpa : 0,
+                    credits: credits
+                };
+            });
+
+            // Phân bố điểm chữ
+            const gradeCounts = { 'A+': 0, 'A': 0, 'B+': 0, 'B': 0, 'C+': 0, 'C': 0, 'D': 0, 'F': 0 };
+            rawCourses.forEach(c => {
+                const calc = GradeCalculator.calculateCourseFinalScore(c.components || []);
+                if (calc.isComplete && calc.finalScore10 !== null) {
+                    const letter = GradeCalculator.getGradeScale(calc.finalScore10).letter;
+                    if (gradeCounts[letter] !== undefined) gradeCounts[letter]++;
+                }
+            });
+            const gradeDistribution = Object.entries(gradeCounts).map(([grade, count]) => ({ grade, count }));
+
+            // Khối kiến thức
+            const blockRequirements = {
+                'Đại cương': { req: 35, color: 'green' },
+                'Cơ sở ngành': { req: 45, color: 'blue' },
+                'Chuyên ngành': { req: 45, color: 'purple' },
+                'Tự chọn & Thực tập': { req: 15, color: 'orange' }
+            };
+            const blockEarned = { 'Đại cương': 0, 'Cơ sở ngành': 0, 'Chuyên ngành': 0, 'Tự chọn & Thực tập': 0 };
+            rawCourses.forEach(c => {
+                const calc = GradeCalculator.calculateCourseFinalScore(c.components || []);
+                if (calc.isComplete && calc.finalScore10 !== null && calc.finalScore10 >= 4.0) {
+                    const cat = c.category || 'Đại cương';
+                    if (blockEarned[cat] !== undefined) {
+                        blockEarned[cat] += Number(c.credits) || 0;
+                    } else {
+                        blockEarned['Tự chọn & Thực tập'] += Number(c.credits) || 0;
+                    }
+                }
+            });
+            const creditBlocks = Object.entries(blockRequirements).map(([name, conf]) => ({
+                name,
+                earned: blockEarned[name] || 0,
+                required: conf.req,
+                color: conf.color
+            }));
+
+            // Môn học nổi bật
+            const evaluatedCourses = rawCourses.map(c => {
+                const calc = GradeCalculator.calculateCourseFinalScore(c.components || []);
+                const scale = calc.finalScore10 !== null ? GradeCalculator.getGradeScale(calc.finalScore10) : { letter: 'F' };
+                const sem = rawSemesters.find(s => s.id === c.semester_id);
+                return {
+                    name: c.course_name,
+                    semester: sem ? `${sem.name} · ${sem.academic_year}` : '',
+                    score: calc.finalScore10 !== null ? calc.finalScore10 : 0,
+                    grade: scale.letter
+                };
+            }).filter(c => c.score > 0);
+            evaluatedCourses.sort((a, b) => b.score - a.score);
+            const highlights = evaluatedCourses.slice(0, 3);
+
+            const uniqueYears = Array.from(new Set(rawSemesters.map(s => s.academic_year).filter(Boolean)));
+            if (uniqueYears.length === 0) uniqueYears.push('2025-2026');
+
+            const cum = GradeCalculator.calculateCumulativeGPA(rawCourses);
+            const avg10 = cum.totalCredits > 0
+                ? rawCourses.reduce((sum, c) => {
+                    const calc = GradeCalculator.calculateCourseFinalScore(c.components || []);
+                    return sum + (calc.finalScore10 || 0) * (Number(c.credits) || 0);
+                }, 0) / cum.totalCredits
+                : 0;
+
+            return {
+                cohorts: [{ id: 'k2025', name: 'Khóa 2025 - 2030' }],
+                programCredits: 140,
+                average10: Number(avg10.toFixed(2)),
+                average10Delta: 0.10,
+                semesters,
+                programYears: uniqueYears.length >= 5 ? uniqueYears : ['2025-2026', '2026-2027', '2027-2028', '2028-2029', '2029-2030'],
+                gradeDistribution,
+                creditBlocks,
+                highlights: highlights.length > 0 ? highlights : MOCK_STATS.highlights
+            };
+        }
+    }
     return MOCK_STATS;
 }
 

@@ -17,14 +17,14 @@ function initAppUser() {
   const idEl = document.getElementById('navStudentId');
   const avatarEl = document.getElementById('navStudentAvatar');
 
-  if (nameEl) nameEl.textContent = student.name || 'Huỳnh Nhơn Nguyên Nghiệp';
-  if (idEl) idEl.textContent = `MSSV: ${student.student_id || 'N25DTCN038'}`;
+  if (nameEl) nameEl.textContent = student.name || 'Sinh viên';
+  if (idEl) idEl.textContent = student.student_id ? `MSSV: ${student.student_id}` : '';
   if (avatarEl) {
     if (student.avatar_url) {
       avatarEl.innerHTML = `<img src="${student.avatar_url}" alt="Avatar" class="app-user__avatar-img">`;
     } else {
-      const parts = (student.name || 'Huỳnh Nghiệp').trim().split(' ').filter(Boolean);
-      const initials = parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : (parts[0] ? parts[0].slice(0, 2).toUpperCase() : 'HN');
+      const parts = (student.name || 'Sinh viên').trim().split(' ').filter(Boolean);
+      const initials = parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : (parts[0] ? parts[0].slice(0, 2).toUpperCase() : 'SV');
       avatarEl.innerHTML = initials;
     }
   }

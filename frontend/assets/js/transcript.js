@@ -11,11 +11,19 @@ function renderTranscript() {
   const courses = StorageService.getCourses();
   const semesters = StorageService.getSemesters();
   const student = StorageService.getStudent();
+  const sessionUser = (typeof getSession === 'function' ? getSession()?.user : null);
 
-  // Cập nhật thông tin in A4
+  // Cập nhật thông tin sinh viên khi in A4 từ dữ liệu local
+  const printNameEl = document.getElementById('printStudentName');
+  const printIdEl = document.getElementById('printStudentId');
+  const printMajorEl = document.getElementById('printStudentMajor');
   const metaLine = document.getElementById('printMetaLine');
+
+  if (printNameEl) printNameEl.textContent = student.name || sessionUser?.fullName || 'Sinh viên';
+  if (printIdEl) printIdEl.textContent = student.student_id || 'Chưa cập nhật';
+  if (printMajorEl) printMajorEl.textContent = student.major || 'Chưa cập nhật';
   if (metaLine) {
-    metaLine.textContent = `Lớp: ${student.class_name || 'K25-CNTT5'} | Ngày in: ${new Date().toLocaleDateString('vi-VN')}`;
+    metaLine.textContent = `Lớp: ${student.class_name || 'Chưa cập nhật'} | Ngày in: ${new Date().toLocaleDateString('vi-VN')}`;
   }
 
   // Tóm tắt tích lũy toàn khóa (PB-52)

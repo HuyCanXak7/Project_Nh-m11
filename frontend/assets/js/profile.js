@@ -24,8 +24,10 @@ function updateProfileAvatarDisplay(student) {
   const btnRemove = document.getElementById('btnRemoveAvatar');
   if (!avatarDisplay) return;
 
-  const parts = (student.name || 'Huỳnh Nghiệp').trim().split(' ').filter(Boolean);
-  const initials = parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : (parts[0] ? parts[0].slice(0, 2).toUpperCase() : 'HN');
+  const user = (typeof getSession === 'function' ? getSession()?.user : null) || {};
+  const displayName = student.name || user.fullName || user.email || 'Sinh viên';
+  const parts = displayName.trim().split(/\s+/).filter(Boolean);
+  const initials = parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : (parts[0] ? parts[0].slice(0, 2).toUpperCase() : 'SV');
 
   if (student.avatar_url) {
     avatarDisplay.innerHTML = `
@@ -94,7 +96,7 @@ function handleAvatarUpload(event) {
       StorageService.saveStudent(student);
 
       updateProfileAvatarDisplay(student);
-      initAppUser(); // Cập nhật trên Navbar ngay lập tức
+      if (typeof renderUser === 'function') renderUser(student);
       showToast('Đã cập nhật ảnh đại diện thành công!');
     };
     img.src = e.target.result;
@@ -113,6 +115,7 @@ function handleRemoveAvatar() {
   if (fileInput) fileInput.value = '';
 
   updateProfileAvatarDisplay(student);
+  if (typeof renderUser === 'function') renderUser(student);
   showToast('Đã xóa ảnh đại diện!');
 }
 
@@ -135,7 +138,16 @@ function handleSaveProfile(e) {
   student.class_name = class_name;
 
   StorageService.saveStudent(student);
+
+  // Cập nhật session user nếu có
+  const session = typeof getSession === 'function' ? getSession() : null;
+  if (session && session.user) {
+    session.user.fullName = name;
+    if (typeof saveSession === 'function') saveSession(session);
+  }
+
   updateProfileAvatarDisplay(student);
+  if (typeof renderUser === 'function') renderUser({ ...student, fullName: name });
   showToast('Cập nhật thông tin hồ sơ sinh viên thành công!');
 }
 

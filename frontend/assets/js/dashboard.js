@@ -5,7 +5,7 @@
  */
 
 const MOCK_DATA = {
-    user: { fullName: 'Huỳnh Nhơn Nguyên Nghiệp' },
+    user: { fullName: 'Sinh viên' },
     stats: {
         gpa: 3.42, gpaDelta: 0.12,
         credits: 78, creditsDelta: 4,
@@ -37,7 +37,7 @@ async function loadDashboardData() {
         currentStudent = StorageService.getStudent();
     }
     const sessionUser = (typeof getSession === 'function' ? getSession()?.user : null);
-    const fullName = sessionUser?.fullName || currentStudent?.name || 'Huỳnh Nhơn Nguyên Nghiệp';
+    const fullName = sessionUser?.fullName || currentStudent?.name || 'Sinh viên';
     data.user = { fullName };
 
     // Tích hợp dữ liệu môn học từ StorageService nếu có
@@ -90,7 +90,7 @@ async function loadDashboardData() {
                 const times = ['2 giờ trước', '1 ngày trước', '2 ngày trước'];
                 recent.push({
                     type: idx === 0 ? 'grade' : (idx === 1 ? 'course' : 'goal'),
-                    text: `Cập nhật môn: ${c.name} (${c.code})`,
+                    text: `Cập nhật môn: ${c.course_name || c.name || 'Môn học'} (${c.course_code || c.code || ''})`,
                     time: times[idx] || 'Gần đây'
                 });
             });
