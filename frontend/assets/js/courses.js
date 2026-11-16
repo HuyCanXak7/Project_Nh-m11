@@ -463,9 +463,9 @@ function calculatePreviewScores() {
   const calc = GradeCalculator.calculateCourseFinalScore(dummyComps);
   const grade = GradeCalculator.convertScore10(calc.finalScore10);
 
-  document.getElementById('previewScore10').textContent = calc.isComplete ? calc.finalScore10 : '--';
-  document.getElementById('previewScoreLetter').textContent = calc.isComplete ? grade.letter : '--';
-  document.getElementById('previewScore4').textContent = calc.isComplete ? grade.scale4.toFixed(1) : '--';
+  document.getElementById('scorePreview10').textContent = calc.isComplete ? calc.finalScore10 : '--';
+  document.getElementById('scorePreviewLetter').textContent = calc.isComplete ? grade.letter : '--';
+  document.getElementById('scorePreview4').textContent = calc.isComplete ? grade.scale4.toFixed(1) : '--';
 }
 
 function handleSaveScores() {
