@@ -106,18 +106,21 @@
             </button>
 
             <div class="dash-header__greeting">
-                <h1 class="dash-header__title">Bảng Điểm Tổng Hợp & In Ấn</h1>
-                <p class="dash-header__subtitle">Tra cứu bảng điểm tổng hợp theo từng học kỳ, xuất tệp CSV / Excel (.xlsx) an toàn và in chuẩn khổ A4</p>
+                <h1 class="dash-header__title">
+                    <span>Bảng điểm</span>
+                    <span class="dash-header__slash">/</span>
+                    <span class="dash-header__sub-inline">Tổng hợp toàn khóa · Xuất CSV, Excel & In A4</span>
+                </h1>
             </div>
 
             <div class="dash-header__actions">
-                <button type="button" onclick="CSVHelper.exportTranscriptCSV()" class="btn-outline btn-outline--sm" title="Xuất tệp CSV bảng điểm">
+                <button type="button" onclick="CSVHelper.exportTranscriptCSV()" class="btn-figma-outline" title="Xuất tệp CSV bảng điểm">
                     Xuất CSV
                 </button>
-                <button type="button" onclick="CSVHelper.exportTranscriptExcel()" class="btn-outline btn-outline--sm" title="Xuất tệp Excel (.xlsx) bảng điểm">
+                <button type="button" onclick="CSVHelper.exportTranscriptExcel()" class="btn-figma-primary" title="Xuất tệp Excel (.xlsx) bảng điểm">
                     Xuất Excel (.xlsx)
                 </button>
-                <button type="button" onclick="window.print()" class="btn btn-primary" style="height: 38px; padding: 0 16px; font-size: 13.5px; border-radius: 10px;" title="In bảng điểm khổ A4">
+                <button type="button" onclick="window.print()" class="btn-figma-pink" title="In bảng điểm khổ A4">
                     In A4
                 </button>
                 <button type="button" onclick="handleResetData()" class="btn-reset" title="Nạp dữ liệu mẫu để trải nghiệm">

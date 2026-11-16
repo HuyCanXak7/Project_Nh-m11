@@ -1,31 +1,57 @@
 ﻿/**
- * LOGIC QUẢN LÝ MÔN HỌC & ĐIỂM SỐ (COURSES PAGE)
+ * LOGIC QUẢN LÝ MÔN HỌC & ĐIỂM SỐ CHUẨN FIGMA STUDYTRACK-E (StudyTrack-E-04-mon-hoc 1)
  * Phụ trách: PB-10 (Tạo môn), PB-11 (Xem), PB-12 (Sửa/Xóa Cascade), PB-13 (Tìm kiếm/Lọc),
  *            PB-14 (Trọng số 100%), PB-15 (Nhập điểm 0-10), PB-16 (Tính điểm), PB-17 (Quy đổi Hệ 4), PB-50 (Học lại)
- * Thành viên: FE Huỳnh Nhơn Nguyên Nghiệp (N25DTCN038)
  */
 
 let currentCourseList = [];
 let currentDeletingCourseId = null;
 let currentConfiguringCourse = null;
+let currentStatusFilter = 'ALL'; // ALL | PASSED | IN_PROGRESS | FAILED
 
 document.addEventListener('DOMContentLoaded', () => {
   initSemesterFilterOptions();
-  
-  // Kiểm tra query parameter ?semId=
+
   const params = new URLSearchParams(window.location.search);
   const semIdParam = params.get('semId');
-  if (semIdParam) {
-    const filterEl = document.getElementById('filterSemester');
-    if (filterEl) filterEl.value = semIdParam;
-    const btnClear = document.getElementById('btnClearFilter');
-    if (btnClear) btnClear.style.display = 'inline-flex';
+  const filterEl = document.getElementById('filterSemester');
+
+  if (semIdParam && filterEl) {
+    filterEl.value = semIdParam;
+  } else if (filterEl) {
+    const sems = StorageService.getSemesters();
+    if (sems.length > 0) {
+      filterEl.value = sems[sems.length - 1].id;
+    }
   }
 
+  renderSemesterTabs();
   renderCourses();
 });
 
-// === 1. TÌM KIẾM VÀ LỌC MÔN HỌC (PB-13) ===
+function formatShortSemName(sem) {
+  if (!sem) return '';
+  const rawName = (sem.name || '').trim();
+  const yr = (sem.academic_year || '').trim();
+  if (/hè/i.test(rawName)) {
+    const endYr = yr.split('-')[1]?.trim().slice(-2) || '26';
+    return `HK hè ${endYr}`;
+  }
+  const shortName = rawName.replace(/Học kỳ\s*/i, 'HK');
+  const shortYr = yr.replace(/20(\d{2})\s*-\s*20(\d{2})/, '$1–$2');
+  return shortYr ? `${shortName} ${shortYr}` : shortName;
+}
+
+function formatDotDateRange(startStr, endStr) {
+  const fmt = (s) => {
+    if (!s) return '--.--';
+    const parts = s.split('-');
+    return parts.length === 3 ? `${parts[2]}.${parts[1]}` : s;
+  };
+  return `${fmt(startStr)} – ${fmt(endStr)}`;
+}
+
+// === 1. DÃY TAB HỌC KỲ NỐI LIỀN & DROPDOWN HỌC KỲ ===
 function initSemesterFilterOptions() {
   const semesters = StorageService.getSemesters();
   const selectFilter = document.getElementById('filterSemester');
@@ -36,11 +62,71 @@ function initSemesterFilterOptions() {
   `).join('');
 
   if (selectFilter) {
+    const prev = selectFilter.value;
     selectFilter.innerHTML = '<option value="">Tất cả học kỳ</option>' + optionsHtml;
+    if ([...selectFilter.options].some(o => o.value === prev)) {
+      selectFilter.value = prev;
+    }
   }
   if (modalSemSelect) {
     modalSemSelect.innerHTML = optionsHtml;
   }
+}
+
+function renderSemesterTabs() {
+  const tabsWrap = document.getElementById('courseSemesterTabs');
+  if (!tabsWrap) return;
+
+  const semesters = StorageService.getSemesters();
+  const allCourses = StorageService.getCourses();
+  const activeSemId = document.getElementById('filterSemester')?.value || '';
+
+  const headerSumEl = document.getElementById('courseHeaderSummary');
+  if (headerSumEl) {
+    headerSumEl.textContent = `${allCourses.length} môn · ${semesters.length} học kỳ`;
+  }
+
+  const pillsHtml = semesters.map(sem => {
+    const semCourses = allCourses.filter(c => c.semester_id === sem.id);
+    const semCalc = GradeCalculator.calculateSemesterGPA(semCourses);
+    const isActive = activeSemId === sem.id;
+    const gpaText = semCalc.totalCredits > 0 ? semCalc.formattedGPA : '--';
+
+    return `
+      <button type="button"
+              class="course-sem-tab ${isActive ? 'is-active' : ''}"
+              onclick="selectSemesterTab('${escapeHtml(sem.id)}')"
+              title="${isActive ? 'Nhấn lần nữa để xem tất cả học kỳ' : 'Lọc theo ' + escapeHtml(sem.name)}">
+        <span class="course-sem-tab__name">${escapeHtml(formatShortSemName(sem))}</span>
+        <span class="course-sem-tab__gpa">${gpaText}</span>
+      </button>
+    `;
+  }).join('');
+
+  tabsWrap.innerHTML = `
+    ${pillsHtml}
+    <a href="semesters.html" class="course-sem-tab course-sem-tab--add" title="Quản lý hoặc thêm học kỳ mới">
+      + Học kỳ mới
+    </a>
+  `;
+}
+
+function selectSemesterTab(semId) {
+  const selectFilter = document.getElementById('filterSemester');
+  if (selectFilter) {
+    selectFilter.value = (selectFilter.value === semId) ? '' : semId;
+  }
+  renderSemesterTabs();
+  handleFilterChange();
+}
+
+function setCourseStatusFilter(status) {
+  currentStatusFilter = status || 'ALL';
+  const buttons = document.querySelectorAll('#courseStatusTabs .course-status-tab');
+  buttons.forEach(btn => {
+    btn.classList.toggle('is-active', btn.dataset.status === currentStatusFilter);
+  });
+  handleFilterChange();
 }
 
 // === BỘ LỌC VÀ TÌM KIẾM MÔN HỌC (Task: T0694D1 | PB-13) ===
@@ -54,50 +140,130 @@ function removeVietnameseTones(str) {
     .toLowerCase();
 }
 
+function getCourseState(course) {
+  const calc = GradeCalculator.calculateCourseFinalScore(course.components);
+  if (!calc.isComplete || calc.finalScore10 === null) {
+    return 'IN_PROGRESS';
+  }
+  return calc.finalScore10 >= 4.0 ? 'PASSED' : 'FAILED';
+}
+
 function handleFilterChange() {
   const searchKey = (document.getElementById('searchCourseInput')?.value || '').trim();
-  const filterSemId = document.getElementById('filterSemester')?.value || '';
   const filterCategory = document.getElementById('filterCategory')?.value || '';
   const btnClear = document.getElementById('btnClearFilter');
 
   if (btnClear) {
-    btnClear.style.display = (searchKey || filterSemId || filterCategory) ? 'inline-flex' : 'none';
+    btnClear.style.display = (searchKey || filterCategory || currentStatusFilter !== 'ALL') ? 'inline-flex' : 'none';
   }
 
+  renderSemesterTabs();
   renderCourses();
 }
 
 function handleClearFilter() {
   const searchInput = document.getElementById('searchCourseInput');
-  const semFilter = document.getElementById('filterSemester');
   const catFilter = document.getElementById('filterCategory');
   const btnClear = document.getElementById('btnClearFilter');
 
   if (searchInput) searchInput.value = '';
-  if (semFilter) semFilter.value = '';
   if (catFilter) catFilter.value = '';
+  currentStatusFilter = 'ALL';
+  const buttons = document.querySelectorAll('#courseStatusTabs .course-status-tab');
+  buttons.forEach(btn => btn.classList.toggle('is-active', btn.dataset.status === 'ALL'));
   if (btnClear) btnClear.style.display = 'none';
 
+  renderSemesterTabs();
   renderCourses();
-  showToast('Đã xóa điều kiện lọc, danh sách đầy đủ đã được hiển thị!');
+  showToast('Đã xóa điều kiện lọc!');
 }
 
-// === 2. XEM VÀ QUẢN LÝ DANH SÁCH MÔN HỌC (Task: T0694CF | PB-11, PB-50) ===
+function updateSemesterSummaryStrip(semCourses, activeSem) {
+  const countEl = document.getElementById('semStripCount');
+  const inProgEl = document.getElementById('semStripInProgress');
+  const credEl = document.getElementById('semStripCredits');
+  const gradedCredEl = document.getElementById('semStripGradedCredits');
+  const avg10El = document.getElementById('semStripAvg10');
+  const datesEl = document.getElementById('semStripDates');
+  const gpa4El = document.getElementById('semStripGpa4');
+  const rankBadgeEl = document.getElementById('semStripRankBadge');
+
+  if (activeSem) {
+    if (datesEl) datesEl.textContent = formatDotDateRange(activeSem.start_date, activeSem.end_date);
+  } else {
+    if (datesEl) datesEl.textContent = 'Toàn khóa';
+  }
+
+  let totalCredits = 0;
+  let gradedCredits = 0;
+  let inProgressCount = 0;
+
+  semCourses.forEach(c => {
+    const cr = Number(c.credits) || 0;
+    totalCredits += cr;
+    const calc = GradeCalculator.calculateCourseFinalScore(c.components);
+    if (calc.isComplete) {
+      gradedCredits += cr;
+    } else {
+      inProgressCount++;
+    }
+  });
+
+  const semCalc = activeSem
+    ? GradeCalculator.calculateSemesterGPA(semCourses)
+    : GradeCalculator.calculateCumulativeGPA(semCourses);
+
+  const gpaVal = activeSem ? (semCalc.gpa || 0) : (semCalc.cumulativeGPA || 0);
+  const avg10Val = semCalc.avg10 || 0;
+  const rankText = gradedCredits > 0
+    ? `${GradeCalculator.getAcademicRank(gpaVal)} · ${gpaVal >= 3.4 ? 'vượt mục tiêu 3.40' : 'mục tiêu 3.40'}`
+    : 'Chưa đủ điểm';
+
+  if (countEl) countEl.textContent = String(semCourses.length);
+  if (inProgEl) inProgEl.textContent = `${inProgressCount} đang học`;
+  if (credEl) credEl.textContent = String(totalCredits);
+  if (gradedCredEl) gradedCredEl.textContent = `${gradedCredits} đã có điểm`;
+  if (avg10El) avg10El.textContent = avg10Val.toFixed(2);
+  if (gpa4El) gpa4El.textContent = gpaVal.toFixed(2);
+  if (rankBadgeEl) rankBadgeEl.textContent = rankText;
+}
+
+// === 2. XEM VÀ QUẢN LÝ DANH SÁCH MÔN HỌC CHUẨN STUDYTRACK-E ===
 function renderCourses() {
   const tbody = document.getElementById('courseTableBody');
   if (!tbody) return;
 
   const allCourses = StorageService.getCourses();
   const semesters = StorageService.getSemesters();
-  
+
   const rawSearch = (document.getElementById('searchCourseInput')?.value || '').trim();
   const searchKey = rawSearch.toLowerCase();
   const searchKeyClean = removeVietnameseTones(rawSearch);
   const filterSemId = document.getElementById('filterSemester')?.value || '';
   const filterCategory = document.getElementById('filterCategory')?.value || '';
 
-  // Tiêu chí chấp nhận PB-13: Khớp từ khóa mã/tên môn, lọc theo loại môn (Đại cương/Cơ sở ngành/Chuyên ngành)
-  currentCourseList = allCourses.filter(c => {
+  const activeSem = semesters.find(s => s.id === filterSemId) || null;
+  const semCourses = filterSemId ? allCourses.filter(c => c.semester_id === filterSemId) : allCourses;
+
+  updateSemesterSummaryStrip(semCourses, activeSem);
+
+  let countAll = semCourses.length;
+  let countPassed = 0;
+  let countInProg = 0;
+  let countFailed = 0;
+  semCourses.forEach(c => {
+    const st = getCourseState(c);
+    if (st === 'PASSED') countPassed++;
+    else if (st === 'FAILED') countFailed++;
+    else countInProg++;
+  });
+
+  if (document.getElementById('countStatusAll')) document.getElementById('countStatusAll').textContent = countAll;
+  if (document.getElementById('countStatusPassed')) document.getElementById('countStatusPassed').textContent = countPassed;
+  if (document.getElementById('countStatusInProgress')) document.getElementById('countStatusInProgress').textContent = countInProg;
+  if (document.getElementById('countStatusFailed')) document.getElementById('countStatusFailed').textContent = countFailed;
+
+  currentCourseList = semCourses.filter(c => {
     const code = (c.course_code || '').toLowerCase();
     const name = (c.course_name || '').toLowerCase();
     const nameClean = removeVietnameseTones(c.course_name || '');
@@ -107,43 +273,36 @@ function renderCourses() {
       name.includes(searchKey) ||
       nameClean.includes(searchKeyClean);
 
-    const matchSem = !filterSemId || c.semester_id === filterSemId;
     const matchCat = !filterCategory || c.category === filterCategory;
+    const state = getCourseState(c);
+    const matchStatus = currentStatusFilter === 'ALL' || state === currentStatusFilter;
 
-    return matchSearch && matchSem && matchCat;
+    return matchSearch && matchCat && matchStatus;
   });
 
-  // Hiển thị thống kê số lượng khớp bộ lọc
   const statsBadge = document.getElementById('filterStatsBadge');
+  const gradedCount = currentCourseList.filter(c => GradeCalculator.calculateCourseFinalScore(c.components).isComplete).length;
   if (statsBadge) {
-    if (rawSearch || filterSemId || filterCategory) {
-      statsBadge.innerHTML = `Tìm thấy: <strong style="color: var(--primary);">${currentCourseList.length}</strong>/${allCourses.length} môn`;
-    } else {
-      statsBadge.innerHTML = `Tổng cộng: <strong>${allCourses.length}</strong> môn`;
-    }
+    statsBadge.innerHTML = `Hiển thị <strong>${currentCourseList.length}</strong> môn của ${activeSem ? escapeHtml(activeSem.name.toLowerCase()) : 'toàn khóa'} · GPA chỉ tính <strong>${gradedCount} môn</strong> đã đủ điểm`;
   }
 
-  // Tiêu chí chấp nhận PB-13 & PB-40: Trạng thái rỗng và xóa điều kiện lọc
   if (currentCourseList.length === 0) {
-    const hasFilter = !!(rawSearch || filterSemId || filterCategory);
+    const hasFilter = !!(rawSearch || filterCategory || currentStatusFilter !== 'ALL');
     tbody.innerHTML = `
       <tr>
-        <td colspan="9">
-          <div class="empty-state" style="padding: 40px 16px; margin: 10px 0;">
-            <div class="empty-state__icon">
-              <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto;">
-                <path d="M3 4h8v16H3zM11 4h10v16H11z"/>
-              </svg>
-            </div>
-            <h4 class="empty-state__title">${hasFilter ? 'Không tìm thấy môn học nào phù hợp' : 'Chưa có môn học nào'}</h4>
+        <td colspan="11">
+          <div class="empty-state" style="padding: 36px 16px; margin: 10px;">
+            <h4 class="empty-state__title">${hasFilter ? 'Không tìm thấy môn học nào phù hợp' : 'Chưa có môn học nào trong học kỳ này'}</h4>
             <p class="empty-state__desc">
               ${hasFilter
-                ? 'Không có môn học nào khớp với từ khóa tìm kiếm hoặc bộ lọc hiện tại. Bạn có thể xóa điều kiện lọc để hiển thị lại toàn bộ môn học.'
-                : 'Tài khoản của bạn chưa có môn học nào. Hãy thêm môn học đầu tiên, nhập từ CSV/Excel hoặc nạp dữ liệu mẫu để bắt đầu!'}
+                ? 'Không có môn học nào khớp với từ khóa hoặc bộ lọc hiện tại. Bạn có thể xóa bộ lọc để xem lại danh sách đầy đủ.'
+                : 'Hãy thêm môn học mới, nhập từ tệp CSV/Excel hoặc nạp dữ liệu mẫu để bắt đầu theo dõi điểm số!'}
             </p>
             <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 12px;">
-              ${hasFilter ? '<button type="button" onclick="handleClearFilter()" class="btn btn-secondary btn-sm">✕ Xóa điều kiện lọc</button>' : '<button type="button" onclick="handleResetData()" class="btn btn-secondary btn-sm">Nạp dữ liệu mẫu</button>'}
-              <button type="button" onclick="openCreateCourseModal()" class="btn btn-primary btn-sm">+ Thêm môn học</button>
+              ${hasFilter
+                ? '<button type="button" onclick="handleClearFilter()" class="btn-figma-outline">✕ Xóa điều kiện lọc</button>'
+                : '<button type="button" onclick="handleResetData()" class="btn-figma-outline">Nạp dữ liệu mẫu</button>'}
+              <button type="button" onclick="openCreateCourseModal()" class="btn-figma-primary">+ Thêm môn học</button>
             </div>
           </div>
         </td>
@@ -153,57 +312,83 @@ function renderCourses() {
   }
 
   tbody.innerHTML = currentCourseList.map(c => {
-    const sem = semesters.find(s => s.id === c.semester_id);
-    const semName = sem ? `${sem.name}` : '--';
     const scoreCalc = GradeCalculator.calculateCourseFinalScore(c.components);
     const grade = GradeCalculator.convertScore10(scoreCalc.finalScore10);
+    const comps = Array.isArray(c.components) ? c.components : [];
 
-    // Huy hiệu loại môn
-    let catBadge = 'badge-blue';
-    if (c.category === 'Cơ sở ngành') catBadge = 'badge-orange';
-    if (c.category === 'Chuyên ngành') catBadge = 'badge-green';
+    const fmtCompScore = (idx) => {
+      const cp = comps[idx];
+      if (!cp) return '<span class="score-dash">—</span>';
+      const hasVal = cp.score !== null && cp.score !== '' && cp.score !== undefined && !isNaN(Number(cp.score));
+      return hasVal
+        ? `<span class="score-cell" title="${escapeHtml(cp.name)} (${cp.weight_percent}%)">${Number(cp.score).toFixed(1)}</span>`
+        : `<span class="score-dash" title="${escapeHtml(cp.name)} (${cp.weight_percent}%): Chưa nhập">—</span>`;
+    };
+
+    // Ô điểm chữ kèm ô vuông màu chuẩn StudyTrack-E (■ A, ■ B+, ■ C+)
+    let letterHtml = '<span class="score-dash">—</span>';
+    if (scoreCalc.isComplete) {
+      let sqColor = '#10B981'; // A, A+
+      if (grade.letter === 'B+' || grade.letter === 'B') sqColor = '#0F1F38';
+      else if (grade.letter !== 'A+' && grade.letter !== 'A') sqColor = '#EF4444';
+      letterHtml = `
+        <span class="e-grade-cell" title="Hệ 4: ${grade.scale4.toFixed(1)}">
+          <i class="e-grade-sq" style="background:${sqColor}"></i>
+          <strong>${escapeHtml(grade.letter)}</strong>
+        </span>
+      `;
+    } else if (!scoreCalc.isValidWeight) {
+      letterHtml = `<span class="e-grade-cell" style="color:#EF4444;"><strong>!</strong></span>`;
+    }
+
+    // Trạng thái môn học chuẩn StudyTrack-E (● Đạt / ○ Đang học / ✕ Chưa đạt)
+    let statusHtml = '';
+    if (!scoreCalc.isValidWeight) {
+      statusHtml = `<span class="course-state course-state--fail">✕ Sai TS (${scoreCalc.totalWeight}%)</span>`;
+    } else if (!scoreCalc.isComplete) {
+      statusHtml = `<span class="course-state course-state--prog">○ Đang học</span>`;
+    } else if (scoreCalc.finalScore10 >= 4.0) {
+      statusHtml = `<span class="course-state course-state--pass">● Đạt</span>`;
+    } else {
+      statusHtml = `<span class="course-state course-state--fail">✕ Chưa đạt</span>`;
+    }
+
+    const rowHighlight = !scoreCalc.isComplete ? 'course-row--inprogress' : '';
+    const totalScoreColor = scoreCalc.isComplete && scoreCalc.finalScore10 < 7.0
+      ? 'color: #EF4444;'
+      : 'color: #0F1F38;';
 
     return `
-      <tr>
-        <td style="font-family: monospace; font-weight: 800; color: var(--primary);">
-          ${escapeHtml(c.course_code)}
-        </td>
+      <tr class="${rowHighlight}">
+        <td class="course-code-cell">${escapeHtml(c.course_code)}</td>
         <td>
-          <div style="font-weight: 700; color: var(--text-black);">${escapeHtml(c.course_name)}</div>
-          ${c.is_retake ? '<span class="badge badge-orange" style="margin-top: 4px;">Học lại</span>' : ''}
+          <div class="course-name-wrap">
+            <span class="course-name-text">${escapeHtml(c.course_name)}</span>
+            ${c.is_retake ? '<span class="badge badge-orange" style="font-size: 10px; padding: 2px 6px;">Học lại</span>' : ''}
+          </div>
         </td>
-        <td><span class="badge badge-gray">${escapeHtml(semName)}</span></td>
-        <td style="text-align: center; font-weight: 700;">${c.credits} TC</td>
-        <td><span class="badge ${catBadge}">${escapeHtml(c.category)}</span></td>
-        <td>
-          <button type="button" onclick="openComponentsModal('${c.id}')" class="btn btn-secondary btn-sm" style="font-size: 11.5px; padding: 4px 10px;">
-            ${(c.components || []).length} cột điểm (${scoreCalc.totalWeight}%)
-          </button>
+        <td style="color: #64748B; font-size: 12px;">${escapeHtml(c.category || 'Đại cương')}</td>
+        <td style="text-align: center; font-weight: 700; color: #0F1F38;">${c.credits}</td>
+        <td style="text-align: center; cursor: pointer;" onclick="openScoreModal('${c.id}')">${fmtCompScore(0)}</td>
+        <td style="text-align: center; cursor: pointer;" onclick="openScoreModal('${c.id}')">${fmtCompScore(1)}</td>
+        <td style="text-align: center; cursor: pointer;" onclick="openScoreModal('${c.id}')">${fmtCompScore(2)}</td>
+        <td style="text-align: center; font-weight: 800; font-size: 13.5px; ${totalScoreColor}">
+          ${scoreCalc.isComplete ? scoreCalc.finalScore10.toFixed(1) : '<span class="score-dash">—</span>'}
         </td>
-        <td style="text-align: center; font-weight: 800; font-size: 15px;">
-          ${scoreCalc.isComplete
-            ? scoreCalc.finalScore10.toFixed(1)
-            : (!scoreCalc.isValidWeight
-                ? '<span style="color: var(--error); font-size: 12px; font-weight: 700;">Sai trọng số</span>'
-                : '<span style="color: var(--text-gray); font-size: 12px; font-weight: 500;">Chưa đủ</span>')}
-        </td>
-        <td style="text-align: center;">
-          ${scoreCalc.isComplete
-            ? `<span class="badge ${grade.colorClass}">${grade.letter} (${grade.scale4.toFixed(1)})</span>`
-            : `<span class="badge ${!scoreCalc.isValidWeight ? 'badge-red' : 'badge-gray'}">${!scoreCalc.isValidWeight ? 'Lỗi TS' : '--'}</span>`}
-        </td>
+        <td>${letterHtml}</td>
+        <td>${statusHtml}</td>
         <td style="text-align: right; white-space: nowrap;">
           <div class="btn-action-group">
             <button type="button" onclick="openScoreModal('${c.id}')" class="btn-action btn-action--score" title="Nhập / Sửa điểm thành phần">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
               <span>Điểm</span>
             </button>
-            <button type="button" onclick="openEditCourseModal('${c.id}')" class="btn-action btn-action--edit" title="Chỉnh sửa thông tin môn học">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <button type="button" onclick="openComponentsModal('${c.id}')" class="btn-action btn-action--edit" title="Cấu hình trọng số (${scoreCalc.totalWeight}%)">
+              <span>${scoreCalc.totalWeight}%</span>
+            </button>
+            <button type="button" onclick="openEditCourseModal('${c.id}')" class="btn-action btn-action--edit" title="Sửa môn học">
               <span>Sửa</span>
             </button>
             <button type="button" onclick="openDeleteCourseModal('${c.id}')" class="btn-action btn-action--delete" title="Xóa môn học">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
               <span>Xóa</span>
             </button>
           </div>
@@ -221,6 +406,7 @@ function openCreateCourseModal() {
     return;
   }
 
+  initSemesterFilterOptions();
   document.getElementById('courseModalTitle').textContent = 'Thêm môn học mới';
   document.getElementById('courseIdInput').value = '';
   document.getElementById('courseCodeInput').value = '';
@@ -237,11 +423,11 @@ function openCreateCourseModal() {
   openAppModal('courseModal');
 }
 
-// === SỬA VÀ XÓA MÔN HỌC CASCADE (Task: T0694D0 | PB-12, PB-46 / BR-18) ===
 function openEditCourseModal(courseId) {
   const course = StorageService.getCourseById(courseId);
   if (!course) return;
 
+  initSemesterFilterOptions();
   document.getElementById('courseModalTitle').textContent = 'Chỉnh sửa môn học';
   document.getElementById('courseIdInput').value = course.id;
   document.getElementById('courseCodeInput').value = course.course_code;
@@ -269,7 +455,6 @@ function handleSaveCourse(e) {
     return;
   }
 
-  // Tiêu chí PB-10: Tín chỉ lớn hơn 0
   if (isNaN(credits) || credits <= 0) {
     showToast('Số tín chỉ phải lớn hơn 0!', true);
     return;
@@ -286,6 +471,7 @@ function handleSaveCourse(e) {
   });
 
   closeAppModal('courseModal');
+  renderSemesterTabs();
   renderCourses();
   showToast(id ? 'Cập nhật môn học thành công!' : 'Thêm môn học mới thành công!');
 }
@@ -310,6 +496,7 @@ function executeDeleteCourse() {
   StorageService.deleteCourseCascade(currentDeletingCourseId);
   currentDeletingCourseId = null;
   closeAppModal('deleteCourseModal');
+  renderSemesterTabs();
   renderCourses();
   showToast('Đã xóa môn học và toàn bộ điểm thành phần liên quan!');
 }
@@ -409,6 +596,7 @@ function handleSaveComponents() {
 
   StorageService.saveCourseComponents(currentConfiguringCourse.id, comps);
   closeAppModal('componentsModal');
+  renderSemesterTabs();
   renderCourses();
   showToast('Lưu cấu hình thành phần điểm thành công!');
 }
@@ -427,21 +615,21 @@ function openScoreModal(courseId) {
   }
 
   document.getElementById('scoreCourseTitle').textContent = `${currentScoreCourse.course_code} - ${currentScoreCourse.course_name}`;
-  
+
   const container = document.getElementById('scoreInputsContainer');
   container.innerHTML = comps.map(comp => `
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: var(--bg-main); padding: 10px 14px; border-radius: 16px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: var(--bg-main); padding: 10px 14px;">
       <div>
         <div style="font-weight: 700; color: var(--text-black);">${escapeHtml(comp.name)}</div>
         <div style="font-size: 11px; color: var(--text-gray); font-weight: 600;">Trọng số: ${comp.weight_percent}%</div>
       </div>
       <div style="width: 110px;">
-        <input type="number" step="0.1" min="0" max="10" 
-               class="modal-input score-input-val" 
-               data-comp-id="${comp.id}" 
+        <input type="number" step="0.1" min="0" max="10"
+               class="modal-input score-input-val"
+               data-comp-id="${comp.id}"
                value="${comp.score !== null && comp.score !== undefined ? comp.score : ''}"
                oninput="calculatePreviewScores()"
-               placeholder="0.0 - 10" 
+               placeholder="0.0 - 10"
                style="text-align: center; font-weight: 800; font-size: 16px; height: 42px;">
       </div>
     </div>
@@ -463,9 +651,12 @@ function calculatePreviewScores() {
   const calc = GradeCalculator.calculateCourseFinalScore(dummyComps);
   const grade = GradeCalculator.convertScore10(calc.finalScore10);
 
-  document.getElementById('scorePreview10').textContent = calc.isComplete ? calc.finalScore10 : '--';
-  document.getElementById('scorePreviewLetter').textContent = calc.isComplete ? grade.letter : '--';
-  document.getElementById('scorePreview4').textContent = calc.isComplete ? grade.scale4.toFixed(1) : '--';
+  const el10 = document.getElementById('scorePreview10');
+  const elLet = document.getElementById('scorePreviewLetter');
+  const el4 = document.getElementById('scorePreview4');
+  if (el10) el10.textContent = calc.isComplete ? calc.finalScore10 : '--';
+  if (elLet) elLet.textContent = calc.isComplete ? grade.letter : '--';
+  if (el4) el4.textContent = calc.isComplete ? grade.scale4.toFixed(1) : '--';
 }
 
 function handleSaveScores() {
@@ -495,11 +686,12 @@ function handleSaveScores() {
 
   StorageService.saveCourseScores(currentScoreCourse.id, scoreMap);
   closeAppModal('scoreModal');
+  renderSemesterTabs();
   renderCourses();
   showToast('Đã lưu điểm thành phần thành công!');
 }
 
 function escapeHtml(str) {
   if (!str) return '';
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }

@@ -126,6 +126,7 @@ function handleSaveGoal(e) {
   }
 
   renderGoalSection();
+  if (typeof refreshSidebarGoalWidget === 'function') refreshSidebarGoalWidget();
   showToast(isUpdate ? 'Đã cập nhật mục tiêu GPA!' : 'Đã tạo mục tiêu GPA!');
 }
 
@@ -133,6 +134,7 @@ function handleDeleteGoal() {
   if (!confirm('Bạn có chắc chắn muốn xóa mục tiêu GPA?')) return;
   StorageService.deleteGoal();
   renderGoalSection();
+  if (typeof refreshSidebarGoalWidget === 'function') refreshSidebarGoalWidget();
   showToast('Đã xóa mục tiêu GPA!');
 }
 

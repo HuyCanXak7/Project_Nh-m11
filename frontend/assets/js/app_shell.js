@@ -1,6 +1,7 @@
 /*
- * Khung trang có sidebar (StudyTrack layout): header, sidebar, menu tài khoản.
- * Dùng chung cho TOÀN BỘ các trang trong ứng dụng theo thiết kế Figma.
+ * Khung trang StudyTrack-E (Editorial Swiss Grid Layout - Figma node-id=0-1 / 13-5):
+ * Thanh điều hướng ngang đánh số (01 Tổng quan, 02 Môn học, 03 Học kỳ, 04 Thống kê, 05 Mục tiêu, 06 Nhập điểm),
+ * cụm ngày tháng + tìm kiếm + thông báo + menu tài khoản ở góc phải trên cùng.
  */
 
 const $ = (id) => document.getElementById(id);
@@ -20,46 +21,151 @@ function escapeHtml(str) {
     return div.innerHTML;
 }
 
-/** Hiển thị chênh lệch: ▲ +0.12 (xanh) hoặc ▼ -0.12 (đỏ) */
+/** Hiển thị chênh lệch chuẩn Figma StudyTrack-E: +0.04 hoặc -0.04 */
 function trendHtml(delta, digits = 2, unit = '') {
     if (delta === null || delta === undefined) return '';
     const up = delta >= 0;
     const sign = up ? '+' : '-';
     const value = Math.abs(delta).toFixed(digits);
-    return `<span class="trend trend--${up ? 'up' : 'down'}">${up ? '▲' : '▼'} ${sign}${value}${unit}</span>`;
+    return `<span class="trend trend--${up ? 'up' : 'down'}">${sign}${value}${unit}</span>`;
 }
+
+function formatTopbarDate() {
+    const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+    const now = new Date();
+    const dd = String(now.getDate()).padStart(2, '0');
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const yyyy = now.getFullYear();
+    return `${days[now.getDay()]}, ${dd}.${mm}.${yyyy}`;
+}
+
+/* ===== Chuẩn hóa Thanh Topbar Ngang theo Figma StudyTrack-E ===== */
+function upgradeSidebarFigma() {
+    const sidebar = $('sidebar');
+    if (!sidebar) return;
+
+    // 1. Logo 2 ô vuông (Navy + Mint) + StudyTrack
+    const logo = sidebar.querySelector('.sidebar__logo');
+    if (logo) {
+        logo.innerHTML = `
+            <span class="sidebar__logo-squares" aria-hidden="true">
+                <i class="sidebar__logo-sq sidebar__logo-sq--navy"></i>
+                <i class="sidebar__logo-sq sidebar__logo-sq--mint"></i>
+            </span>
+            <span>StudyTrack</span>
+        `;
+    }
+
+    // 2. Menu ngang đánh số chuẩn Figma
+    const nav = sidebar.querySelector('.sidebar__nav');
+    if (nav) {
+        nav.innerHTML = `
+            <a href="dashboard.html" class="nav-item"><span class="nav-item__num">01</span><span>Tổng quan</span></a>
+            <a href="courses.html" class="nav-item"><span class="nav-item__num">02</span><span>Môn học</span></a>
+            <a href="semesters.html" class="nav-item"><span class="nav-item__num">03</span><span>Học kỳ</span></a>
+            <a href="statistics.html" class="nav-item"><span class="nav-item__num">04</span><span>Thống kê</span></a>
+            <a href="goals.html" class="nav-item"><span class="nav-item__num">05</span><span>Mục tiêu</span></a>
+            <a href="import.html" class="nav-item"><span class="nav-item__num">06</span><span>Nhập điểm</span></a>
+            <a href="transcript.html" class="nav-item"><span class="nav-item__num">07</span><span>Bảng điểm</span></a>
+        `;
+    }
+
+    // 3. Cụm tiện ích bên phải thanh Topbar (Ngày, Tìm kiếm, Chuông, User Menu)
+    let rightBox = sidebar.querySelector('.topbar-right');
+    if (!rightBox) {
+        rightBox = document.createElement('div');
+        rightBox.className = 'topbar-right';
+        sidebar.appendChild(rightBox);
+    }
+
+    const userMenu = $('userMenu');
+    // Ẩn nút Khôi phục / Dữ liệu mẫu và chuông thông báo thừa dưới header để header khớp 100% Figma
+    document.querySelectorAll('.dash-header__actions > .icon-btn, .dash-header__actions > .btn-reset').forEach(btn => {
+        btn.style.display = 'none';
+    });
+
+    rightBox.innerHTML = `
+        <span class="topbar-date">${formatTopbarDate()}</span>
+        <button type="button" class="topbar-icon-btn" title="Tìm kiếm môn học" onclick="window.location.href='courses.html'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7.5"/><line x1="20" y1="20" x2="16.2" y2="16.2"/></svg>
+        </button>
+        <button type="button" class="topbar-icon-btn" title="Thông báo" onclick="showToast('Không có thông báo mới')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M6 17V11a6 6 0 0 1 12 0v6l2 2H4Z"/><path d="M10 21a2.5 2.5 0 0 0 4 0"/></svg>
+            <span class="topbar-icon-btn__dot"></span>
+        </button>
+        <div class="topbar-user-wrap" id="topbarUserWrap"></div>
+    `;
+
+    const wrap = rightBox.querySelector('#topbarUserWrap');
+    if (wrap && userMenu) {
+        wrap.appendChild(userMenu);
+        // Bổ sung liên kết nhanh trong menu tài khoản
+        const menuList = userMenu.querySelector('#userMenuList');
+        if (menuList && !menuList.dataset.upgraded) {
+            menuList.dataset.upgraded = 'true';
+            menuList.innerHTML = `
+                <li role="none">
+                    <a href="profile.html" class="user-menu__item" role="menuitem">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+                        Hồ sơ cá nhân
+                    </a>
+                </li>
+                <li role="none">
+                    <a href="schedule.html" class="user-menu__item" role="menuitem">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+                        Thời khóa biểu
+                    </a>
+                </li>
+                <li role="none">
+                    <a href="transcript.html" class="user-menu__item" role="menuitem">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        Bảng điểm & In A4
+                    </a>
+                </li>
+                <li role="none">
+                    <button type="button" class="user-menu__item" onclick="handleResetData()" role="menuitem">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+                        Khôi phục dữ liệu mẫu
+                    </button>
+                </li>
+                <li role="none">
+                    <button type="button" class="user-menu__item user-menu__item--danger" id="logoutBtn" role="menuitem">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                        Đăng xuất
+                    </button>
+                </li>
+            `;
+        }
+    }
+}
+
+function refreshSidebarGoalWidget() {}
 
 /* ===== Header: tên + avatar người dùng đang đăng nhập ===== */
 function renderUser(user) {
     if (!user) return;
-    const name = user.fullName || user.name || user.email || 'Sinh viên';
-    
-    // Trang chủ có lời chào "Xin chào, ...", các trang khác thì không
+    const student = (typeof StorageService !== 'undefined') ? StorageService.getStudent() : null;
+    const name = user.fullName || user.name || student?.name || user.email || 'Nguyễn Văn A';
+
     if ($('userName')) $('userName').textContent = name;
     if ($('userChipName')) $('userChipName').textContent = name;
-    
-    // Ảnh đại diện: nếu có upload ảnh thì hiển thị ảnh tròn, nếu chưa có thì hiển thị chữ cái viết tắt
+
     const avatarEl = $('userAvatar');
     if (avatarEl) {
-        let avatarUrl = user.avatar_url;
-        if (!avatarUrl && typeof StorageService !== 'undefined') {
-            const student = StorageService.getStudent();
-            if (student && student.avatar_url) avatarUrl = student.avatar_url;
-        }
-        
+        let avatarUrl = user.avatar_url || student?.avatar_url;
         if (avatarUrl) {
-            avatarEl.innerHTML = `<img src="${avatarUrl}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+            avatarEl.innerHTML = `<img src="${avatarUrl}" alt="Avatar">`;
         } else {
             const parts = name.trim().split(/\s+/).filter(Boolean);
-            const initials = parts.length > 1 
-                ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() 
-                : (parts[0] ? parts[0].slice(0, 2).toUpperCase() : 'SV');
+            const initials = parts.length > 0
+                ? parts[parts.length - 1][0].toUpperCase()
+                : 'A';
             avatarEl.textContent = initials;
         }
     }
 }
 
-/* ===== Tự động đánh dấu mục đang xem trên thanh điều hướng sidebar ===== */
+/* ===== Tự động đánh dấu mục đang xem trên thanh điều hướng ===== */
 function highlightActiveSidebar() {
     const path = window.location.pathname.toLowerCase();
     const items = document.querySelectorAll('.sidebar__nav .nav-item');
@@ -75,7 +181,7 @@ function highlightActiveSidebar() {
     });
 }
 
-/* ===== Sidebar trên mobile ===== */
+/* ===== Menu trên mobile ===== */
 function setupSidebar() {
     const sidebar = $('sidebar');
     const overlay = $('sidebarOverlay');
@@ -94,7 +200,7 @@ function setupSidebar() {
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
 }
 
-/* ===== Menu tài khoản (Xem thông tin / Đăng xuất) ===== */
+/* ===== Menu tài khoản ===== */
 function setupUserMenu() {
     const menu = $('userMenu');
     const toggle = $('userMenuToggle');
@@ -113,7 +219,6 @@ function setupUserMenu() {
         setOpen(list.hidden);
     });
 
-    // Click ra ngoài menu thì đóng
     document.addEventListener('click', (e) => {
         if (!menu.contains(e.target)) setOpen(false);
     });
@@ -131,7 +236,7 @@ function setupUserMenu() {
     }
 }
 
-/* ===== Bảng xác nhận tùy biến (thay cho confirm() của trình duyệt) ===== */
+/* ===== Bảng xác nhận tùy biến ===== */
 function showConfirm({
     type = 'confirm',
     title = 'Xác nhận',
@@ -142,7 +247,7 @@ function showConfirm({
     icon,
     onConfirm,
 } = {}) {
-    document.querySelector('.modal-overlay')?.remove();
+    document.querySelector('.modal-overlay:not([id])')?.remove();
 
     const defaultIcon = danger
         ? '<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/>'
@@ -215,22 +320,22 @@ function handleLogout() {
     });
 }
 
-/* ===== Khôi phục dữ liệu mẫu ban đầu ===== */
+/* ===== Nạp dữ liệu mẫu ===== */
 function handleResetData() {
     showConfirm({
-        danger: true,
-        title: "Khôi phục dữ liệu mẫu",
-        message: "Bạn có chắc là muốn khôi phục dữ liệu về ban đầu?",
-        confirmText: "Khôi phục",
-        cancelText: "Hủy",
+        danger: false,
+        title: 'Khôi phục dữ liệu mẫu',
+        message: 'Bạn có muốn khôi phục bộ dữ liệu mẫu 4 học kỳ chuẩn thiết kế để trải nghiệm đầy đủ biểu đồ và bảng điểm không?',
+        confirmText: 'Khôi phục',
+        cancelText: 'Hủy',
         onConfirm: () => {
             if (typeof StorageService !== 'undefined') {
                 StorageService.resetToDefault();
             }
-            showToast('Đã khôi phục dữ liệu về ban đầu thành công!');
+            showToast('Đã khôi phục dữ liệu mẫu thành công!');
             setTimeout(() => {
                 window.location.reload();
-            }, 1200);
+            }, 900);
         }
     });
 }
@@ -256,7 +361,6 @@ function closeAppModal(modalId) {
     }, 200);
 }
 
-// Đóng modal khi bấm vào vùng phủ (backdrop) hoặc phím Escape
 document.addEventListener('click', (e) => {
     if (e.target && e.target.classList && e.target.classList.contains('modal-overlay')) {
         if (e.target.id) {
@@ -282,16 +386,16 @@ function showToast(msg, isError = false) {
         toast.id = 'appToast';
         toast.style.cssText = `
             position: fixed;
-            top: 24px;
+            top: 64px;
             right: 24px;
             z-index: 9999;
-            background: #1E293B;
+            background: #0F1F38;
             color: #fff;
-            padding: 12px 20px;
-            border-radius: 9999px;
-            font-size: 14px;
-            font-weight: 600;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            padding: 11px 18px;
+            border-radius: 0;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: 0 10px 25px rgba(15, 31, 56, 0.22);
             display: flex;
             align-items: center;
             gap: 10px;
@@ -303,8 +407,8 @@ function showToast(msg, isError = false) {
         document.body.appendChild(toast);
     }
 
-    toast.style.background = isError ? '#DC2626' : '#2563EB';
-    toast.innerHTML = isError ? `${escapeHtml(msg)}` : `${escapeHtml(msg)}`;
+    toast.style.background = isError ? '#DC2626' : '#0F1F38';
+    toast.textContent = msg;
     toast.style.opacity = '1';
     toast.style.transform = 'translateY(0)';
 
@@ -314,26 +418,29 @@ function showToast(msg, isError = false) {
     }, 2800);
 }
 
-/**
- * Gắn header, sidebar, menu tài khoản; gọi một lần ở đầu mỗi trang.
- */
 function initAppShell() {
+    if (typeof StorageService !== 'undefined' && typeof StorageService.init === 'function') {
+        StorageService.init();
+    }
+
+    upgradeSidebarFigma();
+
     let session = typeof getSession === 'function' ? getSession() : null;
     let user = session?.user;
-    
+
     if (!user && typeof StorageService !== 'undefined') {
         const student = StorageService.getStudent();
         if (student && (student.name || student.email)) {
             user = {
-                fullName: student.name || 'Sinh viên',
+                fullName: student.name || 'Nguyễn Văn A',
                 email: student.email || '',
                 avatar_url: student.avatar_url || ''
             };
         }
     }
-    
+
     if (!user) {
-        user = { fullName: 'Sinh viên', email: '' };
+        user = { fullName: 'Nguyễn Văn A', email: '' };
     }
 
     renderUser(user);
@@ -341,14 +448,12 @@ function initAppShell() {
     setupUserMenu();
     highlightActiveSidebar();
 
-    // Đồng bộ nếu có authApi
     if (session && typeof authApi !== 'undefined' && authApi.me) {
         authApi.me().then(renderUser).catch(() => {});
     }
     return true;
 }
 
-// Tự động khởi tạo khi DOM sẵn sàng
 document.addEventListener('DOMContentLoaded', () => {
     initAppShell();
 });

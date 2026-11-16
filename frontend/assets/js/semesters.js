@@ -208,6 +208,7 @@ function executeDeleteSemester() {
   currentDeletingSemId = null;
   closeAppModal('deleteConfirmModal');
   renderSemesters();
+  if (typeof refreshSidebarGoalWidget === 'function') refreshSidebarGoalWidget();
   showToast('Đã xóa học kỳ và toàn bộ dữ liệu môn học liên quan!');
 }
 

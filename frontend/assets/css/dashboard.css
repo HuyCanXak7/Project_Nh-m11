@@ -1,267 +1,442 @@
-/* Phần riêng của trang chủ. Khung chung (sidebar, header, card...) nằm trong app_layout.css */
+/* ===== Giao diện Tổng quan chuẩn Figma StudyTrack-E (StudyTrack-E-03-tong-quan 1) ===== */
 
-/* ===== Hàng bố cục ===== */
 .dash-row {
     display: grid;
-    gap: 17px;
+    gap: 0;
+    border-left: 1px solid var(--e-border);
+    border-right: 1px solid var(--e-border);
+    border-bottom: 1px solid var(--e-border);
 }
 
-.dash-row--chart  { grid-template-columns: minmax(0, 746fr) minmax(0, 396fr); }
-.dash-row--bottom { grid-template-columns: minmax(0, 556fr) minmax(0, 587fr); gap: 16px; }
+.dash-row--hero {
+    grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+}
 
+.dash-row--bottom {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
 
-/* ===== Biểu đồ ===== */
-.chart {
+.dash-row > *:first-child {
+    border-right: 1px solid var(--e-border);
+}
+
+/* ===== Ô Navy GPA Tích lũy Hệ 4 ===== */
+.hero-gpa-card {
+    background: var(--e-navy);
+    color: #FFFFFF;
+    padding: 26px 28px 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 268px;
+}
+
+.hero-gpa-card__kicker {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #94A3B8;
+}
+
+.hero-gpa-card__value {
+    font-size: 88px;
+    font-weight: 800;
+    line-height: 0.94;
+    letter-spacing: -0.035em;
+    color: #FFFFFF;
+    margin: 10px 0 14px;
+}
+
+.hero-gpa-card__meta-line {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: 12.5px;
+    color: #94A3B8;
+}
+
+.hero-gpa-card__meta-line strong,
+.hero-gpa-card__meta-line .trend {
+    color: #FFFFFF !important;
+    font-weight: 700;
+}
+
+/* Thước tiến độ 0.0 -> 4.0 dưới đáy ô Navy */
+.hero-gpa-card__progress {
+    margin-top: 26px;
+    padding-top: 12px;
+}
+
+.hero-gpa-card__track {
     position: relative;
-    width: 100%;
-    height: 220px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.2);
 }
 
-.chart svg {
-    display: block;
-    width: 100%;
+.hero-gpa-card__fill {
     height: 100%;
-    overflow: visible;
+    background: #FFFFFF;
+    transition: width 0.35s ease;
 }
 
-.chart__grid   { stroke: var(--dash-border); stroke-width: 1; }
-.chart__axis   { stroke: #D5DBE6; stroke-width: 1; }
-.chart__label  { font-size: 12.5px; fill: var(--dash-text-muted); font-family: var(--font-main); }
-.chart__line   { fill: none; stroke: var(--dash-primary); stroke-width: 2.5; }
-.chart__area   { fill: url(#chartArea); }
-
-.chart__point {
-    fill: var(--dash-primary);
-    stroke: var(--white);
-    stroke-width: 2;
-    cursor: pointer;
-    transition: r 0.15s;
-}
-
-.chart__point:hover,
-.chart__point.is-active { r: 6.5; }
-
-.chart__hit { fill: transparent; cursor: pointer; }
-
-.chart__tooltip {
+.hero-gpa-card__marker {
     position: absolute;
-    transform: translate(-50%, calc(-100% - 12px));
-    padding: 4px 9px;
-    border-radius: 7px;
-    background: var(--dash-primary);
-    color: var(--white);
-    font-size: 13px;
-    font-weight: 600;
+    bottom: -3px;
+    transform: translateX(-50%);
+    font-size: 10px;
+    font-weight: 700;
+    color: #CBD5E1;
+    padding-bottom: 8px;
+    line-height: 1;
     white-space: nowrap;
-    pointer-events: none;
 }
 
-.chart__tooltip::after {
+.hero-gpa-card__marker::after {
     content: '';
     position: absolute;
     left: 50%;
-    bottom: -6px;
+    bottom: 0;
     transform: translateX(-50%);
-    border: 6px solid transparent;
-    border-bottom: 0;
-    border-top-color: var(--dash-primary);
+    width: 1.5px;
+    height: 11px;
+    background: var(--e-mint);
+}
+
+.hero-gpa-card__ticks {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #64748B;
+}
+
+/* ===== Biểu đồ GPA theo học kỳ (HTML/CSS Bars + SVG Line - Không bao giờ bị méo) ===== */
+.chart-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.dash-chart-legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--dash-text-muted);
+}
+
+.dash-chart-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dash-chart-legend .sq {
+    width: 8px;
+    height: 8px;
+    display: inline-block;
+}
+
+.dash-chart-legend .sq--past   { background: var(--e-slate-bar); }
+.dash-chart-legend .sq--latest { background: var(--e-mint); }
+.dash-chart-legend .sq--cum    { background: var(--e-navy); }
+
+.chart {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+.e-html-chart {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    grid-template-rows: 1fr 24px;
+    column-gap: 10px;
+}
+
+.e-html-chart__yaxis {
+    grid-column: 1;
+    grid-row: 1;
+    position: relative;
+    height: 100%;
+}
+
+.e-html-chart__ylabel {
+    position: absolute;
+    left: 0;
+    transform: translateY(50%);
+    font-size: 10.5px;
+    font-weight: 500;
+    color: #94A3B8;
+    line-height: 1;
+}
+
+.e-html-chart__plot {
+    grid-column: 2;
+    grid-row: 1;
+    position: relative;
+    height: 100%;
+    border-bottom: 1px solid #CBD5E1;
+}
+
+.e-html-chart__gridline {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 0;
+    border-top: 1px solid #F1F5F9;
+    pointer-events: none;
+}
+
+.e-html-chart__cols {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+}
+
+.e-html-chart__col {
+    position: relative;
+    height: 100%;
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.e-html-chart__bar {
+    width: 44px;
+    max-width: 68%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 7px;
+    background: var(--e-slate-bar);
+    transition: height 0.3s ease;
+}
+
+.e-html-chart__bar--latest {
+    background: var(--e-mint);
+}
+
+.e-html-chart__bar--planned {
+    background: transparent;
+    border: 1px dashed #CBD5E1;
+    border-bottom: none;
+}
+
+.e-html-chart__bar-val {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--e-navy);
+    line-height: 1;
+}
+
+.e-html-chart__bar--planned .e-html-chart__bar-val {
+    font-size: 10px;
+    font-weight: 600;
+    color: #94A3B8;
+}
+
+.e-html-chart__dot {
+    position: absolute;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--e-navy);
+    transform: translate(-50%, 50%);
+    z-index: 4;
+}
+
+.e-html-chart__svg-line {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 3;
+    overflow: visible;
+}
+
+.e-html-chart__xaxis {
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+}
+
+.e-html-chart__xlabel {
+    flex: 1;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 500;
+    color: #64748B;
+    white-space: nowrap;
 }
 
 .chart__empty {
     height: 100%;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 15px;
-    color: var(--dash-text-faint);
-}
-
-/* ===== Banner ===== */
-.banner {
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    min-height: 270px;
-    padding: 28px 22px;
-    border-radius: var(--radius-lg);
-    background: linear-gradient(135deg, #3B82F6, #6FA8FF);
-    color: var(--white);
-}
-
-.banner::after {
-    content: '';
-    position: absolute;
-    right: -40px;
-    bottom: -60px;
-    width: 260px;
-    height: 110px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.12);
-}
-
-.banner__content { position: relative; z-index: 1; max-width: calc(100% - 140px); min-width: 190px; }
-
-.banner__title {
-    font-size: 24px;
-    font-weight: 800;
-    white-space: nowrap;
-}
-
-.banner__text {
-    margin-top: 12px;
-    font-size: 16px;
-    line-height: 1.5;
-    opacity: 0.92;
-}
-
-.banner__btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 48px;
-    margin-top: 28px;
-    padding: 0 24px;
-    border-radius: var(--radius-full);
-    background: var(--white);
-    color: var(--dash-text);
-    font-size: 15px;
-    font-weight: 600;
-    white-space: nowrap;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.banner__btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
-}
-
-.banner__trophy {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-58%);
-    width: 132px;
-    height: 132px;
-}
-
-/* ===== Hoạt động gần đây ===== */
-.activity-list { display: flex; flex-direction: column; gap: 16px; }
-
-.activity {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
-
-.activity__icon {
-    width: 26px;
-    height: 26px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-}
-
-.activity__icon svg { width: 14px; height: 14px; }
-
-.activity__icon--grade  { background: #DFF4EA; color: var(--success); }
-.activity__icon--course { background: #E3EDFD; color: var(--dash-primary); }
-.activity__icon--goal   { background: #ECE7FD; color: #7C4DEB; }
-
-.activity__text {
-    flex: 1;
-    min-width: 0;
-    font-size: 15px;
-    color: #1F2937;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.activity__time {
-    flex-shrink: 0;
     font-size: 13px;
     color: var(--dash-text-faint);
 }
 
-/* ===== Lịch học sắp tới ===== */
-.schedule-card::after {
-    content: '';
-    position: absolute;
-    right: -30px;
-    bottom: -40px;
-    width: 230px;
-    height: 130px;
-    border-radius: 60% 40% 0 0;
-    background: #EAF1FD;
+/* Thanh tiến độ mỏng trong ô Tín chỉ tích lũy */
+.stat-thin-bar {
+    height: 4px;
+    background: #E2E8F0;
+    width: 100%;
+    margin-top: 10px;
 }
 
-.schedule-list {
-    position: relative;
-    z-index: 1;
+.stat-thin-bar span {
+    display: block;
+    height: 100%;
+    background: var(--e-navy);
+    transition: width 0.35s ease;
+}
+
+/* ===== Bảng Hôm nay & Điểm mới cập nhật (Row 3) ===== */
+.schedule-list,
+.activity-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    max-width: calc(100% - 140px);
+}
+
+.lesson,
+.activity {
+    display: grid;
+    align-items: center;
+    padding: 11px 0;
+    border-bottom: 1px solid #F1F5F9;
+    font-size: 12.5px;
+}
+
+.lesson:last-child,
+.activity:last-child {
+    border-bottom: none;
 }
 
 .lesson {
-    display: flex;
+    grid-template-columns: 56px 1fr 78px 86px;
+    gap: 10px;
+}
+
+.lesson__time {
+    font-weight: 700;
+    color: var(--e-navy);
+    font-variant-numeric: tabular-nums;
+}
+
+.lesson__name {
+    font-weight: 700;
+    color: var(--e-navy);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.lesson__room {
+    color: #64748B;
+    font-size: 12px;
+}
+
+.lesson__tag {
+    justify-self: end;
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748B;
+}
+
+.lesson__tag--live {
+    background: var(--e-mint);
+    color: var(--e-navy);
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* Điểm mới cập nhật */
+.activity {
+    grid-template-columns: 1fr 48px 48px 72px;
+    gap: 10px;
+}
+
+.activity__name {
+    font-weight: 700;
+    color: var(--e-navy);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.activity__score {
+    font-weight: 800;
+    color: var(--e-navy);
+    text-align: right;
+}
+
+.activity__score--low {
+    color: var(--e-coral);
+}
+
+.activity__grade {
+    display: inline-flex;
     align-items: center;
-    gap: 18px;
+    gap: 5px;
+    font-weight: 800;
+    font-size: 12px;
+    color: var(--e-navy);
 }
 
-.lesson__date {
-    width: 60px;
-    height: 50px;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    background: #F3F6FB;
-    font-size: 14px;
-    line-height: 1.4;
+.activity__grade-sq {
+    width: 7px;
+    height: 7px;
+    display: inline-block;
 }
 
-.lesson__bar {
-    width: 3px;
-    height: 40px;
-    flex-shrink: 0;
-    border-radius: 2px;
-}
-
-.lesson__name { font-size: 15px; color: var(--dash-text); }
-.lesson__time { margin-top: 2px; font-size: 13.5px; color: var(--dash-text-muted); }
-
-.schedule-card__books {
-    position: absolute;
-    right: 24px;
-    bottom: 12px;
-    z-index: 1;
-    width: 120px;
-    height: 70px;
+.activity__time {
+    text-align: right;
+    color: #94A3B8;
+    font-size: 11.5px;
 }
 
 /* ===== Responsive ===== */
-@media (max-width: 1080px) {
-    .dash-row--chart,
-    .dash-row--bottom { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 1024px) {
+    .dash-row--hero,
+    .dash-row--bottom {
+        grid-template-columns: 1fr;
+    }
+    .dash-row > *:first-child {
+        border-right: none;
+        border-bottom: 1px solid var(--e-border);
+    }
 }
 
 @media (max-width: 600px) {
-    .banner { min-height: 0; }
-    .banner__content { max-width: calc(100% - 96px); min-width: 0; }
-    .banner__trophy { width: 90px; height: 90px; right: 10px; top: 28px; transform: none; }
-
-    .activity { flex-wrap: wrap; row-gap: 2px; }
-    .activity__text { white-space: normal; }
-    .activity__time { flex-basis: 100%; padding-left: 40px; }
-
-    .schedule-list { max-width: 100%; }
-    .schedule-card__books,
-    .schedule-card::after { display: none; }
+    .hero-gpa-card { padding: 20px 18px; min-height: 0; }
+    .hero-gpa-card__value { font-size: 56px; }
+    .lesson { grid-template-columns: 48px 1fr auto; }
+    .lesson__room { display: none; }
+    .activity { grid-template-columns: 1fr auto auto; }
+    .activity__time { display: none; }
 }
