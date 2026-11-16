@@ -2,6 +2,8 @@
 
 Stack: Nginx phục vụ FE + proxy API/Swagger, FastAPI, MySQL 8 với volume bền vững. Chỉ Nginx mở cổng host; BE/DB ở mạng Docker nội bộ. Dùng host Docker có sẵn hoặc VM gói miễn phí do nhóm cấp. Cấu hình này không tự tạo tài khoản hay đăng ký gói hosting.
 
+Đã thiết lập trên GitHub: nhánh `develop`, yêu cầu 1 approval và checks `backend/frontend/mysql/containers`, environment `staging` chỉ nhận protected branches. [PR #22](https://github.com/HuyCanXak7/Project_Nh-m11/pull/22) và [CI xanh kiểm tra cả stack Docker/MySQL](https://github.com/HuyCanXak7/Project_Nh-m11/actions/runs/43921309976). Chưa có host/URL/SSH staging; CI runner tạm không phải môi trường staging public.
+
 ## Chuẩn bị một lần trên host
 
 Yêu cầu Docker Engine và Compose v2 hỗ trợ `up --wait`; SSH bằng khóa. Tạo `~/nhom11-staging/.env` từ `.env.example`, điền secret thật. `DATABASE_URL` phải trỏ tới `db:3306`, cùng user/database/password trong `.env` (URL-encode mật khẩu trong URL). Không upload `.env` lên GitHub.
@@ -21,9 +23,9 @@ Seed cần đặt hai biến SEED_* trong `.env`. Không dùng mật khẩu loca
 
 Workflow `Project checks` chạy trên push/PR: Ruff và test BE, validate OpenAPI + payload ví dụ, ESLint + kiểm tra cú pháp/test FE, test thống kê trên MySQL 8 và build/chạy smoke test stack FE+BE+DB bằng Docker Compose trên runner tạm. Deploy chỉ chạy sau **tất cả** job này thành công, với push vào `develop`; không deploy code PR.
 
-1. Tạo nhánh `develop` từ nhánh tích hợp được nhóm thống nhất; hiện remote chưa có `develop` tại thời điểm kiểm tra. Không lấy nhánh cũ bỏ qua các thay đổi cần tích hợp.
+1. Nhánh `develop` đã tạo từ main hiện tại (`c6d1b31`), PR đưa toàn bộ thay đổi BE Huy trên nền code mới nhất vào nhánh này. Khi dựng repo khác, tạo develop từ nhánh tích hợp được nhóm thống nhất.
 2. Repo Settings → Rules/Branches: bảo vệ `develop`, bắt buộc pull request, ít nhất **1 approval**, dismiss stale approvals, required checks `backend`, `frontend`, `mysql`, `containers`; tắt force push/deletion và bypass nếu quy trình nhóm yêu cầu. Tài liệu/PR template không tự cưỡng chế các quy tắc này; cần quyền admin thiết lập thực tế.
-3. Tạo Environment **staging**, giới hạn deployment branch `develop`.
+3. Environment **staging** đã tạo, policy protected branches; hiện develop là nhánh được bảo vệ. Workflow còn kiểm tra chính xác push vào develop. Nếu repo có thêm protected branches, có thể đổi environment thành custom branch policy chỉ develop để giới hạn chặt hơn.
 4. Environment secrets: `STAGING_SSH_KEY` (private key deploy), `STAGING_KNOWN_HOSTS` (host key đã kiểm chứng ngoài luồng).
 5. Environment variables: `STAGING_SSH_TARGET=user@host`, `STAGING_URL=https://...` (base URL, không có `/api/v1` hay `/pages`). Host phải được GitHub runner truy cập được. Host key phải khớp cổng SSH mặc định 22.
 6. Merge PR đã review vào develop. Workflow gửi đúng commit đã qua CI, không gửi `.env`; chạy migration và chờ FE/BE/DB healthy. Bước cuối kiểm tra cả FE và `/api/v1/health` qua URL public.

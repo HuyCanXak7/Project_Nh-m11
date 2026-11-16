@@ -5,6 +5,8 @@ Ngày chuẩn bị: 17/11/2026 (Asia/Saigon). Người phụ trách BE: Nguyễn
 File nộp: `docs/api/openapi.json` (OpenAPI 3.0, `info.version=1.1.0`).
 Bản v1 được giữ tại `docs/api/openapi-v1.json` để so sánh. Swagger UI: `/docs`; tải hợp đồng được phục vụ tại `/openapi.json`.
 
+Hợp đồng và changelog đã xuất bản trong [PR #22](https://github.com/HuyCanXak7/Project_Nh-m11/pull/22) để nhóm review trước tích hợp. Chưa có approval/xác nhận chốt của thành viên khác.
+
 ## Thay đổi so với v1
 
 Đối chiếu bản dự thảo v1 với mã ORM đã merge trên main; bổ sung các endpoint sau, tiền tố chung `/api/v1`:
