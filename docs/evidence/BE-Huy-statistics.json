@@ -1,0 +1,318 @@
+{
+  "/statistics/dashboard": {
+    "success": true,
+    "statusCode": 200,
+    "message": "Dữ liệu Dashboard.",
+    "data": {
+      "summary": {
+        "gpa4": 2.0,
+        "includedCredits": 120,
+        "passedCredits": 60,
+        "ranking": "Trung bình",
+        "average10": 6.45,
+        "totalCourses": 40,
+        "completedCourses": 40,
+        "passedCourses": 20,
+        "retakePolicy": "HIGHEST_GRADE_BY_COURSE_CODE"
+      },
+      "semesters": {
+        "items": [
+          {
+            "semesterId": 1,
+            "name": "HK 1",
+            "academicYear": "2026-2027",
+            "startDate": "2026-01-01",
+            "gpa4": 2.0,
+            "includedCredits": 30,
+            "passedCredits": 15,
+            "ranking": "Trung bình",
+            "cumulativeGpa4": 2.0
+          },
+          {
+            "semesterId": 2,
+            "name": "HK 2",
+            "academicYear": "2026-2027",
+            "startDate": "2026-02-01",
+            "gpa4": 2.0,
+            "includedCredits": 30,
+            "passedCredits": 15,
+            "ranking": "Trung bình",
+            "cumulativeGpa4": 2.0
+          },
+          {
+            "semesterId": 3,
+            "name": "HK 3",
+            "academicYear": "2026-2027",
+            "startDate": "2026-03-01",
+            "gpa4": 2.0,
+            "includedCredits": 30,
+            "passedCredits": 15,
+            "ranking": "Trung bình",
+            "cumulativeGpa4": 2.0
+          },
+          {
+            "semesterId": 4,
+            "name": "HK 4",
+            "academicYear": "2026-2027",
+            "startDate": "2026-04-01",
+            "gpa4": 2.0,
+            "includedCredits": 30,
+            "passedCredits": 15,
+            "ranking": "Trung bình",
+            "cumulativeGpa4": 2.0
+          }
+        ]
+      },
+      "distribution": {
+        "items": [
+          {
+            "grade": "A",
+            "count": 20
+          },
+          {
+            "grade": "B+",
+            "count": 0
+          },
+          {
+            "grade": "B",
+            "count": 0
+          },
+          {
+            "grade": "C+",
+            "count": 0
+          },
+          {
+            "grade": "C",
+            "count": 0
+          },
+          {
+            "grade": "D+",
+            "count": 0
+          },
+          {
+            "grade": "D",
+            "count": 0
+          },
+          {
+            "grade": "F",
+            "count": 20
+          }
+        ],
+        "totalCourses": 40,
+        "countingPolicy": "ALL_COMPLETED_ATTEMPTS"
+      }
+    },
+    "error": null,
+    "timestamp": "2026-11-16T17:38:12.581525+00:00",
+    "path": "/api/v1/statistics/dashboard"
+  },
+  "/statistics/summary": {
+    "success": true,
+    "statusCode": 200,
+    "message": "Thống kê tổng quan.",
+    "data": {
+      "gpa4": 2.0,
+      "includedCredits": 120,
+      "passedCredits": 60,
+      "ranking": "Trung bình",
+      "average10": 6.45,
+      "totalCourses": 40,
+      "completedCourses": 40,
+      "passedCourses": 20,
+      "retakePolicy": "HIGHEST_GRADE_BY_COURSE_CODE"
+    },
+    "error": null,
+    "timestamp": "2026-11-16T17:38:12.587858+00:00",
+    "path": "/api/v1/statistics/summary"
+  },
+  "/statistics/semesters": {
+    "success": true,
+    "statusCode": 200,
+    "message": "GPA theo học kỳ.",
+    "data": {
+      "items": [
+        {
+          "semesterId": 1,
+          "name": "HK 1",
+          "academicYear": "2026-2027",
+          "startDate": "2026-01-01",
+          "gpa4": 2.0,
+          "includedCredits": 30,
+          "passedCredits": 15,
+          "ranking": "Trung bình",
+          "cumulativeGpa4": 2.0
+        },
+        {
+          "semesterId": 2,
+          "name": "HK 2",
+          "academicYear": "2026-2027",
+          "startDate": "2026-02-01",
+          "gpa4": 2.0,
+          "includedCredits": 30,
+          "passedCredits": 15,
+          "ranking": "Trung bình",
+          "cumulativeGpa4": 2.0
+        },
+        {
+          "semesterId": 3,
+          "name": "HK 3",
+          "academicYear": "2026-2027",
+          "startDate": "2026-03-01",
+          "gpa4": 2.0,
+          "includedCredits": 30,
+          "passedCredits": 15,
+          "ranking": "Trung bình",
+          "cumulativeGpa4": 2.0
+        },
+        {
+          "semesterId": 4,
+          "name": "HK 4",
+          "academicYear": "2026-2027",
+          "startDate": "2026-04-01",
+          "gpa4": 2.0,
+          "includedCredits": 30,
+          "passedCredits": 15,
+          "ranking": "Trung bình",
+          "cumulativeGpa4": 2.0
+        }
+      ]
+    },
+    "error": null,
+    "timestamp": "2026-11-16T17:38:12.593316+00:00",
+    "path": "/api/v1/statistics/semesters"
+  },
+  "/statistics/distribution": {
+    "success": true,
+    "statusCode": 200,
+    "message": "Phân bố điểm chữ.",
+    "data": {
+      "items": [
+        {
+          "grade": "A",
+          "count": 20
+        },
+        {
+          "grade": "B+",
+          "count": 0
+        },
+        {
+          "grade": "B",
+          "count": 0
+        },
+        {
+          "grade": "C+",
+          "count": 0
+        },
+        {
+          "grade": "C",
+          "count": 0
+        },
+        {
+          "grade": "D+",
+          "count": 0
+        },
+        {
+          "grade": "D",
+          "count": 0
+        },
+        {
+          "grade": "F",
+          "count": 20
+        }
+      ],
+      "totalCourses": 40,
+      "countingPolicy": "ALL_COMPLETED_ATTEMPTS"
+    },
+    "error": null,
+    "timestamp": "2026-11-16T17:38:12.598173+00:00",
+    "path": "/api/v1/statistics/distribution"
+  },
+  "/grade-scale": {
+    "success": true,
+    "statusCode": 200,
+    "message": "Bảng quy đổi điểm.",
+    "data": [
+      {
+        "id": 1,
+        "minScore": 8.5,
+        "maxScore": 10.0,
+        "letter": "A",
+        "gpa4": 4.0
+      },
+      {
+        "id": 2,
+        "minScore": 8.0,
+        "maxScore": 8.4,
+        "letter": "B+",
+        "gpa4": 3.5
+      },
+      {
+        "id": 3,
+        "minScore": 7.0,
+        "maxScore": 7.9,
+        "letter": "B",
+        "gpa4": 3.0
+      },
+      {
+        "id": 4,
+        "minScore": 6.5,
+        "maxScore": 6.9,
+        "letter": "C+",
+        "gpa4": 2.5
+      },
+      {
+        "id": 5,
+        "minScore": 5.5,
+        "maxScore": 6.4,
+        "letter": "C",
+        "gpa4": 2.0
+      },
+      {
+        "id": 6,
+        "minScore": 5.0,
+        "maxScore": 5.4,
+        "letter": "D+",
+        "gpa4": 1.5
+      },
+      {
+        "id": 7,
+        "minScore": 4.0,
+        "maxScore": 4.9,
+        "letter": "D",
+        "gpa4": 1.0
+      },
+      {
+        "id": 8,
+        "minScore": 0.0,
+        "maxScore": 3.9,
+        "letter": "F",
+        "gpa4": 0.0
+      }
+    ],
+    "error": null,
+    "timestamp": "2026-11-16T17:38:12.606111+00:00",
+    "path": "/api/v1/grade-scale"
+  },
+  "/health": {
+    "success": true,
+    "statusCode": 200,
+    "message": "Sẵn sàng.",
+    "data": {
+      "status": "ok",
+      "database": "ok"
+    },
+    "error": null,
+    "timestamp": "2026-11-16T17:38:12.609543+00:00",
+    "path": "/api/v1/health"
+  },
+  "measurement": {
+    "database": "isolated SQLite, migrated to head",
+    "courses": 40,
+    "requests": 50,
+    "p95Ms": 7.07,
+    "maxMs": 7.38,
+    "apiTargetMs": 500,
+    "passedApiTarget": true,
+    "scope": "Warm TestClient HTTP API; excludes network, cold start and FE rendering. PB-39 must measure full Dashboard <2s separately."
+  }
+}

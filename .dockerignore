@@ -2,3 +2,7 @@
 .env
 .venv
 **/__pycache__
+**/.env
+.tools
+.pytest_cache
+.ruff_cache

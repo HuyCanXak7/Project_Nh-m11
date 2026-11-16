@@ -1,0 +1,14 @@
+{
+  "verifiedSourceCommit": "7e6d7a980db1deded311496d24a1204d4a9969e9",
+  "pullRequest": "https://github.com/HuyCanXak7/Project_Nh-m11/pull/22",
+  "ci": {
+    "url": "https://github.com/HuyCanXak7/Project_Nh-m11/actions/runs/43921309976",
+    "jobs": {"backend": "success", "frontend": "success", "mysql": "success", "containers": "success", "staging": "skipped"},
+    "artifact": "be-huy-statistics-evidence",
+    "containerSmokeTest": "FE + BE + MySQL successfully built, started and healthchecked on disposable GitHub runner"
+  },
+  "localChecks": {"backendTests": 32, "nodeTests": 6, "frontendLinkTests": 1, "ruff": "passed", "eslint": "passed", "openapi": "passed"},
+  "developProtection": {"requiredApprovals": 1, "dismissStaleApprovals": true, "requiredChecks": ["backend", "frontend", "mysql", "containers"], "strict": true, "enforceAdmins": true, "forcePush": false, "deletion": false},
+  "stagingEnvironment": {"created": true, "deploymentBranchPolicy": "protected_branches", "publicDeployment": false},
+  "remaining": ["Team contract sign-off", "One independent PR approval and merge", "Staging host, URL, SSH key and known-host configuration", "FE integration and browser Dashboard performance measurement PB-39"]
+}

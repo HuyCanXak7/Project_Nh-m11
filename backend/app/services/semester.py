@@ -3,7 +3,7 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.models import Course, GradeComponent, Semester
+from app.models import GradeComponent, Semester
 from app.schemas.semester import SemesterCreate, SemesterUpdate
 
 

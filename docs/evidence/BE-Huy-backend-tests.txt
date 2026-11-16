@@ -1,0 +1,53 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\Duc Huy\Documents\ChatGPT\project nhóm 11\Project_Nh-m11\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Duc Huy\Documents\ChatGPT\project nhóm 11\Project_Nh-m11\backend
+plugins: anyio-4.16.0
+collecting ... collected 32 items
+
+tests/test_contract.py::ContractTests::test_implemented_contract_operations_have_real_routes PASSED [  3%]
+tests/test_contract.py::ContractTests::test_no_what_if_or_export_endpoints PASSED [  6%]
+tests/test_contract.py::ContractTests::test_openapi_spec_and_examples_are_valid PASSED [  9%]
+tests/test_contract.py::ContractTests::test_v11_acceptance_scope PASSED  [ 12%]
+tests/test_course_management_api.py::test_list_courses_empty_search_filter_and_owner PASSED [ 15%]
+tests/test_course_management_api.py::test_update_delete_course_validation_owner_and_cascade PASSED [ 18%]
+tests/test_course_retake_api.py::test_mark_unmark_retake_and_show_in_course_list PASSED [ 21%]
+tests/test_course_retake_api.py::test_same_course_code_uses_best_attempt_inside_current_account_only PASSED [ 25%]
+tests/test_current_api.py::test_auth_semester_and_gpa_flow PASSED        [ 28%]
+tests/test_current_api.py::test_semester_ownership_and_validation PASSED [ 31%]
+tests/test_gpa.py::test_gpa_counts_failed_course_but_not_passed_credits PASSED [ 34%]
+tests/test_gpa.py::test_empty_completed_courses PASSED                   [ 37%]
+tests/test_gpa.py::test_rank_thresholds PASSED                           [ 40%]
+tests/test_grade_scale_api.py::test_get_default_grade_scale PASSED       [ 43%]
+tests/test_grade_scale_api.py::test_grade_conversion_boundaries_and_persistence PASSED [ 46%]
+tests/test_grades.py::test_configure_components_and_complete_only_at_100_percent PASSED [ 50%]
+tests/test_grades.py::test_enter_edit_scores_validation_and_ownership PASSED [ 53%]
+tests/test_grades.py::test_calculate_course_grade_only_when_configuration_is_complete PASSED [ 56%]
+tests/test_statistics.py::test_summary_matches_cumulative_gpa PASSED     [ 59%]
+tests/test_statistics.py::test_trend_matches_semester_apis_and_zero_is_not_empty PASSED [ 62%]
+tests/test_statistics.py::test_distribution_counts_all_completed_attempts PASSED [ 65%]
+tests/test_statistics.py::test_empty_dashboard_and_owner_isolation PASSED [ 68%]
+tests/test_statistics.py::test_scale_is_public_and_comes_from_database PASSED [ 71%]
+tests/test_statistics.py::test_distribution_boundaries[3.9-F] PASSED     [ 75%]
+tests/test_statistics.py::test_distribution_boundaries[4.0-D] PASSED     [ 78%]
+tests/test_statistics.py::test_distribution_boundaries[4.9-D] PASSED     [ 81%]
+tests/test_statistics.py::test_distribution_boundaries[5.0-D+] PASSED    [ 84%]
+tests/test_statistics.py::test_distribution_boundaries[8.4-B+] PASSED    [ 87%]
+tests/test_statistics.py::test_distribution_boundaries[8.5-A] PASSED     [ 90%]
+tests/test_statistics.py::test_distribution_boundaries[10-A] PASSED      [ 93%]
+tests/test_statistics.py::test_locked_account_cannot_read_statistics PASSED [ 96%]
+tests/test_statistics.py::test_error_envelope_and_health_database_check PASSED [100%]
+
+============================== warnings summary ===============================
+tests\test_contract.py:5
+tests\test_contract.py:5
+  C:\Users\Duc Huy\Documents\ChatGPT\project nhóm 11\Project_Nh-m11\backend\tests\test_contract.py:5: DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the https://github.com/python-jsonschema/referencing library, which provides more compliant referencing behavior as well as more flexible APIs for customization. A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need.
+    from jsonschema import RefResolver
+
+tests\test_statistics.py:13
+tests\test_statistics.py:13
+  C:\Users\Duc Huy\Documents\ChatGPT\project nhóm 11\Project_Nh-m11\backend\tests\test_statistics.py:13: DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the https://github.com/python-jsonschema/referencing library, which provides more compliant referencing behavior as well as more flexible APIs for customization. A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need.
+    from jsonschema import RefResolver
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 32 passed, 4 warnings in 31.60s =======================

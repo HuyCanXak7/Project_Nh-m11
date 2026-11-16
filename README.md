@@ -1,5 +1,7 @@
 # Hệ thống quản lý chỉ số học tập – Nhóm 11
 
+Bàn giao BE Huy (T0694D7/T0694DB/T0694DC/T0694DE): [API và minh chứng](docs/guides/BE-Huy-Sprint2-3.md), [Swagger v1.1 và thay đổi so với v1](docs/api/CHANGELOG-v1.1.md), [CI và staging](docs/guides/staging.md). Swagger `/docs` phân biệt endpoint đã triển khai với `contract-only`; tích hợp FE, xác nhận của nhóm và deploy thực tế cần được kiểm chứng trước khi chuyển task sang Done.
+
 Ứng dụng web giúp sinh viên quản lý học kỳ, môn học và điểm thành phần. Hệ thống tự tính điểm môn, quy đổi sang điểm chữ và hệ 4, tính GPA học kỳ và GPA tích lũy, đặt mục tiêu GPA và mô phỏng kết quả. Quản trị viên quản lý tài khoản, thang điểm và xem thống kê.
 
 Tài liệu này **chốt các nguyên tắc làm việc và quy tắc nghiệp vụ chung** của cả nhóm (theo PB-46 trong Product Backlog). Mọi thành viên FE và BE làm theo đúng tài liệu này. Khi cần thay đổi, phải thảo luận trong nhóm, cập nhật README và SRS trước rồi mới code.

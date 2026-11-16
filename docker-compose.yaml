@@ -1,6 +1,10 @@
-version: '3.8'
-
 services:
+  frontend:
+    image: nginx:1.28-alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
   db:
     image: mysql:8.0
     container_name: mysql_db
@@ -24,7 +28,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: dockerfile
+      dockerfile: backend/dockerfile
     container_name: fastapi_backend
     restart: always
     depends_on:
@@ -37,7 +41,7 @@ services:
     # Đợi DB sẵn sàng, tự động chạy migration rồi bật server
     command: >
       sh -c "alembic upgrade head && 
-             uvicorn main:app --host 0.0.0.0 --port 8000"
+             uvicorn app.main:app --host 0.0.0.0 --port 8000"
 
 volumes:
   mysql_data: # Đổi tên volume cho phù hợp với MySQL
