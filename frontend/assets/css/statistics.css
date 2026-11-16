@@ -40,17 +40,25 @@
 .stats-row {
     display: grid;
     gap: 0;
-    border-left: 1px solid var(--e-border);
-    border-right: 1px solid var(--e-border);
+    border-left: none;
+    border-right: none;
     border-bottom: 1px solid var(--e-border);
 }
 
 .stats-row--top {
     grid-template-columns: minmax(0, 1.85fr) minmax(0, 1fr);
+    flex: 1.25 1 auto;
 }
 
 .stats-row--bottom {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    flex: 1 1 auto;
+    border-bottom: none;
+}
+
+.stats-row--top > .card {
+    display: flex;
+    flex-direction: column;
 }
 
 .stats-row > *:first-child {
@@ -95,7 +103,8 @@
 .gpa-chart {
     position: relative;
     width: 100%;
-    height: 220px;
+    flex: 1 1 auto;
+    min-height: 220px;
     display: flex;
     flex-direction: column;
 }
@@ -103,6 +112,8 @@
 .e-html-chart {
     position: relative;
     width: 100%;
+    flex: 1 1 auto;
+    min-height: 216px;
     height: 100%;
     display: grid;
     grid-template-columns: 28px 1fr;

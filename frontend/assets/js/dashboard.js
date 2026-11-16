@@ -124,8 +124,16 @@ async function loadDashboardData() {
                 }
             }
 
-            // Điểm mới cập nhật (các môn đã có điểm)
-            const gradedList = courses
+            // Điểm mới cập nhật (các môn đã có điểm của học kỳ gần nhất hoặc toàn bộ)
+            const latestSemObj = semesters[semesters.length - 1];
+            const semGradedSource = latestSemObj
+                ? courses.filter(c => c.semester_id === latestSemObj.id)
+                : courses;
+            const activeSource = semGradedSource.some(c => GradeCalculator.calculateCourseFinalScore(c.components).isComplete)
+                ? semGradedSource
+                : courses;
+
+            const gradedList = activeSource
                 .map(c => {
                     const calc = GradeCalculator.calculateCourseFinalScore(c.components);
                     if (!calc.isComplete || calc.finalScore10 === null) return null;
@@ -137,21 +145,21 @@ async function loadDashboardData() {
                         time: 'Hôm qua'
                     };
                 })
-                .filter(Boolean)
-                .reverse()
-                .slice(0, 3);
+                .filter(Boolean);
 
             data.activities = gradedList;
 
-            // Lịch học hôm nay suy ra từ các môn trong học kỳ mới nhất
+            // Lịch học hôm nay suy ra từ các môn trong học kỳ mới nhất (tự động giãn khi thêm môn)
             const latestSem = semesters[semesters.length - 1];
             const latestCourses = latestSem ? courses.filter(c => c.semester_id === latestSem.id) : courses;
             const slots = [
                 { time: '07:00', room: 'A2-301', tag: 'ĐANG HỌC', live: true },
                 { time: '09:35', room: 'A3-204', tag: 'Bài tập', live: false },
-                { time: '13:00', room: 'Lab 4',  tag: 'Thực hành', live: false }
+                { time: '13:00', room: 'Lab 4',  tag: 'Thực hành', live: false },
+                { time: '15:05', room: 'B1-102', tag: 'Lý thuyết', live: false },
+                { time: '17:30', room: 'A1-205', tag: 'Thảo luận', live: false }
             ];
-            data.schedule = latestCourses.slice(0, 3).map((c, idx) => ({
+            data.schedule = latestCourses.map((c, idx) => ({
                 ...slots[idx % slots.length],
                 name: c.course_name
             }));

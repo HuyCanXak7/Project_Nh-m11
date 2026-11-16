@@ -3,17 +3,31 @@
 .dash-row {
     display: grid;
     gap: 0;
-    border-left: 1px solid var(--e-border);
-    border-right: 1px solid var(--e-border);
+    border-left: none;
+    border-right: none;
     border-bottom: 1px solid var(--e-border);
 }
 
 .dash-row--hero {
     grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+    flex: 1.15 1 auto;
+    min-height: 270px;
 }
 
 .dash-row--bottom {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    flex: 1 1 auto;
+    border-bottom: none;
+}
+
+.dash-row--bottom > .card {
+    display: flex;
+    flex-direction: column;
+}
+
+.dash-row--bottom .schedule-list,
+.dash-row--bottom .activity-list {
+    flex: 1 1 auto;
 }
 
 .dash-row > *:first-child {
@@ -148,7 +162,8 @@
 .chart {
     position: relative;
     width: 100%;
-    height: 200px;
+    flex: 1 1 auto;
+    min-height: 200px;
     display: flex;
     flex-direction: column;
 }
@@ -156,6 +171,8 @@
 .e-html-chart {
     position: relative;
     width: 100%;
+    flex: 1 1 auto;
+    min-height: 196px;
     height: 100%;
     display: grid;
     grid-template-columns: 28px 1fr;

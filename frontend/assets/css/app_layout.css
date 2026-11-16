@@ -47,11 +47,12 @@ body.app-page,
 }
 
 body.app-page {
-    display: block !important;
+    display: flex !important;
+    flex-direction: column !important;
     align-items: stretch !important;
     justify-content: flex-start !important;
     width: 100% !important;
-    min-height: 100vh;
+    min-height: 100vh !important;
     font-family: 'Be Vietnam Pro', var(--font-main, sans-serif);
     color: var(--dash-text) !important;
     background: #FFFFFF !important;
@@ -243,13 +244,16 @@ body.app-page {
     background: rgba(15, 23, 42, 0.45);
 }
 
-/* ===== Khung nội dung chính (.dash) chuẩn Swiss Grid ===== */
+/* ===== Khung nội dung chính (.dash) chuẩn Swiss Grid - Co giãn khít 100% màn hình ===== */
 .dash {
     position: relative;
     z-index: 1;
-    margin: 0 auto;
-    padding: 0 24px 36px;
-    max-width: 1440px;
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: 100%;
+    min-height: calc(100vh - var(--topbar-h));
+    margin: 0;
+    padding: 0;
     background: #FFFFFF;
     display: flex;
     flex-direction: column;
@@ -262,7 +266,7 @@ body.app-page {
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 18px 0;
+    padding: 18px 24px;
     border-bottom: 1px solid var(--e-border);
     margin-bottom: 0;
 }
@@ -495,8 +499,8 @@ body.app-page {
 .stats {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    border-left: 1px solid var(--e-border);
-    border-right: 1px solid var(--e-border);
+    border-left: none;
+    border-right: none;
     border-bottom: 1px solid var(--e-border);
 }
 
@@ -694,15 +698,16 @@ body.app-page {
         background: #F8FAFC;
     }
 
-    .dash { padding: 0 14px 28px; }
+    .dash { padding: 0; }
+    .dash-header { padding: 14px 16px; }
     .dash-header__menu { display: inline-flex; }
     .dash-header__title { font-size: 22px; }
     .header-meta-pair { display: none; }
 }
 
 @media (max-width: 600px) {
-    .dash { padding: 0 10px 24px; }
-    .dash-header { flex-wrap: wrap; gap: 10px; padding: 14px 0; }
+    .dash { padding: 0; }
+    .dash-header { flex-wrap: wrap; gap: 10px; padding: 12px 14px; }
     .dash-header__greeting { order: 2; flex-basis: 100%; }
     .dash-header__actions { margin-left: auto; flex-wrap: wrap; gap: 6px; }
     .stats { grid-template-columns: 1fr; }

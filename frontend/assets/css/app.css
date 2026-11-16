@@ -907,7 +907,15 @@ body.app-body {
     box-shadow: none !important;
     border: 1px solid var(--e-border, #CBD5E1);
     border-top: none;
+    border-left: none;
+    border-right: none;
     padding: 24px;
+    margin-bottom: 0;
+}
+
+.app-card:last-of-type {
+    flex: 1 1 auto;
+    border-bottom: none;
 }
 
 .btn {
@@ -982,8 +990,8 @@ body.app-body {
 .course-sem-tabs {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    border-left: 1px solid #CBD5E1;
-    border-right: 1px solid #CBD5E1;
+    border-left: none;
+    border-right: none;
     border-bottom: 1px solid #CBD5E1;
     background: #FFFFFF;
 }
@@ -1041,8 +1049,8 @@ body.app-body {
 .course-sem-strip {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1.1fr 1.35fr;
-    border-left: 1px solid #CBD5E1;
-    border-right: 1px solid #CBD5E1;
+    border-left: none;
+    border-right: none;
     border-bottom: 1px solid #CBD5E1;
     background: #FFFFFF;
 }
@@ -1113,8 +1121,8 @@ body.app-body {
 .course-toolbar {
     display: flex;
     align-items: stretch;
-    border-left: 1px solid #CBD5E1;
-    border-right: 1px solid #CBD5E1;
+    border-left: none;
+    border-right: none;
     border-bottom: 1px solid #CBD5E1;
     background: #FFFFFF;
     flex-wrap: wrap;
@@ -1204,12 +1212,20 @@ body.app-body {
     background: #FEF2F2;
 }
 
-/* Bảng môn học chuẩn StudyTrack-E */
+/* Bảng môn học chuẩn StudyTrack-E - Tự động giãn khít màn hình */
 .course-table-card {
     background: #FFFFFF;
-    border-left: 1px solid #CBD5E1;
-    border-right: 1px solid #CBD5E1;
-    border-bottom: 1px solid #CBD5E1;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+}
+
+.course-table-card > .table-wrap {
+    flex: 1 1 auto;
 }
 
 .course-figma-table th {
