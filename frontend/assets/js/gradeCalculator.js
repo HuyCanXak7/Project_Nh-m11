@@ -49,30 +49,19 @@ const GradeCalculator = {
     let allEntered = true;
 
     components.forEach(c => {
-      const w = Number(c.weight_percent);
-      if (!Number.isFinite(w) || w < 0 || w > 100 || c.weight_percent === '') allEntered = false;
+      const w = Number(c.weight_percent) || 0;
       totalWeight += w;
-      if (c.score === null || c.score === undefined || String(c.score).trim() === '' ||
-          !Number.isFinite(Number(c.score)) || Number(c.score) < 0 || Number(c.score) > 10) {
+      if (c.score === null || c.score === undefined || isNaN(c.score)) {
         allEntered = false;
       } else {
         weightedSum += Number(c.score) * (w / 100);
       }
     });
 
-    if (Math.abs(totalWeight - 100) > 1e-9 || !allEntered) {
+    if (totalWeight !== 100 || !allEntered) {
       return { finalScore10: null, isComplete: false, totalWeight };
     }
     return { finalScore10: this.round1(weightedSum), isComplete: true, totalWeight };
-  },
-
-  rankGPA(gpa) {
-    if (gpa === null || gpa === undefined) return null;
-    if (gpa >= 3.6) return 'Xuất sắc';
-    if (gpa >= 3.2) return 'Giỏi';
-    if (gpa >= 2.5) return 'Khá';
-    if (gpa >= 2.0) return 'Trung bình';
-    return 'Yếu / Kém';
   },
 
   calculateSemesterGPA(coursesInSemester) {
@@ -83,10 +72,10 @@ const GradeCalculator = {
 
     coursesInSemester.forEach(course => {
       const calc = this.calculateCourseFinalScore(course.components);
-      const cr = Number(course.credits);
-      if (calc.isComplete && calc.finalScore10 !== null && Number.isInteger(cr) && cr > 0) {
+      if (calc.isComplete && calc.finalScore10 !== null) {
         completedCourseCount++;
         const grade = this.convertScore10(calc.finalScore10);
+        const cr = Number(course.credits) || 0;
         totalCredits += cr;
         totalWeightedPoints += grade.scale4 * cr;
         if (grade.scale4 > 0) {
@@ -95,14 +84,13 @@ const GradeCalculator = {
       }
     });
 
-    const gpa = totalCredits > 0 ? this.round2(totalWeightedPoints / totalCredits) : null;
+    const gpa = totalCredits > 0 ? this.round2(totalWeightedPoints / totalCredits) : 0;
     return {
       gpa,
       totalCredits,
       passedCredits,
       completedCourseCount,
-      ranking: this.rankGPA(gpa),
-      formattedGPA: gpa === null ? '--' : gpa.toFixed(2)
+      formattedGPA: gpa.toFixed(2)
     };
   },
 

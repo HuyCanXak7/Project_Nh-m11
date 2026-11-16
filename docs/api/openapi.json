@@ -52,1249 +52,6 @@
     }
   ],
   "paths": {
-    "/auth/register": {
-      "post": {
-        "tags": [
-          "Auth"
-        ],
-        "summary": "Đăng ký tài khoản sinh viên",
-        "operationId": "register",
-        "description": "Tham chiếu PB-01 trong Product Backlog của Nhóm 11.",
-        "x-backlog-id": "PB-01",
-        "requestBody": {
-          "required": true,
-          "description": "Dữ liệu yêu cầu",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegisterRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Tạo tài khoản STUDENT thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/HTTP400"
-          },
-          "409": {
-            "$ref": "#/components/responses/EmailExists"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "security": [],
-        "x-implementation": "contract-only"
-      }
-    },
-    "/auth/login": {
-      "post": {
-        "tags": [
-          "Auth"
-        ],
-        "summary": "Đăng nhập và lấy access/refresh token",
-        "operationId": "login",
-        "description": "Sai email hoặc mật khẩu trả lỗi chung INVALID_CREDENTIALS; không tiết lộ tài khoản tồn tại. Có rate limit; isActive=false bị từ chối. Access token 15 phút, refresh 7 ngày.",
-        "x-backlog-id": "PB-02",
-        "requestBody": {
-          "required": true,
-          "description": "Dữ liệu yêu cầu",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TokenResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/HTTP400"
-          },
-          "401": {
-            "$ref": "#/components/responses/InvalidCredentials"
-          },
-          "403": {
-            "$ref": "#/components/responses/AccountLocked"
-          },
-          "429": {
-            "$ref": "#/components/responses/HTTP429"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "security": [],
-        "x-implementation": "implemented"
-      }
-    },
-    "/auth/refresh": {
-      "post": {
-        "tags": [
-          "Auth"
-        ],
-        "summary": "Làm mới phiên đăng nhập",
-        "operationId": "refreshAccessToken",
-        "description": "Refresh token hợp lệ và chưa thu hồi mới được cấp token. Chính sách xoay vòng refresh token cần thống nhất khi triển khai.",
-        "x-backlog-id": "PB-02",
-        "requestBody": {
-          "required": true,
-          "description": "Dữ liệu yêu cầu",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefreshRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TokenResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/HTTP400"
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "security": [],
-        "x-implementation": "implemented"
-      }
-    },
-    "/auth/logout": {
-      "post": {
-        "tags": [
-          "Auth"
-        ],
-        "summary": "Đăng xuất, thu hồi refresh token",
-        "operationId": "logout",
-        "description": "Thu hồi refresh token đang sử dụng; FE xóa token ở client và chuyển về trang đăng nhập.",
-        "x-backlog-id": "PB-03",
-        "requestBody": {
-          "required": true,
-          "description": "Dữ liệu yêu cầu",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LogoutRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EmptyResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/HTTP400"
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "security": [],
-        "x-implementation": "implemented"
-      }
-    },
-    "/semesters": {
-      "get": {
-        "tags": [
-          "Semester"
-        ],
-        "summary": "Danh sách học kỳ của tôi",
-        "operationId": "listSemesters",
-        "description": "Tham chiếu PB-07 trong Product Backlog của Nhóm 11.",
-        "x-backlog-id": "PB-07",
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SemesterListResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "x-implementation": "contract-only"
-      },
-      "post": {
-        "tags": [
-          "Semester"
-        ],
-        "summary": "Tạo học kỳ",
-        "operationId": "createSemester",
-        "description": "Tham chiếu PB-06 trong Product Backlog của Nhóm 11.",
-        "x-backlog-id": "PB-06",
-        "requestBody": {
-          "required": true,
-          "description": "Dữ liệu yêu cầu",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SemesterWrite"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SemesterResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/HTTP400"
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "x-implementation": "contract-only"
-      }
-    },
-    "/semesters/{semesterId}": {
-      "get": {
-        "tags": [
-          "Semester"
-        ],
-        "summary": "Chi tiết học kỳ",
-        "operationId": "getSemester",
-        "description": "Tham chiếu PB-07 trong Product Backlog của Nhóm 11.",
-        "x-backlog-id": "PB-07",
-        "parameters": [
-          {
-            "name": "semesterId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "description": "ID học kỳ của chính người dùng hiện tại."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SemesterResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "404": {
-            "$ref": "#/components/responses/HTTP404"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "x-implementation": "contract-only"
-      },
-      "put": {
-        "tags": [
-          "Semester"
-        ],
-        "summary": "Sửa học kỳ",
-        "operationId": "updateSemester",
-        "description": "Tham chiếu PB-08 trong Product Backlog của Nhóm 11.",
-        "x-backlog-id": "PB-08",
-        "parameters": [
-          {
-            "name": "semesterId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "description": "ID học kỳ của chính người dùng hiện tại."
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "description": "Dữ liệu yêu cầu",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SemesterWrite"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SemesterResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/HTTP400"
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "404": {
-            "$ref": "#/components/responses/HTTP404"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "x-implementation": "contract-only"
-      },
-      "delete": {
-        "tags": [
-          "Semester"
-        ],
-        "summary": "Xóa học kỳ và xóa dây chuyền môn, điểm",
-        "operationId": "deleteSemester",
-        "description": "FE phải hiển thị hộp xác nhận và số môn/thành phần/điểm bị xóa từ GET delete-preview. Backend xóa học kỳ, môn và thành phần điểm trong một giao dịch; phải xác thực owner.",
-        "x-backlog-id": "PB-09",
-        "parameters": [
-          {
-            "name": "semesterId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "description": "ID học kỳ của chính người dùng hiện tại."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeleteResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "404": {
-            "$ref": "#/components/responses/HTTP404"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "x-implementation": "contract-only"
-      }
-    },
-    "/semesters/{semesterId}/delete-preview": {
-      "get": {
-        "tags": [
-          "Semester"
-        ],
-        "summary": "Xem số dữ liệu sẽ bị xóa cùng học kỳ",
-        "operationId": "previewSemesterDeletion",
-        "description": "Endpoint bổ sung ở bản hợp đồng dự thảo để đáp ứng yêu cầu hiển thị số dữ liệu sẽ mất trước xác nhận xóa.",
-        "x-backlog-id": "PB-09",
-        "parameters": [
-          {
-            "name": "semesterId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "description": "ID học kỳ của chính người dùng hiện tại."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SemesterImpactResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "404": {
-            "$ref": "#/components/responses/HTTP404"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "x-implementation": "contract-only"
-      }
-    },
-    "/semesters/{semesterId}/courses": {
-      "get": {
-        "tags": [
-          "Course"
-        ],
-        "summary": "Danh sách môn của học kỳ, tìm kiếm và lọc",
-        "operationId": "listCourses",
-        "description": "Tham chiếu PB-11, PB-13 trong Product Backlog của Nhóm 11.",
-        "x-backlog-id": "PB-11, PB-13",
-        "parameters": [
-          {
-            "name": "semesterId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "description": "ID học kỳ của chính người dùng hiện tại."
-          },
-          {
-            "name": "q",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Từ khóa tìm theo mã hoặc tên môn."
-          },
-          {
-            "name": "category",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "đại cương",
-                "cơ sở ngành",
-                "chuyên ngành"
-              ],
-              "example": "đại cương"
-            },
-            "description": "Lọc theo loại môn."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CourseListResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/HTTP400"
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "404": {
-            "$ref": "#/components/responses/HTTP404"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "x-implementation": "contract-only"
-      },
-      "post": {
-        "tags": [
-          "Course"
-        ],
-        "summary": "Thêm môn vào học kỳ",
-        "operationId": "createCourse",
-        "description": "Tham chiếu PB-10 trong Product Backlog của Nhóm 11.",
-        "x-backlog-id": "PB-10",
-        "parameters": [
-          {
-            "name": "semesterId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "description": "ID học kỳ của chính người dùng hiện tại."
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "description": "Dữ liệu yêu cầu",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CourseWrite"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CourseResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/HTTP400"
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "404": {
-            "$ref": "#/components/responses/HTTP404"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "x-implementation": "contract-only"
-      }
-    },
-    "/courses/{courseId}": {
-      "get": {
-        "tags": [
-          "Course"
-        ],
-        "summary": "Chi tiết môn học",
-        "operationId": "getCourse",
-        "description": "Tham chiếu PB-11 trong Product Backlog của Nhóm 11.",
-        "x-backlog-id": "PB-11",
-        "parameters": [
-          {
-            "name": "courseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "description": "ID môn học thuộc tài khoản người dùng."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CourseResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "404": {
-            "$ref": "#/components/responses/HTTP404"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "x-implementation": "contract-only"
-      },
-      "put": {
-        "tags": [
-          "Course"
-        ],
-        "summary": "Sửa môn học, đánh dấu học lại",
-        "operationId": "updateCourse",
-        "description": "Tham chiếu PB-12, PB-50 trong Product Backlog của Nhóm 11.",
-        "x-backlog-id": "PB-12, PB-50",
-        "parameters": [
-          {
-            "name": "courseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "description": "ID môn học thuộc tài khoản người dùng."
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "description": "Dữ liệu yêu cầu",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CourseWrite"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CourseResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/HTTP400"
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "404": {
-            "$ref": "#/components/responses/HTTP404"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "x-implementation": "contract-only"
-      },
-      "delete": {
-        "tags": [
-          "Course"
-        ],
-        "summary": "Xóa môn và thành phần điểm liên quan",
-        "operationId": "deleteCourse",
-        "description": "FE phải xác nhận và hiển thị số thành phần điểm sẽ bị xóa theo GET delete-preview; kiểm tra ownership trước thao tác.",
-        "x-backlog-id": "PB-12",
-        "parameters": [
-          {
-            "name": "courseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "description": "ID môn học thuộc tài khoản người dùng."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeleteResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "404": {
-            "$ref": "#/components/responses/HTTP404"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "x-implementation": "contract-only"
-      }
-    },
-    "/courses/{courseId}/delete-preview": {
-      "get": {
-        "tags": [
-          "Course"
-        ],
-        "summary": "Xem số dữ liệu sẽ mất khi xóa môn",
-        "operationId": "previewCourseDeletion",
-        "description": "Tham chiếu PB-12 trong Product Backlog của Nhóm 11.",
-        "x-backlog-id": "PB-12",
-        "parameters": [
-          {
-            "name": "courseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "description": "ID môn học thuộc tài khoản người dùng."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CourseImpactResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "404": {
-            "$ref": "#/components/responses/HTTP404"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "x-implementation": "contract-only"
-      }
-    },
-    "/courses/{courseId}/components": {
-      "get": {
-        "tags": [
-          "Grade"
-        ],
-        "summary": "Xem các thành phần điểm và tổng trọng số",
-        "operationId": "listComponents",
-        "description": "Tham chiếu PB-14 trong Product Backlog của Nhóm 11.",
-        "x-backlog-id": "PB-14",
-        "parameters": [
-          {
-            "name": "courseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "description": "ID môn học thuộc tài khoản người dùng."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ComponentSetResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "404": {
-            "$ref": "#/components/responses/HTTP404"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "x-implementation": "contract-only"
-      },
-      "post": {
-        "tags": [
-          "Grade"
-        ],
-        "summary": "Thêm thành phần điểm",
-        "operationId": "createComponent",
-        "description": "Tham chiếu PB-14 trong Product Backlog của Nhóm 11.",
-        "x-backlog-id": "PB-14",
-        "parameters": [
-          {
-            "name": "courseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "description": "ID môn học thuộc tài khoản người dùng."
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "description": "Dữ liệu yêu cầu",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ComponentWrite"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ComponentResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/HTTP400"
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "404": {
-            "$ref": "#/components/responses/HTTP404"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "x-implementation": "contract-only"
-      }
-    },
-    "/courses/{courseId}/components/{componentId}": {
-      "put": {
-        "tags": [
-          "Grade"
-        ],
-        "summary": "Sửa thành phần điểm và trọng số",
-        "operationId": "updateComponent",
-        "description": "Tham chiếu PB-14 trong Product Backlog của Nhóm 11.",
-        "x-backlog-id": "PB-14",
-        "parameters": [
-          {
-            "name": "courseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "description": "ID môn học thuộc tài khoản người dùng."
-          },
-          {
-            "name": "componentId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "description": "ID thành phần điểm thuộc môn đã chọn."
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "description": "Dữ liệu yêu cầu",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ComponentWrite"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ComponentResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/HTTP400"
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "404": {
-            "$ref": "#/components/responses/HTTP404"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "x-implementation": "contract-only"
-      },
-      "delete": {
-        "tags": [
-          "Grade"
-        ],
-        "summary": "Xóa thành phần điểm",
-        "operationId": "deleteComponent",
-        "description": "Tham chiếu PB-14 trong Product Backlog của Nhóm 11.",
-        "x-backlog-id": "PB-14",
-        "parameters": [
-          {
-            "name": "courseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "description": "ID môn học thuộc tài khoản người dùng."
-          },
-          {
-            "name": "componentId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "description": "ID thành phần điểm thuộc môn đã chọn."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EmptyResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "404": {
-            "$ref": "#/components/responses/HTTP404"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "x-implementation": "contract-only"
-      }
-    },
-    "/courses/{courseId}/components/{componentId}/score": {
-      "put": {
-        "tags": [
-          "Grade"
-        ],
-        "summary": "Nhập, sửa hoặc xóa điểm thành phần",
-        "operationId": "updateComponentScore",
-        "description": "Tham chiếu PB-15 trong Product Backlog của Nhóm 11.",
-        "x-backlog-id": "PB-15",
-        "parameters": [
-          {
-            "name": "courseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "description": "ID môn học thuộc tài khoản người dùng."
-          },
-          {
-            "name": "componentId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "description": "ID thành phần điểm thuộc môn đã chọn."
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "description": "Dữ liệu yêu cầu",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ScoreWrite"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ComponentResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/HTTP400"
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "404": {
-            "$ref": "#/components/responses/HTTP404"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "x-implementation": "contract-only"
-      }
-    },
-    "/courses/{courseId}/grade": {
-      "get": {
-        "tags": [
-          "Grade"
-        ],
-        "summary": "Tính điểm môn và quy đổi hệ 10 → chữ → hệ 4",
-        "operationId": "getCourseGrade",
-        "description": "Điểm môn = Σ(điểm thành phần × trọng số / 100), làm tròn 1 chữ số thập phân TRƯỚC khi quy đổi. Chỉ READY khi tổng trọng số 100% và đủ điểm; nếu thiếu trả INCOMPLETE với các trường điểm null. Bảng quy đổi nằm ở grade_scale trong DB, không hard-code FE. GET /grade-scale thuộc Swagger v1.1 (PB-51).",
-        "x-backlog-id": "PB-16, PB-17",
-        "parameters": [
-          {
-            "name": "courseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "description": "ID môn học thuộc tài khoản người dùng."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CourseGradeResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "404": {
-            "$ref": "#/components/responses/HTTP404"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "x-implementation": "contract-only"
-      }
-    },
-    "/semesters/{semesterId}/gpa": {
-      "get": {
-        "tags": [
-          "Grade"
-        ],
-        "summary": "Tính GPA học kỳ",
-        "operationId": "getSemesterGpa",
-        "description": "GPA kỳ = Σ(grade4 × tín chỉ) / Σ(tín chỉ) trên các môn đủ điểm. Môn F vẫn tham gia GPA nhưng không cộng tín chỉ đạt. Không có môn đủ điểm thì gpa4=null và includedCredits=0.",
-        "x-backlog-id": "PB-18",
-        "parameters": [
-          {
-            "name": "semesterId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "description": "ID học kỳ của chính người dùng hiện tại."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SemesterGpaResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "404": {
-            "$ref": "#/components/responses/HTTP404"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "x-implementation": "implemented"
-      }
-    },
-    "/gpa/cumulative": {
-      "get": {
-        "tags": [
-          "Grade"
-        ],
-        "summary": "Tính GPA tích lũy và tín chỉ đạt",
-        "operationId": "getCumulativeGpa",
-        "description": "GPA tích lũy có tín chỉ làm trọng số; môn F vẫn tham gia GPA nhưng không cộng vào tín chỉ đạt. Nếu học lại cùng mã môn, chỉ lấy lần có điểm cao nhất. Không có môn đủ điểm thì gpa4=null.",
-        "x-backlog-id": "PB-19, PB-50",
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CumulativeGpaResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "x-implementation": "implemented"
-      }
-    },
     "/goals": {
       "get": {
         "tags": [
@@ -1461,351 +218,6 @@
         "x-implementation": "contract-only"
       }
     },
-    "/statistics/summary": {
-      "get": {
-        "tags": [
-          "Statistics"
-        ],
-        "summary": "Tổng hợp Dashboard (PB-20 / T0694DB)",
-        "operationId": "getStatisticsSummary_statistics_summary",
-        "description": "GPA và average10 có trọng số tín chỉ; học lại chọn điểm cao nhất (hệ 4, hệ 10, ID nhỏ nhất). passedCredits chỉ tính môn >= 4.0. Không dữ liệu: GPA/average10/ranking=null, các bộ đếm=0. totalCourses đếm mọi lần học; completedCourses/passedCourses đếm sau gộp mã môn.",
-        "x-task-id": "T0694D7",
-        "x-implementation": "implemented",
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StatisticsSummaryResponse"
-                },
-                "example": {
-                  "success": true,
-                  "statusCode": 200,
-                  "message": "Thành công",
-                  "data": {
-                    "gpa4": 2.4,
-                    "includedCredits": 5,
-                    "passedCredits": 3,
-                    "ranking": "Trung bình",
-                    "average10": 6.96,
-                    "totalCourses": 3,
-                    "completedCourses": 2,
-                    "passedCourses": 1,
-                    "retakePolicy": "HIGHEST_GRADE_BY_COURSE_CODE"
-                  },
-                  "error": null,
-                  "timestamp": "2026-11-17T09:00:00+07:00",
-                  "path": "/api/v1/statistics/summary"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        }
-      }
-    },
-    "/statistics/semesters": {
-      "get": {
-        "tags": [
-          "Statistics"
-        ],
-        "summary": "GPA theo kỳ (PB-21 / T0694DC)",
-        "operationId": "getStatisticsSemesters_statistics_semesters",
-        "description": "Sắp xếp startDate, semesterId tăng dần. GPA kỳ giữ mọi lần học trong kỳ; cumulativeGpa4 gộp học lại trong các kỳ đến thời điểm đó. GPA làm tròn HALF_UP 2 chữ số trước xếp loại. Kỳ rỗng trả GPA null; không có kỳ trả items=[].",
-        "x-task-id": "T0694D7",
-        "x-implementation": "implemented",
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StatisticsSemestersResponse"
-                },
-                "example": {
-                  "success": true,
-                  "statusCode": 200,
-                  "message": "Thành công",
-                  "data": {
-                    "items": [
-                      {
-                        "semesterId": 1,
-                        "name": "HK1",
-                        "academicYear": "2026-2027",
-                        "startDate": "2026-09-01",
-                        "gpa4": 2.4,
-                        "includedCredits": 5,
-                        "passedCredits": 3,
-                        "ranking": "Trung bình",
-                        "cumulativeGpa4": 2.4
-                      }
-                    ]
-                  },
-                  "error": null,
-                  "timestamp": "2026-11-17T09:00:00+07:00",
-                  "path": "/api/v1/statistics/semesters"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        }
-      }
-    },
-    "/statistics/distribution": {
-      "get": {
-        "tags": [
-          "Statistics"
-        ],
-        "summary": "Phân bố điểm chữ (PB-21 / T0694DC)",
-        "operationId": "getDistribution_statistics_distribution",
-        "description": "Đếm mọi lần học đủ điểm, bao gồm F và học lại, để khớp danh sách môn. Tra grade10 đã làm tròn 1 chữ số vào grade_scale trong DB. Trả đủ các mức theo min10 giảm dần, cả mức có count=0. Không đủ điểm: totalCourses=0.",
-        "x-task-id": "T0694D7",
-        "x-implementation": "implemented",
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DistributionResponse"
-                },
-                "example": {
-                  "success": true,
-                  "statusCode": 200,
-                  "message": "Thành công",
-                  "data": {
-                    "items": [
-                      {
-                        "grade": "A",
-                        "count": 1
-                      },
-                      {
-                        "grade": "B+",
-                        "count": 0
-                      },
-                      {
-                        "grade": "B",
-                        "count": 0
-                      },
-                      {
-                        "grade": "C+",
-                        "count": 0
-                      },
-                      {
-                        "grade": "C",
-                        "count": 0
-                      },
-                      {
-                        "grade": "D+",
-                        "count": 0
-                      },
-                      {
-                        "grade": "D",
-                        "count": 0
-                      },
-                      {
-                        "grade": "F",
-                        "count": 1
-                      }
-                    ],
-                    "totalCourses": 2,
-                    "countingPolicy": "ALL_COMPLETED_ATTEMPTS"
-                  },
-                  "error": null,
-                  "timestamp": "2026-11-17T09:00:00+07:00",
-                  "path": "/api/v1/statistics/distribution"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        }
-      }
-    },
-    "/statistics/dashboard": {
-      "get": {
-        "tags": [
-          "Statistics"
-        ],
-        "summary": "Dashboard một request (PB-20 / PB-21)",
-        "operationId": "getDashboard_statistics_dashboard",
-        "description": "Gộp summary, semesters, distribution; cùng một lần đọc dữ liệu. FE dùng để giảm số request. FE hiển thị loading/rỗng/lỗi, không thay lỗi bằng dữ liệu mẫu. Chỉ tiêu Dashboard <2s đo tại FE theo PB-39.",
-        "x-task-id": "T0694D7",
-        "x-implementation": "implemented",
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DashboardResponse"
-                },
-                "example": {
-                  "success": true,
-                  "statusCode": 200,
-                  "message": "Thành công",
-                  "data": {
-                    "summary": {
-                      "gpa4": 2.4,
-                      "includedCredits": 5,
-                      "passedCredits": 3,
-                      "ranking": "Trung bình",
-                      "average10": 6.96,
-                      "totalCourses": 3,
-                      "completedCourses": 2,
-                      "passedCourses": 1,
-                      "retakePolicy": "HIGHEST_GRADE_BY_COURSE_CODE"
-                    },
-                    "semesters": {
-                      "items": [
-                        {
-                          "semesterId": 1,
-                          "name": "HK1",
-                          "academicYear": "2026-2027",
-                          "startDate": "2026-09-01",
-                          "gpa4": 2.4,
-                          "includedCredits": 5,
-                          "passedCredits": 3,
-                          "ranking": "Trung bình",
-                          "cumulativeGpa4": 2.4
-                        }
-                      ]
-                    },
-                    "distribution": {
-                      "items": [
-                        {
-                          "grade": "A",
-                          "count": 1
-                        },
-                        {
-                          "grade": "B+",
-                          "count": 0
-                        },
-                        {
-                          "grade": "B",
-                          "count": 0
-                        },
-                        {
-                          "grade": "C+",
-                          "count": 0
-                        },
-                        {
-                          "grade": "C",
-                          "count": 0
-                        },
-                        {
-                          "grade": "D+",
-                          "count": 0
-                        },
-                        {
-                          "grade": "D",
-                          "count": 0
-                        },
-                        {
-                          "grade": "F",
-                          "count": 1
-                        }
-                      ],
-                      "totalCourses": 2,
-                      "countingPolicy": "ALL_COMPLETED_ATTEMPTS"
-                    }
-                  },
-                  "error": null,
-                  "timestamp": "2026-11-17T09:00:00+07:00",
-                  "path": "/api/v1/statistics/dashboard"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        }
-      }
-    },
-    "/grade-scale": {
-      "get": {
-        "tags": [
-          "Grade scale"
-        ],
-        "summary": "Đọc bảng quy đổi (BR-04)",
-        "operationId": "getGradeScale_grade-scale",
-        "description": "Yêu cầu Bearer token. Đọc DB; FE dùng bảng này cho What-if, không hard-code các mốc.",
-        "x-task-id": "T0694D7",
-        "x-implementation": "implemented",
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GradeScaleResponse"
-                },
-                "example": {
-                  "success": true,
-                  "statusCode": 200,
-                  "message": "Thành công",
-                  "data": {
-                    "items": [
-                      {
-                        "letter": "A",
-                        "min10": 8.5,
-                        "max10": 10,
-                        "grade4": 4
-                      }
-                    ]
-                  },
-                  "error": null,
-                  "timestamp": "2026-11-17T09:00:00+07:00",
-                  "path": "/api/v1/grade-scale"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        }
-      }
-    },
     "/goals/required-score": {
       "get": {
         "tags": [
@@ -1954,7 +366,7 @@
                     "courseCode": "CS1",
                     "courseName": "Lập trình",
                     "credits": 3,
-                    "category": "cơ sở ngành",
+                    "category": "FOUNDATION",
                     "componentName": "Tổng kết",
                     "weightPercent": 100,
                     "score": 8.5
@@ -2394,6 +806,2658 @@
         ]
       }
     },
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Register",
+        "operationId": "register_api_v1_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveRegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 201
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "fullName": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "email",
+                        "fullName"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "x-implementation": "implemented",
+        "security": []
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Login",
+        "operationId": "login_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveLoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/TokenPair"
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "x-implementation": "implemented",
+        "security": []
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Refresh",
+        "operationId": "refresh_api_v1_auth_refresh_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveRefreshRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/TokenPair"
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "x-implementation": "implemented",
+        "security": []
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Logout",
+        "operationId": "logout_api_v1_auth_logout_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveRefreshRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "type": "object",
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "x-implementation": "implemented",
+        "security": []
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Thông tin tài khoản hiện tại",
+        "operationId": "getMe",
+        "description": "Đọc tài khoản từ phiên đăng nhập.",
+        "x-backlog-id": "PB-22",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "x-implementation": "implemented"
+      }
+    },
+    "/semesters": {
+      "get": {
+        "tags": [
+          "Semesters"
+        ],
+        "summary": "List Semesters",
+        "operationId": "list_semesters_api_v1_semesters_get",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LiveSemesterResponse"
+                      }
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-implementation": "implemented"
+      },
+      "post": {
+        "tags": [
+          "Semesters"
+        ],
+        "summary": "Add Semester",
+        "operationId": "add_semester_api_v1_semesters_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveSemesterCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 201
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/LiveSemesterResponse"
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-implementation": "implemented"
+      }
+    },
+    "/semesters/{semester_id}": {
+      "get": {
+        "tags": [
+          "Semesters"
+        ],
+        "summary": "Semester Detail",
+        "operationId": "semester_detail_api_v1_semesters__semester_id__get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "semester_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Semester Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/LiveSemesterResponse"
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "x-implementation": "implemented"
+      },
+      "put": {
+        "tags": [
+          "Semesters"
+        ],
+        "summary": "Edit Semester",
+        "operationId": "edit_semester_api_v1_semesters__semester_id__put",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "semester_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Semester Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveSemesterUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/LiveSemesterResponse"
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "x-implementation": "implemented"
+      },
+      "delete": {
+        "tags": [
+          "Semesters"
+        ],
+        "summary": "Remove Semester",
+        "operationId": "remove_semester_api_v1_semesters__semester_id__delete",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "semester_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Semester Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "deletedGradeComponents": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "deletedCourses": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "deletedGradeComponents",
+                        "deletedCourses"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "x-implementation": "implemented"
+      }
+    },
+    "/semesters/{semester_id}/courses": {
+      "post": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Add Course",
+        "description": "Nhận request, gọi service tạo môn và trả response chuẩn.",
+        "operationId": "add_course_api_v1_semesters__semester_id__courses_post",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "semester_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Semester Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveCourseCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 201
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/LiveCourseResponse"
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "x-implementation": "implemented"
+      },
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "List Courses",
+        "description": "Danh sách rỗng được biểu diễn bằng data = [].",
+        "operationId": "list_courses_api_v1_semesters__semester_id__courses_get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "semester_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Semester Id"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "title": "Keyword",
+              "type": "string",
+              "maxLength": 150,
+              "nullable": true
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "title": "Category",
+              "enum": [
+                "GENERAL",
+                "FOUNDATION",
+                "SPECIALIZED"
+              ],
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LiveCourseResponse"
+                      }
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "x-implementation": "implemented"
+      }
+    },
+    "/courses/{course_id}": {
+      "put": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Edit Course",
+        "operationId": "edit_course_api_v1_courses__course_id__put",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveCourseUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/LiveCourseResponse"
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "x-implementation": "implemented"
+      },
+      "delete": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Remove Course",
+        "operationId": "remove_course_api_v1_courses__course_id__delete",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "deletedGradeComponents": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "deletedGradeComponents"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "x-implementation": "implemented"
+      }
+    },
+    "/courses/{course_id}/deletion-preview": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Course Deletion Preview",
+        "operationId": "course_deletion_preview_api_v1_courses__course_id__deletion_preview_get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "gradeComponentsToDelete": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "gradeComponentsToDelete"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "x-implementation": "implemented"
+      }
+    },
+    "/courses/{course_id}/grade-components": {
+      "get": {
+        "tags": [
+          "Grade components"
+        ],
+        "summary": "Get Course Grade Components",
+        "operationId": "get_course_grade_components_api_v1_courses__course_id__grade_components_get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/CurrentGradeConfiguration"
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "x-implementation": "implemented"
+      },
+      "post": {
+        "tags": [
+          "Grade components"
+        ],
+        "summary": "Add Grade Component",
+        "operationId": "add_grade_component_api_v1_courses__course_id__grade_components_post",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveGradeComponentCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 201
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/CurrentGradeConfiguration"
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "x-implementation": "implemented"
+      }
+    },
+    "/grade-components/{component_id}": {
+      "put": {
+        "tags": [
+          "Grade components"
+        ],
+        "summary": "Edit Grade Component",
+        "operationId": "edit_grade_component_api_v1_grade_components__component_id__put",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "component_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Component Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveGradeComponentUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/CurrentGradeConfiguration"
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "x-implementation": "implemented"
+      },
+      "delete": {
+        "tags": [
+          "Grade components"
+        ],
+        "summary": "Remove Grade Component",
+        "operationId": "remove_grade_component_api_v1_grade_components__component_id__delete",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "component_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Component Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/CurrentGradeConfiguration"
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "x-implementation": "implemented"
+      }
+    },
+    "/courses/{course_id}/grade-components/complete": {
+      "post": {
+        "tags": [
+          "Grade components"
+        ],
+        "summary": "Complete Course Grade Configuration",
+        "operationId": "complete_course_grade_configuration_api_v1_courses__course_id__grade_components_complete_post",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/CurrentGradeConfiguration"
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "x-implementation": "implemented"
+      }
+    },
+    "/courses/{course_id}/scores": {
+      "put": {
+        "tags": [
+          "Grade components"
+        ],
+        "summary": "Enter Or Edit Course Scores",
+        "description": "PB-15: nhập hoặc sửa điểm, còn tính điểm chính thức thuộc PB-16.",
+        "operationId": "enter_or_edit_course_scores_api_v1_courses__course_id__scores_put",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveCourseScoresUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/CurrentGradeConfiguration"
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "x-implementation": "implemented"
+      }
+    },
+    "/grade-scale": {
+      "get": {
+        "tags": [
+          "Grade scale"
+        ],
+        "summary": "List Grade Scale",
+        "description": "Công khai, đọc bảng quy đổi DB; data là mảng {id,minScore,maxScore,letter,gpa4}. FE dùng trực tiếp, không hard-code.",
+        "operationId": "list_grade_scale_api_v1_grade_scale_get",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LiveGradeScaleResponse"
+                      }
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "x-implementation": "implemented",
+        "security": []
+      }
+    },
+    "/semesters/{semester_id}/gpa": {
+      "get": {
+        "tags": [
+          "GPA"
+        ],
+        "summary": "Get Semester Gpa",
+        "operationId": "get_semester_gpa_api_v1_semesters__semester_id__gpa_get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "semester_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Semester Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SemesterGpa"
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "x-implementation": "implemented"
+      }
+    },
+    "/gpa/cumulative": {
+      "get": {
+        "tags": [
+          "GPA"
+        ],
+        "summary": "Get Cumulative Gpa",
+        "operationId": "get_cumulative_gpa_api_v1_gpa_cumulative_get",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Thành công"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/CumulativeGpa"
+                    },
+                    "error": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Luôn là null khi thành công.",
+                      "example": null
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 có múi giờ.",
+                      "format": "date-time",
+                      "example": "2026-11-10T09:00:00+07:00"
+                    },
+                    "path": {
+                      "type": "string",
+                      "example": "/api/v1/semesters"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "statusCode",
+                    "message",
+                    "data",
+                    "error",
+                    "timestamp",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-implementation": "implemented"
+      }
+    },
+    "/statistics/summary": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "summary": "Tổng hợp Dashboard (PB-20 / T0694DB)",
+        "operationId": "getStatisticsSummary_statistics_summary",
+        "description": "GPA và average10 có trọng số tín chỉ; học lại chọn điểm cao nhất (hệ 4, hệ 10, ID nhỏ nhất). passedCredits chỉ tính môn >= 4.0. Không dữ liệu: GPA/average10/ranking=null, các bộ đếm=0. totalCourses đếm mọi lần học; completedCourses/passedCourses đếm sau gộp mã môn.",
+        "x-task-id": "T0694D7",
+        "x-implementation": "implemented",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatisticsSummaryResponse"
+                },
+                "example": {
+                  "success": true,
+                  "statusCode": 200,
+                  "message": "Thành công",
+                  "data": {
+                    "gpa4": 2.4,
+                    "includedCredits": 5,
+                    "passedCredits": 3,
+                    "ranking": "Trung bình",
+                    "average10": 6.96,
+                    "totalCourses": 3,
+                    "completedCourses": 2,
+                    "passedCourses": 1,
+                    "retakePolicy": "HIGHEST_GRADE_BY_COURSE_CODE"
+                  },
+                  "error": null,
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/statistics/summary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        }
+      }
+    },
+    "/statistics/semesters": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "summary": "GPA theo kỳ (PB-21 / T0694DC)",
+        "operationId": "getStatisticsSemesters_statistics_semesters",
+        "description": "Sắp xếp startDate, semesterId tăng dần. GPA kỳ giữ mọi lần học trong kỳ; cumulativeGpa4 gộp học lại trong các kỳ đến thời điểm đó. GPA làm tròn HALF_UP 2 chữ số trước xếp loại. Kỳ rỗng trả GPA null; không có kỳ trả items=[].",
+        "x-task-id": "T0694D7",
+        "x-implementation": "implemented",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatisticsSemestersResponse"
+                },
+                "example": {
+                  "success": true,
+                  "statusCode": 200,
+                  "message": "Thành công",
+                  "data": {
+                    "items": [
+                      {
+                        "semesterId": 1,
+                        "name": "HK1",
+                        "academicYear": "2026-2027",
+                        "startDate": "2026-09-01",
+                        "gpa4": 2.4,
+                        "includedCredits": 5,
+                        "passedCredits": 3,
+                        "ranking": "Trung bình",
+                        "cumulativeGpa4": 2.4
+                      }
+                    ]
+                  },
+                  "error": null,
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/statistics/semesters"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        }
+      }
+    },
+    "/statistics/distribution": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "summary": "Phân bố điểm chữ (PB-21 / T0694DC)",
+        "operationId": "getDistribution_statistics_distribution",
+        "description": "Đếm mọi lần học đủ điểm, bao gồm F và học lại, để khớp danh sách môn. Tra grade10 đã làm tròn 1 chữ số vào grade_scale trong DB. Trả đủ các mức theo min10 giảm dần, cả mức có count=0. Không đủ điểm: totalCourses=0.",
+        "x-task-id": "T0694D7",
+        "x-implementation": "implemented",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DistributionResponse"
+                },
+                "example": {
+                  "success": true,
+                  "statusCode": 200,
+                  "message": "Thành công",
+                  "data": {
+                    "items": [
+                      {
+                        "grade": "A",
+                        "count": 1
+                      },
+                      {
+                        "grade": "B+",
+                        "count": 0
+                      },
+                      {
+                        "grade": "B",
+                        "count": 0
+                      },
+                      {
+                        "grade": "C+",
+                        "count": 0
+                      },
+                      {
+                        "grade": "C",
+                        "count": 0
+                      },
+                      {
+                        "grade": "D+",
+                        "count": 0
+                      },
+                      {
+                        "grade": "D",
+                        "count": 0
+                      },
+                      {
+                        "grade": "F",
+                        "count": 1
+                      }
+                    ],
+                    "totalCourses": 2,
+                    "countingPolicy": "ALL_COMPLETED_ATTEMPTS"
+                  },
+                  "error": null,
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/statistics/distribution"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        }
+      }
+    },
+    "/statistics/dashboard": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "summary": "Dashboard một request (PB-20 / PB-21)",
+        "operationId": "getDashboard_statistics_dashboard",
+        "description": "Gộp summary, semesters, distribution; cùng một lần đọc dữ liệu. FE dùng để giảm số request. FE hiển thị loading/rỗng/lỗi, không thay lỗi bằng dữ liệu mẫu. Chỉ tiêu Dashboard <2s đo tại FE theo PB-39.",
+        "x-task-id": "T0694D7",
+        "x-implementation": "implemented",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardResponse"
+                },
+                "example": {
+                  "success": true,
+                  "statusCode": 200,
+                  "message": "Thành công",
+                  "data": {
+                    "summary": {
+                      "gpa4": 2.4,
+                      "includedCredits": 5,
+                      "passedCredits": 3,
+                      "ranking": "Trung bình",
+                      "average10": 6.96,
+                      "totalCourses": 3,
+                      "completedCourses": 2,
+                      "passedCourses": 1,
+                      "retakePolicy": "HIGHEST_GRADE_BY_COURSE_CODE"
+                    },
+                    "semesters": {
+                      "items": [
+                        {
+                          "semesterId": 1,
+                          "name": "HK1",
+                          "academicYear": "2026-2027",
+                          "startDate": "2026-09-01",
+                          "gpa4": 2.4,
+                          "includedCredits": 5,
+                          "passedCredits": 3,
+                          "ranking": "Trung bình",
+                          "cumulativeGpa4": 2.4
+                        }
+                      ]
+                    },
+                    "distribution": {
+                      "items": [
+                        {
+                          "grade": "A",
+                          "count": 1
+                        },
+                        {
+                          "grade": "B+",
+                          "count": 0
+                        },
+                        {
+                          "grade": "B",
+                          "count": 0
+                        },
+                        {
+                          "grade": "C+",
+                          "count": 0
+                        },
+                        {
+                          "grade": "C",
+                          "count": 0
+                        },
+                        {
+                          "grade": "D+",
+                          "count": 0
+                        },
+                        {
+                          "grade": "D",
+                          "count": 0
+                        },
+                        {
+                          "grade": "F",
+                          "count": 1
+                        }
+                      ],
+                      "totalCourses": 2,
+                      "countingPolicy": "ALL_COMPLETED_ATTEMPTS"
+                    }
+                  },
+                  "error": null,
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/statistics/dashboard"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "tags": [
@@ -2432,42 +3496,6 @@
           }
         },
         "security": []
-      }
-    },
-    "/auth/me": {
-      "get": {
-        "tags": [
-          "Auth"
-        ],
-        "summary": "Thông tin tài khoản hiện tại",
-        "operationId": "getMe",
-        "description": "Đọc tài khoản từ phiên đăng nhập.",
-        "x-backlog-id": "PB-22",
-        "responses": {
-          "200": {
-            "description": "Thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "404": {
-            "$ref": "#/components/responses/HTTP404"
-          },
-          "500": {
-            "$ref": "#/components/responses/HTTP500"
-          }
-        },
-        "x-implementation": "implemented"
       }
     }
   },
@@ -4389,7 +5417,7 @@
                   "minimum": 1
                 },
                 "semester": {
-                  "$ref": "#/components/schemas/SemesterWrite"
+                  "$ref": "#/components/schemas/LiveSemesterCreate"
                 },
                 "courseCode": {
                   "type": "string",
@@ -4408,9 +5436,9 @@
                 "category": {
                   "type": "string",
                   "enum": [
-                    "đại cương",
-                    "cơ sở ngành",
-                    "chuyên ngành"
+                    "GENERAL",
+                    "FOUNDATION",
+                    "SPECIALIZED"
                   ]
                 },
                 "componentName": {
@@ -5204,6 +6232,610 @@
           "error",
           "timestamp",
           "path"
+        ],
+        "additionalProperties": false
+      },
+      "LiveCourseCreate": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "credits": {
+            "type": "integer",
+            "maximum": 100.0,
+            "exclusiveMinimum": true,
+            "title": "Credits",
+            "minimum": 0.0
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "GENERAL",
+              "FOUNDATION",
+              "SPECIALIZED"
+            ],
+            "title": "Category"
+          },
+          "is_retake": {
+            "type": "boolean",
+            "title": "Is Retake",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "credits",
+          "category"
+        ],
+        "title": "CourseCreate"
+      },
+      "LiveCourseScoresUpdate": {
+        "properties": {
+          "scores": {
+            "items": {
+              "$ref": "#/components/schemas/LiveGradeScoreItem"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Scores"
+          }
+        },
+        "type": "object",
+        "required": [
+          "scores"
+        ],
+        "title": "CourseScoresUpdate",
+        "description": "Cho phép FE gửi một hoặc nhiều điểm trong cùng một lần cập nhật."
+      },
+      "LiveCourseUpdate": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "credits": {
+            "type": "integer",
+            "maximum": 100.0,
+            "exclusiveMinimum": true,
+            "title": "Credits",
+            "minimum": 0.0
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "GENERAL",
+              "FOUNDATION",
+              "SPECIALIZED"
+            ],
+            "title": "Category"
+          },
+          "is_retake": {
+            "type": "boolean",
+            "title": "Is Retake",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "credits",
+          "category"
+        ],
+        "title": "CourseUpdate",
+        "description": "Dữ liệu hợp lệ được phép cập nhật cho môn học."
+      },
+      "LiveGradeComponentCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "weight_percent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "exclusiveMinimum": true,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Weight Percent"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "weight_percent"
+        ],
+        "title": "GradeComponentCreate",
+        "description": "Sinh viên chỉ cấu hình tên và trọng số; nhập điểm thuộc PB-15."
+      },
+      "LiveGradeComponentUpdate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "weight_percent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "exclusiveMinimum": true,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Weight Percent"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "weight_percent"
+        ],
+        "title": "GradeComponentUpdate",
+        "description": "PB-14 cho phép sửa cả tên và trọng số của thành phần."
+      },
+      "LiveGradeScoreItem": {
+        "properties": {
+          "component_id": {
+            "type": "integer",
+            "exclusiveMinimum": true,
+            "title": "Component Id",
+            "minimum": 0.0
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 10.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Score"
+          }
+        },
+        "type": "object",
+        "required": [
+          "component_id",
+          "score"
+        ],
+        "title": "GradeScoreItem",
+        "description": "Điểm của một thành phần; component_id giúp lưu đúng thành phần."
+      },
+      "LiveHTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/LiveValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "LiveLoginRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 72,
+            "minLength": 1,
+            "format": "password",
+            "title": "Password",
+            "writeOnly": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "LoginRequest"
+      },
+      "LiveRefreshRequest": {
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "maxLength": 4096,
+            "minLength": 1,
+            "format": "password",
+            "title": "Refreshtoken",
+            "writeOnly": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "refreshToken"
+        ],
+        "title": "RefreshRequest"
+      },
+      "LiveRegisterRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "full_name": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Full Name"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 72,
+            "minLength": 8,
+            "format": "password",
+            "title": "Password",
+            "writeOnly": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "full_name",
+          "password"
+        ],
+        "title": "RegisterRequest"
+      },
+      "LiveSemesterCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "academic_year": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 1,
+            "title": "Academic Year"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "title": "End Date"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "academic_year",
+          "start_date",
+          "end_date"
+        ],
+        "title": "SemesterCreate"
+      },
+      "LiveSemesterUpdate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "academic_year": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 1,
+            "title": "Academic Year"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "title": "End Date"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "academic_year",
+          "start_date",
+          "end_date"
+        ],
+        "title": "SemesterUpdate"
+      },
+      "LiveValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "LiveCourseResponse": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "semester_id": {
+            "title": "Semester Id",
+            "type": "integer"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "credits": {
+            "title": "Credits",
+            "type": "integer"
+          },
+          "category": {
+            "enum": [
+              "GENERAL",
+              "FOUNDATION",
+              "SPECIALIZED"
+            ],
+            "title": "Category",
+            "type": "string"
+          },
+          "is_retake": {
+            "title": "Is Retake",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "semester_id",
+          "code",
+          "name",
+          "credits",
+          "category",
+          "is_retake"
+        ],
+        "title": "CourseResponse",
+        "type": "object"
+      },
+      "LiveSemesterResponse": {
+        "properties": {
+          "name": {
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "academic_year": {
+            "maxLength": 20,
+            "minLength": 1,
+            "title": "Academic Year",
+            "type": "string"
+          },
+          "start_date": {
+            "format": "date",
+            "title": "Start Date",
+            "type": "string"
+          },
+          "end_date": {
+            "format": "date",
+            "title": "End Date",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "academic_year",
+          "start_date",
+          "end_date",
+          "id",
+          "user_id"
+        ],
+        "title": "SemesterResponse",
+        "type": "object"
+      },
+      "LiveGradeScaleResponse": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "minScore": {
+            "title": "Minscore",
+            "type": "number"
+          },
+          "maxScore": {
+            "title": "Maxscore",
+            "type": "number"
+          },
+          "letter": {
+            "title": "Letter",
+            "type": "string"
+          },
+          "gpa4": {
+            "title": "Gpa4",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "minScore",
+          "maxScore",
+          "letter",
+          "gpa4"
+        ],
+        "title": "GradeScaleResponse",
+        "type": "object"
+      },
+      "CurrentGradeConfiguration": {
+        "type": "object",
+        "properties": {
+          "components": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "courseId": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "weightPercent": {
+                  "type": "number"
+                },
+                "score": {
+                  "type": "number",
+                  "nullable": true
+                }
+              },
+              "required": [
+                "id",
+                "courseId",
+                "name",
+                "weightPercent",
+                "score"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "totalWeightPercent": {
+            "type": "number"
+          },
+          "isComplete": {
+            "type": "boolean"
+          },
+          "temporaryCourseScore": {
+            "type": "number",
+            "nullable": true
+          },
+          "hasAllScores": {
+            "type": "boolean"
+          },
+          "canCalculateCourseGrade": {
+            "type": "boolean"
+          },
+          "courseGrade10": {
+            "type": "number",
+            "nullable": true
+          },
+          "calculationMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "letterGrade": {
+            "type": "string",
+            "nullable": true
+          },
+          "grade4": {
+            "type": "number",
+            "nullable": true
+          },
+          "isPassed": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "required": [
+          "components",
+          "totalWeightPercent",
+          "isComplete",
+          "temporaryCourseScore",
+          "hasAllScores",
+          "canCalculateCourseGrade",
+          "courseGrade10",
+          "calculationMessage",
+          "letterGrade",
+          "grade4",
+          "isPassed"
         ],
         "additionalProperties": false
       }

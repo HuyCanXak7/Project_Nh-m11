@@ -22,7 +22,7 @@ jobs:
       - run: python -m ruff check app scripts migrations tests
       - run: python -m compileall -q app scripts migrations
       - run: python -m openapi_spec_validator ../docs/api/openapi.json
-      - run: python -m unittest discover -s tests -v
+      - run: python -m pytest tests -v
       - run: python -m scripts.verify_statistics > statistics-evidence.json
       - uses: actions/upload-artifact@v4
         with:
@@ -41,11 +41,11 @@ jobs:
           node-version: '22'
       - run: python -m unittest discover -s frontend/tests -v
       - run: npx --yes --package eslint@9.39.1 eslint frontend/assets/js
-      - run: node --test frontend/tests/test_semester_gpa.cjs
+      - run: node --test frontend/tests/test_frontend.cjs
       - run: find frontend/assets/js -name '*.js' -print0 | xargs -0 -n1 node --check
 
   staging:
-    needs: [backend, frontend, mysql]
+    needs: [backend, frontend, mysql, containers]
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     uses: ./.github/workflows/staging.yml
     secrets: inherit
@@ -72,5 +72,24 @@ jobs:
       - name: Statistics API against MySQL 8
         working-directory: backend
         env:
-          GPA_TEST_DATABASE_URL: mysql+pymysql://root:ci-only-password@127.0.0.1:3306/statistics_test
-        run: python -m unittest tests.test_statistics -v
+          TEST_DATABASE_URL: mysql+pymysql://root:ci-only-password@127.0.0.1:3306/statistics_test
+        run: python -m pytest tests/test_statistics.py -v
+
+  containers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Configure disposable CI stack
+        run: |
+          cp .env.example .env
+          python -c "from pathlib import Path; import secrets; p=Path('.env'); p.write_text('\n'.join('SECRET_KEY='+secrets.token_urlsafe(32) if line.startswith('SECRET_KEY=') else line for line in p.read_text().splitlines())+'\n')"
+      - name: Build and start FE, BE and MySQL
+        run: docker compose --env-file .env -f deploy/compose.staging.yaml up --build -d --wait --wait-timeout 240
+      - name: Smoke test the full stack
+        run: python backend/scripts/warm_staging.py http://127.0.0.1:8080
+      - name: Stop disposable CI stack
+        if: always()
+        run: docker compose --env-file .env -f deploy/compose.staging.yaml down -v

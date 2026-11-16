@@ -6,6 +6,7 @@
     <title>Thống kê - Quản lí chỉ số học tập</title>
     <link rel="stylesheet" href="../assets/css/variables.css">
     <link rel="stylesheet" href="../assets/css/app_layout.css">
+    <link rel="stylesheet" href="../assets/css/model.css">
     <link rel="stylesheet" href="../assets/css/statistics.css">
 </head>
 <body class="app-page page-statistics">
@@ -96,14 +97,15 @@
             </div>
 
             <div class="dash-header__actions">
-                <button type="button" onclick="handleResetData()" class="btn-outline btn-outline--sm" title="Khôi phục dữ liệu mẫu ban đầu">
-                    🔄 Khôi phục
+                <button type="button" onclick="handleResetData()" class="btn-reset" title="Khôi phục dữ liệu mẫu ban đầu">
+                    Khôi phục
                 </button>
                 <button type="button" class="icon-btn" aria-label="Thông báo" title="Thông báo">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 17V11a6 6 0 0 1 12 0v6l2 2H4Z"/><path d="M10 21a2.5 2.5 0 0 0 4 0"/></svg>
                     <span class="icon-btn__dot"></span>
                 </button>
                 <!-- Menu tài khoản -->
+                
                 <div class="user-menu" id="userMenu">
                     <button type="button" class="user-chip" id="userMenuToggle" aria-haspopup="menu" aria-expanded="false" aria-controls="userMenuList">
                         <span class="user-chip__avatar" id="userAvatar">HN</span>
@@ -254,6 +256,6 @@
     <script src="../assets/js/gradeCalculator.js"></script>
     <script src="../assets/js/session.js"></script>
     <script src="../assets/js/app_shell.js"></script>
-    <script src="../assets/js/pages/statistics.js"></script>
+    <script src="../assets/js/statistics.js"></script>
 </body>
 </html>

@@ -89,7 +89,7 @@ function showToast(msg, isError = false) {
   }
 
   toast.style.background = isError ? 'var(--error, #E53E3E)' : 'var(--primary, #3B82F6)';
-  toast.innerHTML = isError ? `⚠️ ${msg}` : `✅ ${msg}`;
+  toast.innerHTML = isError ? `${msg}` : `${msg}`;
   toast.style.opacity = '1';
   toast.style.transform = 'translateY(0)';
 
@@ -102,10 +102,20 @@ function showToast(msg, isError = false) {
 // Helper đóng modal
 function closeAppModal(modalId) {
   const el = document.getElementById(modalId);
-  if (el) el.style.display = 'none';
+  if (!el) return;
+  el.classList.remove('is-open');
+  setTimeout(() => {
+    if (!el.classList.contains('is-open')) {
+      el.style.display = 'none';
+    }
+  }, 200);
 }
 
 function openAppModal(modalId) {
   const el = document.getElementById(modalId);
-  if (el) el.style.display = 'flex';
+  if (!el) return;
+  el.style.display = 'flex';
+  requestAnimationFrame(() => {
+    el.classList.add('is-open');
+  });
 }

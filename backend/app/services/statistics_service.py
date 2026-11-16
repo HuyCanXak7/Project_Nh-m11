@@ -4,25 +4,24 @@ from decimal import Decimal, ROUND_HALF_UP
 
 import sqlalchemy as sa
 
-from app.db.session import get_engine
-from app.db.tables import courses, semesters, grade_scale
-from app.services.gpa_service import summarize_gpa
+from app.models import Course, Semester, GradeScale
+from app.services.gpa import summarize_gpa
 
 
-def snapshot(user_id):
+def snapshot(db, user_id):
     # One transaction and two queries, independent of the number of semesters.
-    with get_engine().begin() as connection:
-        rows = connection.execute(
-            sa.select(
-                semesters.c.id.label("semester_id"), semesters.c.name.label("semester_name"),
-                semesters.c.academic_year, semesters.c.start_date,
-                courses.c.id.label("course_id"), courses.c.code, courses.c.credits,
-                courses.c.grade10, courses.c.grade4,
-            ).select_from(semesters.outerjoin(courses))
-            .where(semesters.c.user_id == user_id)
-            .order_by(semesters.c.start_date, semesters.c.id, courses.c.id)
-        ).all()
-        scale = connection.execute(sa.select(grade_scale).order_by(grade_scale.c.min10.desc())).mappings().all()
+    rows = db.execute(
+        sa.select(
+            Semester.id.label("semester_id"), Semester.name.label("semester_name"),
+            Semester.academic_year, Semester.start_date,
+            Course.id.label("course_id"), Course.code, Course.credits,
+            Course.grade10, Course.grade4,
+        ).select_from(Semester).outerjoin(Course)
+        .where(Semester.user_id == user_id)
+        .order_by(Semester.start_date, Semester.id, Course.id)
+    ).all()
+    scale = [{"letter": entry.letter, "min10": entry.min_score, "max10": entry.max_score}
+             for entry in db.query(GradeScale).order_by(GradeScale.min_score.desc()).all()]
     return rows, scale
 
 

@@ -2,6 +2,9 @@
 
 import copy
 import json
+import os
+import sys
+from secrets import token_urlsafe
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -245,8 +248,111 @@ def build():
     for tag in ["Statistics", "Grade scale", "Import", "Admin", "Health"]:
         if tag not in [item["name"] for item in spec["tags"]]:
             spec["tags"].append({"name": tag})
+    merge_runtime(spec)
     TARGET.write_text(json.dumps(spec, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def merge_runtime(spec):
+    """Reconcile the old draft with the merged ORM API without changing its wire format."""
+    from fastapi.openapi.utils import get_openapi
+    from app.main import app
+    from app.schemas.course import CourseResponse
+    from app.schemas.semester import SemesterResponse
+    from app.schemas.grade_scale import GradeScaleResponse
+
+    def convert(node):
+        if isinstance(node, list):
+            return [convert(child) for child in node]
+        if not isinstance(node, dict):
+            return node
+        node = {key: convert(value) for key, value in node.items()}
+        if "$ref" in node and node["$ref"].startswith("#/components/schemas/"):
+            node["$ref"] = node["$ref"].replace("#/components/schemas/", "#/components/schemas/Live")
+        if "anyOf" in node and any(child.get("type") == "null" for child in node["anyOf"]):
+            rest = [child for child in node.pop("anyOf") if child.get("type") != "null"]
+            node.update(rest[0] if len(rest) == 1 else {"anyOf": rest})
+            node["nullable"] = True
+        for bound in ["Minimum", "Maximum"]:
+            key = "exclusive" + bound
+            if key in node and not isinstance(node[key], bool):
+                node[bound.lower()] = node[key]
+                node[key] = True
+        node.pop("const", None)
+        return node
+
+    live = get_openapi(title=app.title, version="1.1.0", openapi_version="3.0.3", routes=app.routes)
+    schemas = spec["components"]["schemas"]
+    for name, schema in live.get("components", {}).get("schemas", {}).items():
+        schemas["Live" + name] = convert(schema)
+    for model in [CourseResponse, SemesterResponse, GradeScaleResponse]:
+        schemas["Live" + model.__name__] = convert(model.model_json_schema(mode="serialization"))
+    draft_paths = spec["paths"]
+    spec["paths"] = {path: value for path, value in draft_paths.items()
+                     if path == "/goals" or path.startswith(("/admin/", "/import/", "/goals/required"))}
+    for full_path, methods in live["paths"].items():
+        if not full_path.startswith("/api/v1"):
+            continue
+        path = full_path.removeprefix("/api/v1")
+        if path.startswith("/statistics/") or path in {"/health", "/auth/me"}:
+            spec["paths"][path] = draft_paths[path]
+            continue
+        spec["paths"][path] = convert(methods)
+        for method, operation in spec["paths"][path].items():
+            operation["x-implementation"] = "implemented"
+            operation["responses"].pop("422", None)
+            for code in [400, 401, 403, 404, 500]:
+                operation["responses"][str(code)] = {"$ref": f"#/components/responses/HTTP{code}"}
+            operation["security"] = [] if path in {"/auth/register", "/auth/login", "/auth/refresh", "/auth/logout", "/grade-scale"} else [{"BearerAuth": []}]
+            data_schema = None
+            if path == "/grade-scale":
+                data_schema = array(ref("LiveGradeScaleResponse"))
+                operation["description"] = "Công khai, đọc bảng quy đổi DB; data là mảng {id,minScore,maxScore,letter,gpa4}. FE dùng trực tiếp, không hard-code."
+                operation["responses"] = {"200": operation["responses"]["200"], "500": operation["responses"]["500"]}
+            elif path.startswith("/auth/"):
+                data_schema = ref("TokenPair") if path.endswith(("login", "refresh")) else {"type": "object", "nullable": True}
+                if path.endswith("register"):
+                    data_schema = obj({"id": {"type": "integer"}, "email": {"type": "string"}, "fullName": {"type": "string"}})
+            elif path.endswith("/gpa"):
+                data_schema = ref("SemesterGpa")
+            elif path == "/gpa/cumulative":
+                data_schema = ref("CumulativeGpa")
+            elif "grade-components" in path or path.endswith("/scores"):
+                data_schema = ref("CurrentGradeConfiguration")
+            elif method != "delete" and not path.endswith("deletion-preview"):
+                name = "LiveCourseResponse" if "/courses" in path else "LiveSemesterResponse"
+                data_schema = array(ref(name)) if method == "get" and (path == "/semesters" or path.endswith("/courses")) else ref(name)
+            elif path.endswith("deletion-preview"):
+                data_schema = obj({"gradeComponentsToDelete": {"type": "integer", "minimum": 0}})
+            else:
+                props = {"deletedGradeComponents": {"type": "integer", "minimum": 0}}
+                if path.startswith("/semesters"):
+                    props["deletedCourses"] = {"type": "integer", "minimum": 0}
+                data_schema = obj(props)
+            status = "201" if method == "post" and path in {"/auth/register"} or method == "post" and path.endswith("/courses") or method == "post" and path == "/semesters" or method == "post" and path.endswith("grade-components") else "200"
+            envelope = copy.deepcopy(schemas["UserResponse"])
+            envelope["properties"]["data"] = data_schema
+            envelope["properties"]["statusCode"]["example"] = int(status)
+            operation["responses"][status] = {"description": "Thành công", "content": {"application/json": {"schema": envelope}}}
+    num = {"type": "number", "nullable": True}
+    boolean = {"type": "boolean"}
+    schemas["CurrentGradeConfiguration"] = obj({
+        "components": array(obj({"id": {"type": "integer"}, "courseId": {"type": "integer"}, "name": {"type": "string"},
+                                 "weightPercent": {"type": "number"}, "score": num})),
+        "totalWeightPercent": {"type": "number"}, "isComplete": boolean, "temporaryCourseScore": num,
+        "hasAllScores": boolean, "canCalculateCourseGrade": boolean, "courseGrade10": num,
+        "calculationMessage": {"type": "string", "nullable": True}, "letterGrade": {"type": "string", "nullable": True},
+        "grade4": num, "isPassed": {"type": "boolean", "nullable": True},
+    })
+    # The draft import uses the current semester fields and current category enum.
+    import_row = schemas["ImportGradesRequest"]["properties"]["rows"]["items"]
+    import_row["properties"]["semester"] = ref("LiveSemesterCreate")
+    import_row["properties"]["category"]["enum"] = ["GENERAL", "FOUNDATION", "SPECIALIZED"]
+    draft_paths["/import/grades"]["post"]["requestBody"]["content"]["application/json"]["example"]["rows"][0]["category"] = "FOUNDATION"
+
+
 if __name__ == "__main__":
+    # Import the app for schema generation with a disposable in-memory engine, never the real configured DB.
+    sys.path.insert(0, str(ROOT / "backend"))
+    os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+    os.environ["SECRET_KEY"] = token_urlsafe(32)
     build()

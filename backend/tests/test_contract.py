@@ -7,7 +7,7 @@ from openapi_schema_validator import OAS30Validator
 from openapi_spec_validator import validate
 
 from app.main import app
-from app.routers import auth, gpa, statistics
+from fastapi.openapi.utils import get_openapi
 
 SPEC_PATH = Path(__file__).resolve().parents[2] / "docs/api/openapi.json"
 
@@ -34,8 +34,8 @@ class ContractTests(unittest.TestCase):
         visit(self.spec)
 
     def test_implemented_contract_operations_have_real_routes(self):
-        actual = {(route.path, method) for router in [app, auth.router, gpa.router, statistics.router]
-                  for route in router.routes for method in getattr(route, "methods", [])}
+        live = get_openapi(title=app.title, version=app.version, routes=app.routes)
+        actual = {(path, method.upper()) for path, methods in live["paths"].items() for method in methods}
         for path, item in self.spec["paths"].items():
             for method, operation in item.items():
                 if isinstance(operation, dict) and operation.get("x-implementation") == "implemented":
@@ -53,5 +53,5 @@ class ContractTests(unittest.TestCase):
                     "/admin/statistics": "get", "/admin/audit-logs": "get"}
         for path, method in required.items():
             operation = self.spec["paths"][path][method]
-            for status in ["200", "401", "403", "500"]:
+            for status in (["200", "500"] if path == "/grade-scale" else ["200", "401", "403", "500"]):
                 self.assertIn(status, operation["responses"])

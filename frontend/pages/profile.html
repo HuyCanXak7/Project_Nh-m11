@@ -99,8 +99,8 @@
             </div>
 
             <div class="dash-header__actions">
-                <button type="button" onclick="handleResetData()" class="btn-outline btn-outline--sm" title="Khôi phục dữ liệu mẫu ban đầu">
-                    🔄 Khôi phục
+                <button type="button" onclick="handleResetData()" class="btn-reset" title="Khôi phục dữ liệu mẫu ban đầu">
+                    Khôi phục
                 </button>
                 <button type="button" class="icon-btn" aria-label="Thông báo" title="Thông báo">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 17V11a6 6 0 0 1 12 0v6l2 2H4Z"/><path d="M10 21a2.5 2.5 0 0 0 4 0"/></svg>
@@ -154,10 +154,10 @@
                             <p style="font-size: 12px; color: var(--text-gray); margin-bottom: 10px;">Hỗ trợ JPG, PNG, WEBP (tự động cắt vuông & tối ưu nhẹ)</p>
                             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                                 <button type="button" onclick="triggerAvatarUpload()" class="btn btn-primary btn-sm" style="font-size: 12px; padding: 6px 14px;">
-                                    📷 Tải ảnh lên
+                                    Tải ảnh lên
                                 </button>
                                 <button type="button" onclick="handleRemoveAvatar()" id="btnRemoveAvatar" class="btn btn-secondary btn-sm" style="display: none; font-size: 12px; padding: 6px 12px; color: var(--error);">
-                                    🗑️ Xóa ảnh
+                                    Xóa ảnh
                                 </button>
                             </div>
                         </div>
@@ -184,7 +184,7 @@
                             <label class="modal-label" for="profileClassInput">Lớp sinh hoạt</label>
                             <input type="text" id="profileClassInput" class="modal-input">
                         </div>
-                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">💾 Cập nhật hồ sơ</button>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Cập nhật hồ sơ</button>
                     </form>
                 </div>
 
@@ -192,7 +192,7 @@
                 <div style="background: #fff; border: 1.5px solid rgba(107, 114, 128, 0.2); border-radius: 24px; padding: 26px; display: flex; flex-direction: column; justify-content: space-between;">
                     <div>
                         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                            <span style="font-size: 26px;">🔒</span>
+                            <span style="font-size: 26px;"></span>
                             <div>
                                 <h3 style="font-size: 17px; font-weight: 800; color: var(--text-black);">Đổi Mật Khẩu</h3>
                                 <p style="font-size: 12px; color: var(--text-gray);">Bảo vệ tài khoản và phiên đăng nhập</p>
@@ -212,7 +212,7 @@
                                 <label class="modal-label" for="confirmPasswordInput">Xác nhận mật khẩu mới *</label>
                                 <input type="password" id="confirmPasswordInput" class="modal-input" minlength="8" required placeholder="Nhập lại mật khẩu mới">
                             </div>
-                            <button type="submit" class="btn btn-secondary" style="width: 100%; margin-top: 10px;">🔐 Đổi mật khẩu</button>
+                            <button type="submit" class="btn btn-secondary" style="width: 100%; margin-top: 10px;">Đổi mật khẩu</button>
                             <div style="text-align: center; margin-top: 14px; font-size: 13px; color: var(--text-gray);">
                                 Bạn quên mật khẩu hiện tại? <a href="forgot-password.html" style="color: var(--primary); font-weight: 700; text-decoration: none;">Khôi phục mật khẩu</a>
                             </div>
@@ -220,7 +220,7 @@
                     </div>
 
                     <div style="background: var(--bg-main); border-radius: 18px; padding: 14px; margin-top: 20px; font-size: 12.5px; color: var(--text-dark);">
-                        <strong style="color: var(--primary);">🛡️ Tiêu chuẩn bảo mật:</strong><br>
+                        <strong style="color: var(--primary);">Tiêu chuẩn bảo mật:</strong><br>
                         Khi đổi mật khẩu thành công, toàn bộ refresh token cũ trên các thiết bị khác sẽ được tự động thu hồi ngay lập tức.
                     </div>
                 </div>
@@ -233,6 +233,6 @@
     <script src="../assets/js/gradeCalculator.js"></script>
     <script src="../assets/js/session.js"></script>
     <script src="../assets/js/app_shell.js"></script>
-    <script src="../assets/js/pages/profile.js"></script>
+    <script src="../assets/js/profile.js"></script>
 </body>
 </html>

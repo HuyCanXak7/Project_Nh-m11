@@ -1,0 +1,243 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="810" viewBox="0 0 1440 810" font-family="Inter, 'SF Pro Display', sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F5F8FE"/><stop offset="1" stop-color="#EEF3FC"/>
+    </linearGradient>
+    <linearGradient id="banner" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3B82F6"/><stop offset="1" stop-color="#6FA8FF"/>
+    </linearGradient>
+    <linearGradient id="area" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3B6EF5" stop-opacity="0.18"/><stop offset="1" stop-color="#3B6EF5" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFD966"/><stop offset="1" stop-color="#F5A623"/>
+    </linearGradient>
+    <linearGradient id="card4" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#FFF6EA"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#2B4C9B" flood-opacity="0.07"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect id="Background" width="1440" height="810" fill="url(#bg)"/>
+  <circle cx="1080" cy="-20" r="110" fill="#DCE7FB" opacity="0.6"/>
+  <circle cx="1440" cy="140" r="90" fill="#DCE7FB" opacity="0.5"/>
+
+  <!-- Sidebar -->
+  <g id="Sidebar">
+    <rect width="220" height="810" fill="#FFFFFF" opacity="0.75"/>
+    <!-- Logo -->
+    <g id="Logo">
+      <path d="M100 40 L132 54 L100 68 L68 54 Z" fill="#2563EB"/>
+      <path d="M80 60 V72 Q100 84 120 72 V60 L100 69 Z" fill="#2563EB"/>
+      <path d="M130 55 V70" stroke="#2563EB" stroke-width="3" stroke-linecap="round"/>
+      <text x="103" y="104" text-anchor="middle" font-size="23" font-weight="800" fill="#2563EB">StudyTrack</text>
+    </g>
+    <!-- Nav -->
+    <g id="Nav" font-size="16" fill="#3A4256">
+      <rect x="22" y="141" width="180" height="52" rx="16" fill="#E6EEFD"/>
+      <path d="M38 168 L49 158 L60 168 V178 H53 V171 H45 V178 H38 Z" fill="#2563EB"/>
+      <text x="80" y="173" fill="#2563EB" font-weight="600">Trang chủ</text>
+
+      <g fill="none" stroke="#3A4256" stroke-width="1.8" stroke-linecap="round">
+        <path d="M40 240 V224 M47 240 V220 M54 240 V228 M37 240 H60"/>
+        <path d="M38 280 H47 V298 H38 Z M47 280 H58 V298 H47"/>
+        <rect x="38" y="334" width="20" height="19" rx="3"/><path d="M38 340 H58 M43 331 V336 M53 331 V336"/>
+        <circle cx="48" cy="399" r="9.5"/><path d="M44 399 L47 402 L53 395"/>
+        <circle cx="48" cy="454" r="4"/><circle cx="48" cy="454" r="9.5" stroke-dasharray="4 2.5"/>
+      </g>
+      <text x="80" y="236">Thống kê</text>
+      <text x="80" y="293">Môn học</text>
+      <text x="80" y="349">Thời khóa biểu</text>
+      <text x="80" y="405">Mục tiêu</text>
+      <text x="80" y="460">Cài đặt</text>
+    </g>
+    <!-- Motivation card -->
+    <g id="Motivation Card">
+      <rect x="22" y="532" width="190" height="152" rx="20" fill="#EDF2FC"/>
+      <path d="M105 560 H131 V572 Q131 586 118 588 Q105 586 105 572 Z" fill="url(#gold)"/>
+      <rect x="114" y="588" width="8" height="8" fill="#F5A623"/><rect x="108" y="596" width="20" height="6" rx="2" fill="#E2961C"/>
+      <text x="117" y="628" text-anchor="middle" font-size="15" fill="#1F2937">Cố gắng hơn mỗi</text>
+      <text x="117" y="650" text-anchor="middle" font-size="15" fill="#1F2937">ngày!</text>
+      <path d="M82 670 Q117 660 156 664" stroke="#2563EB" stroke-width="3" fill="none" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <!-- Header -->
+  <g id="Header">
+    <text x="252" y="93" font-size="32" font-weight="800" fill="#1A2233">Xin chào, Nguyễn Văn A! 👋</text>
+    <text x="252" y="124" font-size="17" fill="#5B6475">Cùng theo dõi và cải thiện kết quả học tập của bạn nhé!</text>
+    <g id="Bell" fill="none" stroke="#3A4256" stroke-width="1.8">
+      <path d="M1191 58 Q1191 42 1201 40 Q1211 42 1211 58 L1214 62 H1188 Z"/><path d="M1197 66 Q1201 70 1205 66"/>
+    </g>
+    <circle cx="1211" cy="38" r="4" fill="#EF4444"/>
+    <circle cx="1264" cy="49" r="19" fill="#2563EB"/>
+    <text x="1264" y="56" text-anchor="middle" font-size="18" font-weight="600" fill="#fff">A</text>
+    <text x="1290" y="55" font-size="15" fill="#1F2937">Nguyễn Văn A</text>
+    <path d="M1403 47 L1408 52 L1413 47" stroke="#1F2937" stroke-width="1.8" fill="none"/>
+  </g>
+
+  <!-- Stat cards -->
+  <g id="Stat Cards">
+    <g id="Card GPA" filter="url(#shadow)">
+      <rect x="250" y="152" width="288" height="118" rx="18" fill="#fff"/>
+      <circle cx="303" cy="198" r="33" fill="#E3EDFD"/>
+      <path d="M303 186 L321 194 L303 202 L285 194 Z M293 199 V206 Q303 213 313 206 V199 L303 203 Z" fill="#2563EB"/>
+      <text x="359" y="187" font-size="15" fill="#3A4256">GPA hiện tại</text>
+      <text x="359" y="223" font-size="30" font-weight="800" fill="#1A2233">3.42</text>
+      <text x="359" y="249" font-size="12.5" fill="#5B6475"><tspan fill="#16A34A">▲ +0.12</tspan> so với kỳ trước</text>
+    </g>
+    <g id="Card Credits" filter="url(#shadow)">
+      <rect x="553" y="152" width="262" height="118" rx="18" fill="#fff"/>
+      <circle cx="600" cy="198" r="31" fill="#ECE7FD"/>
+      <path d="M586 186 Q593 184 600 189 Q607 184 614 186 V210 Q607 208 600 212 Q593 208 586 210 Z" fill="#6D4AE8"/>
+      <path d="M600 189 V212" stroke="#ECE7FD" stroke-width="1.5"/>
+      <text x="652" y="187" font-size="15" fill="#3A4256">Tổng số tín chỉ</text>
+      <text x="652" y="223" font-size="30" font-weight="800" fill="#1A2233">78</text>
+      <text x="652" y="249" font-size="12.5" font-weight="600" fill="#16A34A">▲ +4 tín chỉ</text>
+    </g>
+    <g id="Card Passed" filter="url(#shadow)">
+      <rect x="828" y="152" width="266" height="118" rx="18" fill="#fff"/>
+      <circle cx="876" cy="198" r="31" fill="#DFF4EA"/>
+      <circle cx="876" cy="198" r="14" fill="#16A34A"/>
+      <path d="M869 198 L874 203 L883 193" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <text x="928" y="187" font-size="15" fill="#3A4256">Môn đạt</text>
+      <text x="928" y="223" font-size="30" font-weight="800" fill="#1A2233">6 / 8</text>
+      <text x="928" y="249" font-size="12.5" fill="#5B6475">75% hoàn thành</text>
+    </g>
+    <g id="Card Term Avg" filter="url(#shadow)">
+      <rect x="1109" y="152" width="300" height="118" rx="18" fill="url(#card4)"/>
+      <circle cx="1158" cy="198" r="31" fill="#FDEBD3"/>
+      <rect x="1145" y="187" width="26" height="24" rx="4" fill="none" stroke="#F59E0B" stroke-width="2.4"/>
+      <path d="M1145 194 H1171 M1151 183 V190 M1165 183 V190" stroke="#F59E0B" stroke-width="2.4"/>
+      <text x="1210" y="187" font-size="15" fill="#3A4256">Điểm trung bình kỳ này</text>
+      <text x="1210" y="223" font-size="30" font-weight="800" fill="#1A2233">8.3</text>
+      <text x="1210" y="249" font-size="12.5" fill="#5B6475"><tspan fill="#16A34A">▲ +0.3</tspan> so với kỳ trước</text>
+    </g>
+  </g>
+
+  <!-- Chart card -->
+  <g id="Chart Card">
+    <rect x="250" y="298" width="746" height="280" rx="18" fill="#fff" filter="url(#shadow)"/>
+    <g fill="#2563EB"><rect x="272" y="322" width="4" height="12" rx="1"/><rect x="279" y="316" width="4" height="18" rx="1"/><rect x="286" y="326" width="4" height="8" rx="1"/></g>
+    <text x="305" y="335" font-size="19" font-weight="700" fill="#1A2233">Biểu đồ kết quả học tập</text>
+    <!-- Tabs -->
+    <rect x="750" y="315" width="65" height="29" rx="14.5" fill="#2563EB"/>
+    <text x="782.5" y="334" text-anchor="middle" font-size="13" font-weight="600" fill="#fff">Kỳ này</text>
+    <rect x="825" y="315" width="75" height="29" rx="14.5" fill="#F1F4F9"/>
+    <text x="862.5" y="334" text-anchor="middle" font-size="13" fill="#5B6475">Kỳ trước</text>
+    <rect x="910" y="315" width="64" height="29" rx="14.5" fill="#F1F4F9"/>
+    <text x="942" y="334" text-anchor="middle" font-size="13" fill="#5B6475">Tất cả</text>
+    <!-- Grid -->
+    <g stroke="#E8ECF3" stroke-width="1">
+      <path d="M323 367 V535 M478 367 V535 M633 367 V535 M787 367 V535 M942 367 V535"/>
+      <path d="M318 535 H960" stroke="#D5DBE6"/>
+    </g>
+    <g font-size="12.5" fill="#5B6475" text-anchor="end">
+      <text x="290" y="371">10</text><text x="290" y="404">8</text><text x="290" y="438">6</text>
+      <text x="290" y="472">4</text><text x="290" y="505">2</text><text x="290" y="539">0</text>
+    </g>
+    <g font-size="12.5" fill="#5B6475" text-anchor="middle">
+      <text x="323" y="558">Tuần 1</text><text x="478" y="558">Tuần 2</text><text x="633" y="558">Tuần 3</text>
+      <text x="787" y="558">Tuần 4</text><text x="942" y="558">Tuần 5</text>
+    </g>
+    <!-- Line -->
+    <path d="M323 468 C380 450 420 442 478 438 C540 432 580 428 633 426 C690 422 735 416 787 412 C850 406 900 402 942 399 V535 H323 Z" fill="url(#area)"/>
+    <path d="M323 468 C380 450 420 442 478 438 C540 432 580 428 633 426 C690 422 735 416 787 412 C850 406 900 402 942 399" fill="none" stroke="#2563EB" stroke-width="2.5"/>
+    <g fill="#2563EB" stroke="#fff" stroke-width="2">
+      <circle cx="323" cy="468" r="5.5"/><circle cx="478" cy="438" r="5.5"/><circle cx="633" cy="426" r="5.5"/>
+      <circle cx="787" cy="412" r="5.5"/><circle cx="942" cy="399" r="6.5"/>
+    </g>
+    <!-- Tooltip -->
+    <rect x="922" y="359" width="40" height="25" rx="7" fill="#2563EB"/>
+    <path d="M937 384 L942 390 L947 384 Z" fill="#2563EB"/>
+    <text x="942" y="376" text-anchor="middle" font-size="13" font-weight="600" fill="#fff">8.3</text>
+  </g>
+
+  <!-- Banner -->
+  <g id="Banner">
+    <rect x="1013" y="302" width="396" height="270" rx="18" fill="url(#banner)"/>
+    <path d="M1240 572 Q1330 520 1409 540 V554 Q1409 572 1391 572 Z" fill="#fff" opacity="0.12"/>
+    <text x="1035" y="397" font-size="24" font-weight="800" fill="#fff">Bạn làm rất tốt!</text>
+    <text x="1035" y="430" font-size="16" fill="#fff" opacity="0.92">Hãy tiếp tục cố gắng</text>
+    <text x="1035" y="454" font-size="16" fill="#fff" opacity="0.92">để đạt được mục tiêu nhé!</text>
+    <rect x="1035" y="498" width="190" height="48" rx="24" fill="#fff"/>
+    <text x="1130" y="528" text-anchor="middle" font-size="15" font-weight="600" fill="#1A2233">Đặt mục tiêu mới →</text>
+    <!-- Trophy -->
+    <g id="Trophy">
+      <path d="M1262 352 Q1238 352 1240 378 Q1243 400 1272 406" fill="none" stroke="#F5B731" stroke-width="9"/>
+      <path d="M1360 352 Q1384 352 1382 378 Q1379 400 1350 406" fill="none" stroke="#F5B731" stroke-width="9"/>
+      <path d="M1258 338 H1364 V368 Q1364 420 1311 428 Q1258 420 1258 368 Z" fill="url(#gold)"/>
+      <path d="M1311 360 L1317 374 L1332 375 L1320 384 L1324 399 L1311 391 L1298 399 L1302 384 L1290 375 L1305 374 Z" fill="#FFF3C4"/>
+      <rect x="1302" y="428" width="18" height="20" fill="#E8A21E"/>
+      <rect x="1284" y="448" width="54" height="20" rx="4" fill="#F5B731"/>
+      <rect x="1274" y="466" width="74" height="14" rx="4" fill="#3B4A6B"/>
+    </g>
+    <g fill="#FFE27A">
+      <path d="M1245 330 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3 Z"/>
+      <path d="M1250 420 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2 Z"/>
+      <path d="M1360 446 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3 Z"/>
+    </g>
+  </g>
+
+  <!-- Recent activity -->
+  <g id="Activity Card">
+    <rect x="250" y="600" width="556" height="180" rx="18" fill="#fff" filter="url(#shadow)"/>
+    <circle cx="281" cy="630" r="9" fill="none" stroke="#1A2233" stroke-width="1.8"/>
+    <path d="M281 625 V630 L285 633" stroke="#1A2233" stroke-width="1.8" fill="none"/>
+    <text x="302" y="636" font-size="19" font-weight="700" fill="#1A2233">Hoạt động gần đây</text>
+    <text x="786" y="636" text-anchor="end" font-size="15" fill="#2563EB">Xem tất cả →</text>
+
+    <circle cx="287" cy="671" r="12" fill="#DFF4EA"/>
+    <path d="M281 671 L285 675 L293 667" stroke="#16A34A" stroke-width="2.2" fill="none"/>
+    <text x="322" y="676" font-size="15" fill="#1F2937">Bạn đã cập nhật điểm môn Toán</text>
+    <text x="786" y="676" text-anchor="end" font-size="13" fill="#7A8396">2 giờ trước</text>
+
+    <circle cx="287" cy="711" r="12" fill="#E3EDFD"/>
+    <rect x="281" y="705" width="12" height="12" rx="2" fill="none" stroke="#2563EB" stroke-width="1.8"/>
+    <text x="322" y="716" font-size="15" fill="#1F2937">Thêm lịch học: Cơ sở dữ liệu</text>
+    <text x="786" y="716" text-anchor="end" font-size="13" fill="#7A8396">1 ngày trước</text>
+
+    <circle cx="287" cy="751" r="12" fill="#ECE7FD"/>
+    <circle cx="287" cy="751" r="6" fill="none" stroke="#7C4DEB" stroke-width="2"/>
+    <circle cx="287" cy="751" r="2" fill="#7C4DEB"/>
+    <text x="322" y="756" font-size="15" fill="#1F2937">Cập nhật mục tiêu: Đạt GPA 3.5</text>
+    <text x="786" y="756" text-anchor="end" font-size="13" fill="#7A8396">2 ngày trước</text>
+  </g>
+
+  <!-- Upcoming schedule -->
+  <g id="Schedule Card">
+    <rect x="822" y="600" width="587" height="180" rx="18" fill="#fff" filter="url(#shadow)"/>
+    <path d="M1250 780 Q1290 700 1409 690 V762 Q1409 780 1391 780 Z" fill="#EAF1FD"/>
+    <rect x="840" y="621" width="18" height="17" rx="3" fill="none" stroke="#1A2233" stroke-width="1.8"/>
+    <path d="M840 627 H858 M845 618 V623 M853 618 V623" stroke="#1A2233" stroke-width="1.8"/>
+    <text x="872" y="636" font-size="19" font-weight="700" fill="#1A2233">Lịch học sắp tới</text>
+    <text x="1389" y="636" text-anchor="end" font-size="15" fill="#2563EB">Xem tất cả →</text>
+
+    <rect x="840" y="657" width="60" height="50" rx="8" fill="#F3F6FB"/>
+    <text x="870" y="678" text-anchor="middle" font-size="14" fill="#1A2233">Th 3</text>
+    <text x="870" y="698" text-anchor="middle" font-size="14" fill="#1A2233">11/11</text>
+    <rect x="920" y="662" width="3" height="40" rx="1.5" fill="#7FA9F7"/>
+    <text x="936" y="677" font-size="15" fill="#1A2233">Lập trình iOS</text>
+    <text x="936" y="698" font-size="13.5" fill="#5B6475">08:00 - 10:00</text>
+
+    <rect x="840" y="719" width="60" height="50" rx="8" fill="#F3F6FB"/>
+    <text x="870" y="740" text-anchor="middle" font-size="14" fill="#1A2233">Th 4</text>
+    <text x="870" y="760" text-anchor="middle" font-size="14" fill="#1A2233">12/11</text>
+    <rect x="920" y="724" width="3" height="40" rx="1.5" fill="#A989F2"/>
+    <text x="936" y="739" font-size="15" fill="#1A2233">Cơ sở dữ liệu</text>
+    <text x="936" y="760" font-size="13.5" fill="#5B6475">13:30 - 15:30</text>
+
+    <!-- Books -->
+    <g id="Books">
+      <path d="M1262 742 L1330 730 L1372 744 L1304 758 Z" fill="#6D8FF0"/>
+      <path d="M1262 742 V756 L1304 772 V758 Z" fill="#4C6FE0"/>
+      <path d="M1304 758 L1372 744 V758 L1304 772 Z" fill="#EEF2FF"/>
+      <path d="M1268 720 L1336 708 L1378 722 L1310 736 Z" fill="#3E63DD"/>
+      <path d="M1268 720 V734 L1310 750 V736 Z" fill="#2C4FC5"/>
+      <path d="M1310 736 L1378 722 V736 L1310 750 Z" fill="#F7F9FF"/>
+    </g>
+  </g>
+</svg>

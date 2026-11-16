@@ -1,37 +1,53 @@
-C:\Users\Duc Huy\Documents\ChatGPT\project nhóm 11\Project_Nh-m11\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
-  from starlette.testclient import TestClient as TestClient  # noqa
-test_errors_keep_response_format (test_auth.AuthTests.test_errors_keep_response_format) ... ok
-test_login_refresh_logout_lifecycle (test_auth.AuthTests.test_login_refresh_logout_lifecycle) ... ok
-test_seed_is_repeatable (test_auth.AuthTests.test_seed_is_repeatable) ... ok
-test_implemented_contract_operations_have_real_routes (test_contract.ContractTests.test_implemented_contract_operations_have_real_routes) ... ok
-test_no_what_if_or_export_endpoints (test_contract.ContractTests.test_no_what_if_or_export_endpoints) ... ok
-test_openapi_spec_and_examples_are_valid (test_contract.ContractTests.test_openapi_spec_and_examples_are_valid) ... ok
-test_v11_acceptance_scope (test_contract.ContractTests.test_v11_acceptance_scope) ... ok
-test_all_failed_is_zero_not_empty (test_gpa.GpaTests.test_all_failed_is_zero_not_empty) ... ok
-test_cumulative_gpa_keeps_best_attempt_for_each_code (test_gpa.GpaTests.test_cumulative_gpa_keeps_best_attempt_for_each_code) ... ok
-test_cumulative_gpa_without_completed_courses (test_gpa.GpaTests.test_cumulative_gpa_without_completed_courses) ... ok
-test_empty_semester_is_not_missing (test_gpa.GpaTests.test_empty_semester_is_not_missing) ... ok
-test_invalid_semester_ids (test_gpa.GpaTests.test_invalid_semester_ids) ... ok
-test_rank_thresholds (test_gpa.GpaTests.test_rank_thresholds) ... ok
-test_round_half_up_on_api (test_gpa.GpaTests.test_round_half_up_on_api) ... ok
-test_semester_gpa_counts_failed_credits_and_weights_grades (test_gpa.GpaTests.test_semester_gpa_counts_failed_credits_and_weights_grades) ... ok
-test_semester_is_private (test_gpa.GpaTests.test_semester_is_private) ... ok
-test_semester_with_only_incomplete_courses (test_gpa.GpaTests.test_semester_with_only_incomplete_courses) ... ok
-test_swagger_describes_semester_response (test_gpa.GpaTests.test_swagger_describes_semester_response) ... ok
-test_all_private_endpoints_require_auth_and_ignore_user_id_query (test_statistics.StatisticsTests.test_all_private_endpoints_require_auth_and_ignore_user_id_query) ... ok
-test_dashboard_matches_individual_endpoints (test_statistics.StatisticsTests.test_dashboard_matches_individual_endpoints) ... ok
-test_database_error_keeps_error_envelope (test_statistics.StatisticsTests.test_database_error_keeps_error_envelope) ... ok
-test_distribution_counts_attempts_not_deduplicated_codes (test_statistics.StatisticsTests.test_distribution_counts_attempts_not_deduplicated_codes) ... ok
-test_distribution_grade_boundaries (test_statistics.StatisticsTests.test_distribution_grade_boundaries) ... ok
-test_empty_dashboard_has_null_gpa_and_zero_counts (test_statistics.StatisticsTests.test_empty_dashboard_has_null_gpa_and_zero_counts) ... ok
-test_health_is_public_and_checks_database (test_statistics.StatisticsTests.test_health_is_public_and_checks_database) ... ok
-test_locked_account_cannot_read_statistics (test_statistics.StatisticsTests.test_locked_account_cannot_read_statistics) ... ok
-test_openapi_is_versioned_contract_served_by_swagger (test_statistics.StatisticsTests.test_openapi_is_versioned_contract_served_by_swagger) ... ok
-test_scale_comes_from_database (test_statistics.StatisticsTests.test_scale_comes_from_database) ... ok
-test_semester_trend_matches_each_gpa_endpoint (test_statistics.StatisticsTests.test_semester_trend_matches_each_gpa_endpoint) ... ok
-test_summary_equals_cumulative_gpa_and_never_counts_other_owner (test_statistics.StatisticsTests.test_summary_equals_cumulative_gpa_and_never_counts_other_owner) ... ok
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\Duc Huy\Documents\ChatGPT\project nhóm 11\Project_Nh-m11\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Duc Huy\Documents\ChatGPT\project nhóm 11\Project_Nh-m11\backend
+plugins: anyio-4.16.0
+collecting ... collected 32 items
 
-----------------------------------------------------------------------
-Ran 30 tests in 5.351s
+tests/test_contract.py::ContractTests::test_implemented_contract_operations_have_real_routes PASSED [  3%]
+tests/test_contract.py::ContractTests::test_no_what_if_or_export_endpoints PASSED [  6%]
+tests/test_contract.py::ContractTests::test_openapi_spec_and_examples_are_valid PASSED [  9%]
+tests/test_contract.py::ContractTests::test_v11_acceptance_scope PASSED  [ 12%]
+tests/test_course_management_api.py::test_list_courses_empty_search_filter_and_owner PASSED [ 15%]
+tests/test_course_management_api.py::test_update_delete_course_validation_owner_and_cascade PASSED [ 18%]
+tests/test_course_retake_api.py::test_mark_unmark_retake_and_show_in_course_list PASSED [ 21%]
+tests/test_course_retake_api.py::test_same_course_code_uses_best_attempt_inside_current_account_only PASSED [ 25%]
+tests/test_current_api.py::test_auth_semester_and_gpa_flow PASSED        [ 28%]
+tests/test_current_api.py::test_semester_ownership_and_validation PASSED [ 31%]
+tests/test_gpa.py::test_gpa_counts_failed_course_but_not_passed_credits PASSED [ 34%]
+tests/test_gpa.py::test_empty_completed_courses PASSED                   [ 37%]
+tests/test_gpa.py::test_rank_thresholds PASSED                           [ 40%]
+tests/test_grade_scale_api.py::test_get_default_grade_scale PASSED       [ 43%]
+tests/test_grade_scale_api.py::test_grade_conversion_boundaries_and_persistence PASSED [ 46%]
+tests/test_grades.py::test_configure_components_and_complete_only_at_100_percent PASSED [ 50%]
+tests/test_grades.py::test_enter_edit_scores_validation_and_ownership PASSED [ 53%]
+tests/test_grades.py::test_calculate_course_grade_only_when_configuration_is_complete PASSED [ 56%]
+tests/test_statistics.py::test_summary_matches_cumulative_gpa PASSED     [ 59%]
+tests/test_statistics.py::test_trend_matches_semester_apis_and_zero_is_not_empty PASSED [ 62%]
+tests/test_statistics.py::test_distribution_counts_all_completed_attempts PASSED [ 65%]
+tests/test_statistics.py::test_empty_dashboard_and_owner_isolation PASSED [ 68%]
+tests/test_statistics.py::test_scale_is_public_and_comes_from_database PASSED [ 71%]
+tests/test_statistics.py::test_distribution_boundaries[3.9-F] PASSED     [ 75%]
+tests/test_statistics.py::test_distribution_boundaries[4.0-D] PASSED     [ 78%]
+tests/test_statistics.py::test_distribution_boundaries[4.9-D] PASSED     [ 81%]
+tests/test_statistics.py::test_distribution_boundaries[5.0-D+] PASSED    [ 84%]
+tests/test_statistics.py::test_distribution_boundaries[8.4-B+] PASSED    [ 87%]
+tests/test_statistics.py::test_distribution_boundaries[8.5-A] PASSED     [ 90%]
+tests/test_statistics.py::test_distribution_boundaries[10-A] PASSED      [ 93%]
+tests/test_statistics.py::test_locked_account_cannot_read_statistics PASSED [ 96%]
+tests/test_statistics.py::test_error_envelope_and_health_database_check PASSED [100%]
 
-OK
+============================== warnings summary ===============================
+tests\test_contract.py:5
+tests\test_contract.py:5
+  C:\Users\Duc Huy\Documents\ChatGPT\project nhóm 11\Project_Nh-m11\backend\tests\test_contract.py:5: DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the https://github.com/python-jsonschema/referencing library, which provides more compliant referencing behavior as well as more flexible APIs for customization. A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need.
+    from jsonschema import RefResolver
+
+tests\test_statistics.py:13
+tests\test_statistics.py:13
+  C:\Users\Duc Huy\Documents\ChatGPT\project nhóm 11\Project_Nh-m11\backend\tests\test_statistics.py:13: DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the https://github.com/python-jsonschema/referencing library, which provides more compliant referencing behavior as well as more flexible APIs for customization. A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need.
+    from jsonschema import RefResolver
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 32 passed, 4 warnings in 31.60s =======================

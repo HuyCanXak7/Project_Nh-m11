@@ -1,58 +1,52 @@
-import sqlalchemy as sa
-from fastapi import APIRouter, Depends, Request
+"""Các endpoint đăng ký, đăng nhập, refresh, logout và xem tài khoản."""
 
-from app.core.errors import auth_error, session_invalid
-from app.core.responses import response
-from app.core.security import verify_password
-from app.db.session import get_engine
-from app.db.tables import auth_sessions, users
-from app.schemas.auth import LoginRequest, RefreshRequest
-from app.services.auth_service import (
-    check_login_limit, current_user, decode_token, get_active_user, issue_tokens, session_filter,
-)
+from fastapi import APIRouter, Depends, Request, status
+from sqlalchemy.orm import Session
 
-router = APIRouter()
+from app.db.database import get_db
+from app.dependencies import get_current_user
+from app.models import User
+from app.schemas.auth import LoginRequest, RefreshRequest, RegisterRequest
+from app.services.auth import login_user, logout_user, refresh_tokens, register_user
+from app.utils.responses import api_response
 
-
-@router.post("/api/v1/auth/login", tags=["Auth"])
-def login(payload: LoginRequest, request: Request):
-    check_login_limit(request)
-    with get_engine().begin() as connection:
-        user = connection.execute(
-            sa.select(users).where(users.c.email == payload.email.strip().lower())
-        ).mappings().one_or_none()
-        password_hash = user["password_hash"] if user else request.app.state.dummy_password_hash
-        if not verify_password(payload.password.get_secret_value(), password_hash) or user is None:
-            raise auth_error(401, "INVALID_CREDENTIALS", "Email hoặc mật khẩu không đúng.")
-        tokens = issue_tokens(request, connection, get_active_user(user)["id"])
-    return response(request, 200, "Đăng nhập thành công.", tokens)
+router = APIRouter(prefix="/api/v1/auth", tags=["Auth"])
 
 
-@router.post("/api/v1/auth/refresh", tags=["Auth"])
-def refresh(payload: RefreshRequest, request: Request):
-    claims = decode_token(request, payload.refreshToken.get_secret_value(), "refresh")
-    with get_engine().begin() as connection:
-        if connection.execute(auth_sessions.delete().where(session_filter(claims))).rowcount != 1:
-            raise session_invalid()
-        user = connection.execute(
-            sa.select(users).where(users.c.id == int(claims["sub"]))
-        ).mappings().one_or_none()
-        tokens = issue_tokens(request, connection, get_active_user(user)["id"])
-    return response(request, 200, "Đã làm mới phiên đăng nhập.", tokens)
+@router.post("/register", status_code=status.HTTP_201_CREATED)
+def register(data: RegisterRequest, request: Request, db: Session = Depends(get_db)):
+    user = register_user(db, data)
+    return api_response(
+        request,
+        201,
+        "Đăng ký tài khoản thành công.",
+        {"id": user.id, "email": user.email, "fullName": user.full_name},
+    )
 
 
-@router.post("/api/v1/auth/logout", tags=["Auth"])
-def logout(payload: RefreshRequest, request: Request):
-    claims = decode_token(request, payload.refreshToken.get_secret_value(), "refresh")
-    with get_engine().begin() as connection:
-        if connection.execute(auth_sessions.delete().where(session_filter(claims))).rowcount != 1:
-            raise session_invalid()
-    return response(request, 200, "Đăng xuất thành công.")
+@router.post("/login")
+def login(data: LoginRequest, request: Request, db: Session = Depends(get_db)):
+    return api_response(request, 200, "Đăng nhập thành công.", login_user(db, data, request))
 
 
-@router.get("/api/v1/auth/me", tags=["Auth"])
-def me(request: Request, user: sa.RowMapping = Depends(current_user)):
-    return response(request, 200, "Thông tin tài khoản.", {
-        "id": user["id"], "email": user["email"], "fullName": user["full_name"],
-        "role": user["role"], "isActive": user["is_active"],
-    })
+@router.post("/refresh")
+def refresh(data: RefreshRequest, request: Request, db: Session = Depends(get_db)):
+    tokens = refresh_tokens(db, data.refreshToken.get_secret_value())
+    return api_response(request, 200, "Đã làm mới phiên đăng nhập.", tokens)
+
+
+@router.post("/logout")
+def logout(data: RefreshRequest, request: Request, db: Session = Depends(get_db)):
+    logout_user(db, data.refreshToken.get_secret_value())
+    return api_response(request, 200, "Đăng xuất thành công.")
+
+
+@router.get("/me")
+def me(request: Request, user: User = Depends(get_current_user)):
+    return api_response(
+        request,
+        200,
+        "Thông tin tài khoản.",
+        {"id": user.id, "email": user.email, "fullName": user.full_name,
+         "role": user.role, "isActive": user.is_active},
+    )

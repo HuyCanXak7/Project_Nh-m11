@@ -1,9 +1,5 @@
-import os
-from functools import cache
+"""Đường import ngắn cho dependency Session trong các router FastAPI."""
 
-import sqlalchemy as sa
+from app.db.database import SessionLocal, get_db
 
-
-@cache
-def get_engine():
-    return sa.create_engine(os.environ["DATABASE_URL"], pool_pre_ping=True, hide_parameters=True)
+__all__ = ["SessionLocal", "get_db"]

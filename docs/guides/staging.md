@@ -19,10 +19,10 @@ Seed cần đặt hai biến SEED_* trong `.env`. Không dùng mật khẩu loca
 
 ## GitHub Actions và review
 
-Workflow `Project checks` chạy trên push/PR: Ruff và test BE, validate OpenAPI + payload ví dụ, ESLint + kiểm tra cú pháp/test FE, và test thống kê trên MySQL 8. Deploy chỉ chạy sau **tất cả** job này thành công, với push vào `develop`; không deploy code PR.
+Workflow `Project checks` chạy trên push/PR: Ruff và test BE, validate OpenAPI + payload ví dụ, ESLint + kiểm tra cú pháp/test FE, test thống kê trên MySQL 8 và build/chạy smoke test stack FE+BE+DB bằng Docker Compose trên runner tạm. Deploy chỉ chạy sau **tất cả** job này thành công, với push vào `develop`; không deploy code PR.
 
 1. Tạo nhánh `develop` từ nhánh tích hợp được nhóm thống nhất; hiện remote chưa có `develop` tại thời điểm kiểm tra. Không lấy nhánh cũ bỏ qua các thay đổi cần tích hợp.
-2. Repo Settings → Rules/Branches: bảo vệ `develop`, bắt buộc pull request, ít nhất **1 approval**, dismiss stale approvals, required checks `backend`, `frontend`, `mysql`; tắt force push/deletion và bypass nếu quy trình nhóm yêu cầu. Tài liệu/PR template không tự cưỡng chế các quy tắc này; cần quyền admin thiết lập thực tế.
+2. Repo Settings → Rules/Branches: bảo vệ `develop`, bắt buộc pull request, ít nhất **1 approval**, dismiss stale approvals, required checks `backend`, `frontend`, `mysql`, `containers`; tắt force push/deletion và bypass nếu quy trình nhóm yêu cầu. Tài liệu/PR template không tự cưỡng chế các quy tắc này; cần quyền admin thiết lập thực tế.
 3. Tạo Environment **staging**, giới hạn deployment branch `develop`.
 4. Environment secrets: `STAGING_SSH_KEY` (private key deploy), `STAGING_KNOWN_HOSTS` (host key đã kiểm chứng ngoài luồng).
 5. Environment variables: `STAGING_SSH_TARGET=user@host`, `STAGING_URL=https://...` (base URL, không có `/api/v1` hay `/pages`). Host phải được GitHub runner truy cập được. Host key phải khớp cổng SSH mặc định 22.

@@ -131,33 +131,148 @@ function setupUserMenu() {
     }
 }
 
+/* ===== Bảng xác nhận tùy biến (thay cho confirm() của trình duyệt) ===== */
+function showConfirm({
+    type = 'confirm',
+    title = 'Xác nhận',
+    message = '',
+    confirmText = 'Xác nhận',
+    cancelText = 'Hủy',
+    danger = false,
+    icon,
+    onConfirm,
+} = {}) {
+    document.querySelector('.modal-overlay')?.remove();
+
+    const defaultIcon = danger
+        ? '<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/>'
+        : '<path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>';
+    const svgIcon = icon || defaultIcon;
+    const variant = danger ? 'danger' : type;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+        <div class="modal modal--${variant}" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+            <div class="modal__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                    stroke-linecap="round" stroke-linejoin="round">${svgIcon}</svg>
+            </div>
+            <h3 class="modal__title" id="confirmTitle"></h3>
+            <p class="modal__message"></p>
+            <div class="modal__actions">
+                <button type="button" class="modal__btn modal__btn--ghost" data-action="cancel"></button>
+                <button type="button" class="modal__btn ${danger ? 'modal__btn--danger' : ''}" data-action="confirm"></button>
+            </div>
+        </div>`;
+
+    overlay.querySelector('.modal__title').textContent = title;
+    overlay.querySelector('.modal__message').textContent = message;
+    const cancelBtn = overlay.querySelector('[data-action="cancel"]');
+    const confirmBtn = overlay.querySelector('[data-action="confirm"]');
+    cancelBtn.textContent = cancelText;
+    confirmBtn.textContent = confirmText;
+
+    const close = () => {
+        overlay.classList.remove('is-open');
+        document.removeEventListener('keydown', onKey);
+        setTimeout(() => overlay.remove(), 200);
+    };
+    const onKey = (e) => { if (e.key === 'Escape') close(); };
+
+    cancelBtn.addEventListener('click', close);
+    confirmBtn.addEventListener('click', () => {
+        close();
+        onConfirm?.();
+    });
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', onKey);
+
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add('is-open'));
+    confirmBtn.focus();
+}
+
 /* ===== Đăng xuất ===== */
 function handleLogout() {
-    if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?')) {
-        if (typeof logout === 'function') {
-            logout();
-        } else {
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-            localStorage.removeItem('session');
-            sessionStorage.removeItem('session');
-            window.location.replace('index.html');
-        }
-    }
+    showConfirm({
+        danger: true,
+        title: 'Đăng xuất',
+        message: 'Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?',
+        confirmText: 'Đăng xuất',
+        cancelText: 'Ở lại',
+        onConfirm: () => {
+            if (typeof logout === 'function') {
+                logout();
+            } else {
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+                localStorage.removeItem('session');
+                sessionStorage.removeItem('session');
+                window.location.replace('../index.html');
+            }
+        },
+    });
 }
 
 /* ===== Khôi phục dữ liệu mẫu ban đầu ===== */
 function handleResetData() {
-    if (confirm('Khôi phục lại toàn bộ dữ liệu mẫu ban đầu (Học kỳ, Môn học, Điểm số)?')) {
-        if (typeof StorageService !== 'undefined') {
-            StorageService.resetToDefault();
+    showConfirm({
+        danger: true,
+        title: "Khôi phục dữ liệu mẫu",
+        message: "Bạn có chắc là muốn khôi phục dữ liệu về ban đầu?",
+        confirmText: "Khôi phục",
+        cancelText: "Hủy",
+        onConfirm: () => {
+            if (typeof StorageService !== 'undefined') {
+                StorageService.resetToDefault();
+            }
+            showToast('Đã khôi phục dữ liệu về ban đầu thành công!');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1200);
         }
-        showToast('Đã khôi phục dữ liệu mẫu ban đầu thành công!');
-        setTimeout(() => {
-            window.location.reload();
-        }, 500);
-    }
+    });
 }
+
+/* ===== Quản lý Modal dùng chung (openAppModal & closeAppModal) ===== */
+function openAppModal(modalId) {
+    const el = document.getElementById(modalId);
+    if (!el) return;
+    el.style.display = 'flex';
+    requestAnimationFrame(() => {
+        el.classList.add('is-open');
+    });
+}
+
+function closeAppModal(modalId) {
+    const el = document.getElementById(modalId);
+    if (!el) return;
+    el.classList.remove('is-open');
+    setTimeout(() => {
+        if (!el.classList.contains('is-open')) {
+            el.style.display = 'none';
+        }
+    }, 200);
+}
+
+// Đóng modal khi bấm vào vùng phủ (backdrop) hoặc phím Escape
+document.addEventListener('click', (e) => {
+    if (e.target && e.target.classList && e.target.classList.contains('modal-overlay')) {
+        if (e.target.id) {
+            closeAppModal(e.target.id);
+        }
+    }
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const openModal = document.querySelector('.modal-overlay.is-open');
+        if (openModal && openModal.id) {
+            closeAppModal(openModal.id);
+        }
+    }
+});
 
 /* ===== Toast thông báo nhanh ===== */
 function showToast(msg, isError = false) {
@@ -189,7 +304,7 @@ function showToast(msg, isError = false) {
     }
 
     toast.style.background = isError ? '#DC2626' : '#2563EB';
-    toast.innerHTML = isError ? `⚠️ ${escapeHtml(msg)}` : `✅ ${escapeHtml(msg)}`;
+    toast.innerHTML = isError ? `${escapeHtml(msg)}` : `${escapeHtml(msg)}`;
     toast.style.opacity = '1';
     toast.style.transform = 'translateY(0)';
 

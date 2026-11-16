@@ -99,8 +99,8 @@
             </div>
 
             <div class="dash-header__actions">
-                <button type="button" onclick="handleResetData()" class="btn-outline btn-outline--sm" title="Khôi phục dữ liệu mẫu ban đầu">
-                    🔄 Khôi phục
+                <button type="button" onclick="handleResetData()" class="btn-reset" title="Khôi phục dữ liệu mẫu ban đầu">
+                     Khôi phục
                 </button>
                 <button type="button" class="icon-btn" aria-label="Thông báo" title="Thông báo">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 17V11a6 6 0 0 1 12 0v6l2 2H4Z"/><path d="M10 21a2.5 2.5 0 0 0 4 0"/></svg>
@@ -139,7 +139,7 @@
                 <!-- Form Mục tiêu -->
                 <div style="background: var(--bg-main); border-radius: 24px; padding: 26px;">
                     <h3 style="font-size: 17px; font-weight: 800; margin-bottom: 16px; color: var(--text-black);">
-                        🎯 Thiết Lập GPA Mục Tiêu
+                        Thiết Lập GPA Mục Tiêu
                     </h3>
                     <form onsubmit="handleSaveGoal(event)">
                         <div class="modal-form-group">
@@ -154,7 +154,7 @@
                             <label class="modal-label" for="inputRemainingCredits">Số tín chỉ còn lại dự kiến tích lũy *</label>
                             <input type="number" min="1" max="150" id="inputRemainingCredits" class="modal-input" placeholder="Ví dụ: 30" required>
                         </div>
-                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">💾 Lưu mục tiêu GPA</button>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">Lưu mục tiêu GPA</button>
                     </form>
                 </div>
 
@@ -162,7 +162,7 @@
                 <div style="background: #fff; border: 1.5px solid rgba(59, 130, 246, 0.3); border-radius: 24px; padding: 26px; display: flex; flex-direction: column; justify-content: space-between;">
                     <div>
                         <h3 style="font-size: 17px; font-weight: 800; margin-bottom: 16px; color: var(--text-black);">
-                            🧮 Điểm Hệ 4 Cần Đạt
+                            Điểm Hệ 4 Cần Đạt
                         </h3>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
@@ -193,12 +193,12 @@
             <div style="background: var(--bg-main); border-radius: 24px; padding: 26px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 18px;">
                     <div>
-                        <h3 style="font-size: 17px; font-weight: 800; color: var(--text-black);">🧪 Công Cụ Mô Phỏng What-If</h3>
+                        <h3 style="font-size: 17px; font-weight: 800; color: var(--text-black);">Công Cụ Mô Phỏng What-If</h3>
                         <p style="font-size: 13px; color: var(--text-gray); margin-top: 2px;">
                             Điều chỉnh điểm giả định ở các môn học để xem kết quả GPA tích lũy dự kiến. <strong>Không làm thay đổi điểm thật trong CSDL.</strong>
                         </p>
                     </div>
-                    <button type="button" onclick="resetSimulation()" class="btn btn-secondary btn-sm">🔄 Đặt lại mô phỏng</button>
+                    <button type="button" onclick="resetSimulation()" class="btn btn-secondary btn-sm">Đặt lại mô phỏng</button>
                 </div>
 
                 <!-- Thống kê kết quả mô phỏng -->
@@ -241,6 +241,6 @@
     <script src="../assets/js/gradeCalculator.js"></script>
     <script src="../assets/js/session.js"></script>
     <script src="../assets/js/app_shell.js"></script>
-    <script src="../assets/js/pages/goals.js"></script>
+    <script src="../assets/js/goals.js"></script>
 </body>
 </html>

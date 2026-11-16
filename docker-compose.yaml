@@ -1,12 +1,10 @@
 services:
   frontend:
-    image: nginx:alpine
-    restart: always
+    image: nginx:1.28-alpine
     ports:
       - "8080:80"
     volumes:
       - ./frontend:/usr/share/nginx/html:ro
-
   db:
     image: mysql:8.0
     container_name: mysql_db
@@ -30,7 +28,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: backend/Dockerfile
+      dockerfile: backend/dockerfile
     container_name: fastapi_backend
     restart: always
     depends_on:

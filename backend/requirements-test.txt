@@ -1,5 +1,6 @@
 -r requirements.txt
-httpx>=0.28,<1
+httpx2
+pytest>=8,<10
 openapi-spec-validator>=0.7,<0.8
 openapi-schema-validator>=0.6,<0.7
 ruff>=0.14,<0.15

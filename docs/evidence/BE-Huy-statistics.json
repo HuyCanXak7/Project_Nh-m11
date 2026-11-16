@@ -103,7 +103,7 @@
       }
     },
     "error": null,
-    "timestamp": "2026-11-16T17:22:24.996724+00:00",
+    "timestamp": "2026-11-16T17:38:12.581525+00:00",
     "path": "/api/v1/statistics/dashboard"
   },
   "/statistics/summary": {
@@ -122,7 +122,7 @@
       "retakePolicy": "HIGHEST_GRADE_BY_COURSE_CODE"
     },
     "error": null,
-    "timestamp": "2026-11-16T17:22:25.001265+00:00",
+    "timestamp": "2026-11-16T17:38:12.587858+00:00",
     "path": "/api/v1/statistics/summary"
   },
   "/statistics/semesters": {
@@ -178,7 +178,7 @@
       ]
     },
     "error": null,
-    "timestamp": "2026-11-16T17:22:25.005198+00:00",
+    "timestamp": "2026-11-16T17:38:12.593316+00:00",
     "path": "/api/v1/statistics/semesters"
   },
   "/statistics/distribution": {
@@ -224,67 +224,73 @@
       "countingPolicy": "ALL_COMPLETED_ATTEMPTS"
     },
     "error": null,
-    "timestamp": "2026-11-16T17:22:25.010325+00:00",
+    "timestamp": "2026-11-16T17:38:12.598173+00:00",
     "path": "/api/v1/statistics/distribution"
   },
   "/grade-scale": {
     "success": true,
     "statusCode": 200,
     "message": "Bảng quy đổi điểm.",
-    "data": {
-      "items": [
-        {
-          "letter": "A",
-          "min10": 8.5,
-          "max10": 10.0,
-          "grade4": 4.0
-        },
-        {
-          "letter": "B+",
-          "min10": 8.0,
-          "max10": 8.4,
-          "grade4": 3.5
-        },
-        {
-          "letter": "B",
-          "min10": 7.0,
-          "max10": 7.9,
-          "grade4": 3.0
-        },
-        {
-          "letter": "C+",
-          "min10": 6.5,
-          "max10": 6.9,
-          "grade4": 2.5
-        },
-        {
-          "letter": "C",
-          "min10": 5.5,
-          "max10": 6.4,
-          "grade4": 2.0
-        },
-        {
-          "letter": "D+",
-          "min10": 5.0,
-          "max10": 5.4,
-          "grade4": 1.5
-        },
-        {
-          "letter": "D",
-          "min10": 4.0,
-          "max10": 4.9,
-          "grade4": 1.0
-        },
-        {
-          "letter": "F",
-          "min10": 0.0,
-          "max10": 3.9,
-          "grade4": 0.0
-        }
-      ]
-    },
+    "data": [
+      {
+        "id": 1,
+        "minScore": 8.5,
+        "maxScore": 10.0,
+        "letter": "A",
+        "gpa4": 4.0
+      },
+      {
+        "id": 2,
+        "minScore": 8.0,
+        "maxScore": 8.4,
+        "letter": "B+",
+        "gpa4": 3.5
+      },
+      {
+        "id": 3,
+        "minScore": 7.0,
+        "maxScore": 7.9,
+        "letter": "B",
+        "gpa4": 3.0
+      },
+      {
+        "id": 4,
+        "minScore": 6.5,
+        "maxScore": 6.9,
+        "letter": "C+",
+        "gpa4": 2.5
+      },
+      {
+        "id": 5,
+        "minScore": 5.5,
+        "maxScore": 6.4,
+        "letter": "C",
+        "gpa4": 2.0
+      },
+      {
+        "id": 6,
+        "minScore": 5.0,
+        "maxScore": 5.4,
+        "letter": "D+",
+        "gpa4": 1.5
+      },
+      {
+        "id": 7,
+        "minScore": 4.0,
+        "maxScore": 4.9,
+        "letter": "D",
+        "gpa4": 1.0
+      },
+      {
+        "id": 8,
+        "minScore": 0.0,
+        "maxScore": 3.9,
+        "letter": "F",
+        "gpa4": 0.0
+      }
+    ],
     "error": null,
-    "timestamp": "2026-11-16T17:22:25.013731+00:00",
+    "timestamp": "2026-11-16T17:38:12.606111+00:00",
     "path": "/api/v1/grade-scale"
   },
   "/health": {
@@ -296,15 +302,15 @@
       "database": "ok"
     },
     "error": null,
-    "timestamp": "2026-11-16T17:22:25.016560+00:00",
+    "timestamp": "2026-11-16T17:38:12.609543+00:00",
     "path": "/api/v1/health"
   },
   "measurement": {
     "database": "isolated SQLite, migrated to head",
     "courses": 40,
     "requests": 50,
-    "p95Ms": 5.44,
-    "maxMs": 6.71,
+    "p95Ms": 7.07,
+    "maxMs": 7.38,
     "apiTargetMs": 500,
     "passedApiTarget": true,
     "scope": "Warm TestClient HTTP API; excludes network, cold start and FE rendering. PB-39 must measure full Dashboard <2s separately."

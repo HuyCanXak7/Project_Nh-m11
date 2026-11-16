@@ -100,10 +100,10 @@
 
             <div class="dash-header__actions">
                 <button type="button" onclick="CSVHelper.downloadTemplate()" class="btn-outline btn-outline--sm" title="Tải file mẫu CSV">
-                    📄 Tải file mẫu CSV
+                    Tải file mẫu CSV
                 </button>
-                <button type="button" onclick="handleResetData()" class="btn-outline btn-outline--sm" title="Khôi phục dữ liệu mẫu ban đầu">
-                    🔄 Khôi phục
+                <button type="button" onclick="handleResetData()" class="btn-reset" title="Khôi phục dữ liệu mẫu ban đầu">
+                     Khôi phục
                 </button>
                 <button type="button" class="icon-btn" aria-label="Thông báo" title="Thông báo">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 17V11a6 6 0 0 1 12 0v6l2 2H4Z"/><path d="M10 21a2.5 2.5 0 0 0 4 0"/></svg>
@@ -139,12 +139,12 @@
         <div class="app-card" style="margin-top: 0; box-shadow: var(--shadow-soft); border-radius: var(--radius-lg);">
             <!-- VÙNG KÉO THẢ CSV -->
             <div id="dropZone" class="empty-state" style="cursor: pointer; margin-bottom: 28px;">
-                <div class="empty-state__icon">📄</div>
+                <div class="empty-state__icon"></div>
                 <h3 class="empty-state__title">Kéo & Thả tệp CSV vào đây</h3>
                 <p class="empty-state__desc">hoặc bấm vào nút bên dưới để chọn file từ máy tính của bạn.<br>Định dạng .csv, dung lượng tối đa 2 MB, không quá 1.000 dòng.</p>
                 <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
                 <button type="button" onclick="document.getElementById('csvFileInput').click()" class="btn btn-primary">
-                    📁 Chọn file CSV từ máy tính...
+                    Chọn file CSV từ máy tính...
                 </button>
             </div>
 
@@ -189,6 +189,6 @@
     <script src="../assets/js/csvHelper.js"></script>
     <script src="../assets/js/session.js"></script>
     <script src="../assets/js/app_shell.js"></script>
-    <script src="../assets/js/pages/import.js"></script>
+    <script src="../assets/js/import.js"></script>
 </body>
 </html>

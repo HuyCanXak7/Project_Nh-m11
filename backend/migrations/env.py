@@ -1,9 +1,7 @@
 from alembic import context
 
-from app.db.session import get_engine
-from app.db.tables import metadata
-
-engine = get_engine()
+from app.db.database import engine, metadata
+from app import models  # noqa: F401 - nạp model vào metadata cho Alembic
 
 if context.is_offline_mode():
     context.configure(dialect_name=engine.dialect.name, target_metadata=metadata, literal_binds=True)
