@@ -1,0 +1,37 @@
+C:\Users\Duc Huy\Documents\ChatGPT\project nhóm 11\Project_Nh-m11\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+test_errors_keep_response_format (test_auth.AuthTests.test_errors_keep_response_format) ... ok
+test_login_refresh_logout_lifecycle (test_auth.AuthTests.test_login_refresh_logout_lifecycle) ... ok
+test_seed_is_repeatable (test_auth.AuthTests.test_seed_is_repeatable) ... ok
+test_implemented_contract_operations_have_real_routes (test_contract.ContractTests.test_implemented_contract_operations_have_real_routes) ... ok
+test_no_what_if_or_export_endpoints (test_contract.ContractTests.test_no_what_if_or_export_endpoints) ... ok
+test_openapi_spec_and_examples_are_valid (test_contract.ContractTests.test_openapi_spec_and_examples_are_valid) ... ok
+test_v11_acceptance_scope (test_contract.ContractTests.test_v11_acceptance_scope) ... ok
+test_all_failed_is_zero_not_empty (test_gpa.GpaTests.test_all_failed_is_zero_not_empty) ... ok
+test_cumulative_gpa_keeps_best_attempt_for_each_code (test_gpa.GpaTests.test_cumulative_gpa_keeps_best_attempt_for_each_code) ... ok
+test_cumulative_gpa_without_completed_courses (test_gpa.GpaTests.test_cumulative_gpa_without_completed_courses) ... ok
+test_empty_semester_is_not_missing (test_gpa.GpaTests.test_empty_semester_is_not_missing) ... ok
+test_invalid_semester_ids (test_gpa.GpaTests.test_invalid_semester_ids) ... ok
+test_rank_thresholds (test_gpa.GpaTests.test_rank_thresholds) ... ok
+test_round_half_up_on_api (test_gpa.GpaTests.test_round_half_up_on_api) ... ok
+test_semester_gpa_counts_failed_credits_and_weights_grades (test_gpa.GpaTests.test_semester_gpa_counts_failed_credits_and_weights_grades) ... ok
+test_semester_is_private (test_gpa.GpaTests.test_semester_is_private) ... ok
+test_semester_with_only_incomplete_courses (test_gpa.GpaTests.test_semester_with_only_incomplete_courses) ... ok
+test_swagger_describes_semester_response (test_gpa.GpaTests.test_swagger_describes_semester_response) ... ok
+test_all_private_endpoints_require_auth_and_ignore_user_id_query (test_statistics.StatisticsTests.test_all_private_endpoints_require_auth_and_ignore_user_id_query) ... ok
+test_dashboard_matches_individual_endpoints (test_statistics.StatisticsTests.test_dashboard_matches_individual_endpoints) ... ok
+test_database_error_keeps_error_envelope (test_statistics.StatisticsTests.test_database_error_keeps_error_envelope) ... ok
+test_distribution_counts_attempts_not_deduplicated_codes (test_statistics.StatisticsTests.test_distribution_counts_attempts_not_deduplicated_codes) ... ok
+test_distribution_grade_boundaries (test_statistics.StatisticsTests.test_distribution_grade_boundaries) ... ok
+test_empty_dashboard_has_null_gpa_and_zero_counts (test_statistics.StatisticsTests.test_empty_dashboard_has_null_gpa_and_zero_counts) ... ok
+test_health_is_public_and_checks_database (test_statistics.StatisticsTests.test_health_is_public_and_checks_database) ... ok
+test_locked_account_cannot_read_statistics (test_statistics.StatisticsTests.test_locked_account_cannot_read_statistics) ... ok
+test_openapi_is_versioned_contract_served_by_swagger (test_statistics.StatisticsTests.test_openapi_is_versioned_contract_served_by_swagger) ... ok
+test_scale_comes_from_database (test_statistics.StatisticsTests.test_scale_comes_from_database) ... ok
+test_semester_trend_matches_each_gpa_endpoint (test_statistics.StatisticsTests.test_semester_trend_matches_each_gpa_endpoint) ... ok
+test_summary_equals_cumulative_gpa_and_never_counts_other_owner (test_statistics.StatisticsTests.test_summary_equals_cumulative_gpa_and_never_counts_other_owner) ... ok
+
+----------------------------------------------------------------------
+Ran 30 tests in 5.351s
+
+OK

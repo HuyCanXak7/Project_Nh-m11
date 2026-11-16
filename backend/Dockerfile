@@ -3,12 +3,13 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Khắc phục lỗi in log của Python trong Docker
-ENV PYTHONUNBUFFERED=1 
+ENV PYTHONUNBUFFERED=1 API_CONTRACT_PATH=/app/api/openapi.json
 
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY backend/ .
+COPY docs/api/openapi.json /app/api/openapi.json
 
 EXPOSE 8000
 

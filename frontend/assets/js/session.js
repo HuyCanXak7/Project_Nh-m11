@@ -244,7 +244,7 @@ const mockServer = (() => {
     };
 
     const now = () => Date.now();
-    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    const sleep = (ms) => new Promise((r) => { setTimeout(r, ms); });
     const randomToken = () => Array.from(crypto.getRandomValues(new Uint8Array(24)), (b) => b.toString(16).padStart(2, '0')).join('');
     const fail = (status, code, message, details) => { throw new ApiError(status, code, message, details); };
 

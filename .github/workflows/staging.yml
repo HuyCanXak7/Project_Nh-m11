@@ -1,0 +1,48 @@
+name: Deploy staging
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: staging
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.STAGING_KNOWN_HOSTS }}
+          TARGET: ${{ vars.STAGING_SSH_TARGET }}
+          STAGING_URL: ${{ vars.STAGING_URL }}
+        run: |
+          test -n "$SSH_KEY" && test -n "$KNOWN_HOSTS" && test -n "$TARGET" && test -n "$STAGING_URL"
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+      - name: Upload checked commit and deploy
+        env:
+          TARGET: ${{ vars.STAGING_SSH_TARGET }}
+        run: |
+          git archive --format=tar HEAD > /tmp/staging.tar
+          ssh -o BatchMode=yes "$TARGET" 'mkdir -p ~/nhom11-staging'
+          scp -o BatchMode=yes /tmp/staging.tar "$TARGET:nhom11-staging/source.tar"
+          ssh -o BatchMode=yes "$TARGET" 'cd ~/nhom11-staging && tar -xf source.tar && bash deploy/deploy.sh'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify FE, BE and DB through staging URL
+        env:
+          STAGING_URL: ${{ vars.STAGING_URL }}
+        run: python backend/scripts/warm_staging.py "$STAGING_URL"

@@ -68,6 +68,9 @@ Project_Nh-m11/
 ```
 
 Hướng dẫn chạy local, kiểm thử và vị trí các file cũ: [docs/guides/development.md](docs/guides/development.md).
+
+Bàn giao BE Huy (T0694D7, T0694DB, T0694DC, T0694DE): [API và minh chứng](docs/guides/BE-Huy-Sprint2-3.md), [changelog Swagger v1.1](docs/api/CHANGELOG-v1.1.md), [thiết lập staging](docs/guides/staging.md). Swagger `/docs` đọc hợp đồng v1.1; xem `x-implementation` để biết endpoint đã có BE hay mới có hợp đồng. API thống kê, bảng quy đổi và healthcheck đã triển khai; tích hợp FE, xác nhận chốt của nhóm và deploy staging thực tế cần được kiểm chứng trước khi chuyển task sang Done.
+
 Các thư mục chức năng được bổ sung khi có mã triển khai tương ứng. JavaScript dùng chung nằm trực tiếp trong `frontend/assets/js/`; mã riêng từng trang nằm trong `frontend/assets/js/pages/`.
 
 Cấu hình Docker hiện dùng **MySQL 8.0**. Các mục bên dưới đề cập PostgreSQL là định hướng trong đặc tả ban đầu; việc tổ chức lại thư mục giữ nguyên MySQL đang triển khai.

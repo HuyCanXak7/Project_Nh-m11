@@ -1,6 +1,5 @@
 import logging
 
-import sqlalchemy as sa
 from fastapi import HTTPException
 
 from app.core.responses import response

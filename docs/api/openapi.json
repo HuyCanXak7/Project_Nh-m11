@@ -2,16 +2,16 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Nhóm 11 – Academic Tracker API",
-    "version": "1.0.0",
-    "description": "Hợp đồng OpenAPI **dự thảo v1** cho PB-41, đối chiếu với SRS Nhóm 11 ngày 06/11/2026 và README.md. Phạm vi: Auth, Semester, Course, Grade, Goal. Các endpoint thống kê, tính điểm cần đạt, import hàng loạt, Admin và GET /grade-scale thuộc **v1.1 (PB-51)**, không xuất hiện ở v1. What-if và Export xử lý tại FE, không có endpoint. Mọi API phải kiểm tra quyền sở hữu dữ liệu người dùng. Phản hồi thống nhất gồm success, statusCode, message, data, error, timestamp, path. Lưu ý: các đường dẫn, tên trường và cấu trúc payload cụ thể chưa được tài liệu nguồn chốt hoàn toàn; đây là thiết kế đề xuất để FE/BE thống nhất, chưa phải Swagger sinh từ backend đang chạy.",
+    "version": "1.1.0",
+    "description": "Hợp đồng API v1.1 – PB-51 / T0694D7. Bổ sung thống kê, required-score, grade-scale, import và Admin. What-if và Export xử lý tại FE, không có endpoint. x-implementation phân biệt implemented với contract-only; chỉ nối API implemented. Thông báo và nội dung chốt xem docs/api/CHANGELOG-v1.1.md. Mọi dữ liệu cá nhân được giới hạn theo tài khoản từ Bearer token, không nhận userId từ FE.",
     "contact": {
       "name": "Nhóm 11"
     }
   },
   "servers": [
     {
-      "url": "http://localhost:8000/api/v1",
-      "description": "Địa chỉ local dự kiến (cần đối chiếu cấu hình FastAPI thực tế)"
+      "url": "/api/v1",
+      "description": "Cùng origin qua Nginx; local API http://localhost:8000"
     }
   ],
   "tags": [
@@ -34,6 +34,21 @@
     {
       "name": "Goal",
       "description": "Mục tiêu GPA duy nhất (PB-22)."
+    },
+    {
+      "name": "Statistics"
+    },
+    {
+      "name": "Grade scale"
+    },
+    {
+      "name": "Import"
+    },
+    {
+      "name": "Admin"
+    },
+    {
+      "name": "Health"
     }
   ],
   "paths": {
@@ -78,7 +93,8 @@
             "$ref": "#/components/responses/HTTP500"
           }
         },
-        "security": []
+        "security": [],
+        "x-implementation": "contract-only"
       }
     },
     "/auth/login": {
@@ -128,7 +144,8 @@
             "$ref": "#/components/responses/HTTP500"
           }
         },
-        "security": []
+        "security": [],
+        "x-implementation": "implemented"
       }
     },
     "/auth/refresh": {
@@ -175,7 +192,8 @@
             "$ref": "#/components/responses/HTTP500"
           }
         },
-        "security": []
+        "security": [],
+        "x-implementation": "implemented"
       }
     },
     "/auth/logout": {
@@ -219,7 +237,8 @@
             "$ref": "#/components/responses/HTTP500"
           }
         },
-        "security": []
+        "security": [],
+        "x-implementation": "implemented"
       }
     },
     "/semesters": {
@@ -251,7 +270,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "contract-only"
       },
       "post": {
         "tags": [
@@ -295,7 +315,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "contract-only"
       }
     },
     "/semesters/{semesterId}": {
@@ -342,7 +363,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "contract-only"
       },
       "put": {
         "tags": [
@@ -401,7 +423,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "contract-only"
       },
       "delete": {
         "tags": [
@@ -446,7 +469,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "contract-only"
       }
     },
     "/semesters/{semesterId}/delete-preview": {
@@ -493,7 +517,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "contract-only"
       }
     },
     "/semesters/{semesterId}/courses": {
@@ -567,7 +592,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "contract-only"
       },
       "post": {
         "tags": [
@@ -626,7 +652,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "contract-only"
       }
     },
     "/courses/{courseId}": {
@@ -673,7 +700,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "contract-only"
       },
       "put": {
         "tags": [
@@ -732,7 +760,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "contract-only"
       },
       "delete": {
         "tags": [
@@ -777,7 +806,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "contract-only"
       }
     },
     "/courses/{courseId}/delete-preview": {
@@ -824,7 +854,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "contract-only"
       }
     },
     "/courses/{courseId}/components": {
@@ -871,7 +902,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "contract-only"
       },
       "post": {
         "tags": [
@@ -930,7 +962,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "contract-only"
       }
     },
     "/courses/{courseId}/components/{componentId}": {
@@ -1001,7 +1034,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "contract-only"
       },
       "delete": {
         "tags": [
@@ -1056,7 +1090,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "contract-only"
       }
     },
     "/courses/{courseId}/components/{componentId}/score": {
@@ -1127,7 +1162,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "contract-only"
       }
     },
     "/courses/{courseId}/grade": {
@@ -1174,7 +1210,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "contract-only"
       }
     },
     "/semesters/{semesterId}/gpa": {
@@ -1221,7 +1258,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "implemented"
       }
     },
     "/gpa/cumulative": {
@@ -1253,7 +1291,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "implemented"
       }
     },
     "/goals": {
@@ -1288,7 +1327,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "contract-only"
       },
       "post": {
         "tags": [
@@ -1335,7 +1375,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "contract-only"
       },
       "put": {
         "tags": [
@@ -1382,7 +1423,8 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
-        }
+        },
+        "x-implementation": "contract-only"
       },
       "delete": {
         "tags": [
@@ -1415,7 +1457,1017 @@
           "500": {
             "$ref": "#/components/responses/HTTP500"
           }
+        },
+        "x-implementation": "contract-only"
+      }
+    },
+    "/statistics/summary": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "summary": "Tổng hợp Dashboard (PB-20 / T0694DB)",
+        "operationId": "getStatisticsSummary_statistics_summary",
+        "description": "GPA và average10 có trọng số tín chỉ; học lại chọn điểm cao nhất (hệ 4, hệ 10, ID nhỏ nhất). passedCredits chỉ tính môn >= 4.0. Không dữ liệu: GPA/average10/ranking=null, các bộ đếm=0. totalCourses đếm mọi lần học; completedCourses/passedCourses đếm sau gộp mã môn.",
+        "x-task-id": "T0694D7",
+        "x-implementation": "implemented",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatisticsSummaryResponse"
+                },
+                "example": {
+                  "success": true,
+                  "statusCode": 200,
+                  "message": "Thành công",
+                  "data": {
+                    "gpa4": 2.4,
+                    "includedCredits": 5,
+                    "passedCredits": 3,
+                    "ranking": "Trung bình",
+                    "average10": 6.96,
+                    "totalCourses": 3,
+                    "completedCourses": 2,
+                    "passedCourses": 1,
+                    "retakePolicy": "HIGHEST_GRADE_BY_COURSE_CODE"
+                  },
+                  "error": null,
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/statistics/summary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
         }
+      }
+    },
+    "/statistics/semesters": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "summary": "GPA theo kỳ (PB-21 / T0694DC)",
+        "operationId": "getStatisticsSemesters_statistics_semesters",
+        "description": "Sắp xếp startDate, semesterId tăng dần. GPA kỳ giữ mọi lần học trong kỳ; cumulativeGpa4 gộp học lại trong các kỳ đến thời điểm đó. GPA làm tròn HALF_UP 2 chữ số trước xếp loại. Kỳ rỗng trả GPA null; không có kỳ trả items=[].",
+        "x-task-id": "T0694D7",
+        "x-implementation": "implemented",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatisticsSemestersResponse"
+                },
+                "example": {
+                  "success": true,
+                  "statusCode": 200,
+                  "message": "Thành công",
+                  "data": {
+                    "items": [
+                      {
+                        "semesterId": 1,
+                        "name": "HK1",
+                        "academicYear": "2026-2027",
+                        "startDate": "2026-09-01",
+                        "gpa4": 2.4,
+                        "includedCredits": 5,
+                        "passedCredits": 3,
+                        "ranking": "Trung bình",
+                        "cumulativeGpa4": 2.4
+                      }
+                    ]
+                  },
+                  "error": null,
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/statistics/semesters"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        }
+      }
+    },
+    "/statistics/distribution": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "summary": "Phân bố điểm chữ (PB-21 / T0694DC)",
+        "operationId": "getDistribution_statistics_distribution",
+        "description": "Đếm mọi lần học đủ điểm, bao gồm F và học lại, để khớp danh sách môn. Tra grade10 đã làm tròn 1 chữ số vào grade_scale trong DB. Trả đủ các mức theo min10 giảm dần, cả mức có count=0. Không đủ điểm: totalCourses=0.",
+        "x-task-id": "T0694D7",
+        "x-implementation": "implemented",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DistributionResponse"
+                },
+                "example": {
+                  "success": true,
+                  "statusCode": 200,
+                  "message": "Thành công",
+                  "data": {
+                    "items": [
+                      {
+                        "grade": "A",
+                        "count": 1
+                      },
+                      {
+                        "grade": "B+",
+                        "count": 0
+                      },
+                      {
+                        "grade": "B",
+                        "count": 0
+                      },
+                      {
+                        "grade": "C+",
+                        "count": 0
+                      },
+                      {
+                        "grade": "C",
+                        "count": 0
+                      },
+                      {
+                        "grade": "D+",
+                        "count": 0
+                      },
+                      {
+                        "grade": "D",
+                        "count": 0
+                      },
+                      {
+                        "grade": "F",
+                        "count": 1
+                      }
+                    ],
+                    "totalCourses": 2,
+                    "countingPolicy": "ALL_COMPLETED_ATTEMPTS"
+                  },
+                  "error": null,
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/statistics/distribution"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        }
+      }
+    },
+    "/statistics/dashboard": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "summary": "Dashboard một request (PB-20 / PB-21)",
+        "operationId": "getDashboard_statistics_dashboard",
+        "description": "Gộp summary, semesters, distribution; cùng một lần đọc dữ liệu. FE dùng để giảm số request. FE hiển thị loading/rỗng/lỗi, không thay lỗi bằng dữ liệu mẫu. Chỉ tiêu Dashboard <2s đo tại FE theo PB-39.",
+        "x-task-id": "T0694D7",
+        "x-implementation": "implemented",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardResponse"
+                },
+                "example": {
+                  "success": true,
+                  "statusCode": 200,
+                  "message": "Thành công",
+                  "data": {
+                    "summary": {
+                      "gpa4": 2.4,
+                      "includedCredits": 5,
+                      "passedCredits": 3,
+                      "ranking": "Trung bình",
+                      "average10": 6.96,
+                      "totalCourses": 3,
+                      "completedCourses": 2,
+                      "passedCourses": 1,
+                      "retakePolicy": "HIGHEST_GRADE_BY_COURSE_CODE"
+                    },
+                    "semesters": {
+                      "items": [
+                        {
+                          "semesterId": 1,
+                          "name": "HK1",
+                          "academicYear": "2026-2027",
+                          "startDate": "2026-09-01",
+                          "gpa4": 2.4,
+                          "includedCredits": 5,
+                          "passedCredits": 3,
+                          "ranking": "Trung bình",
+                          "cumulativeGpa4": 2.4
+                        }
+                      ]
+                    },
+                    "distribution": {
+                      "items": [
+                        {
+                          "grade": "A",
+                          "count": 1
+                        },
+                        {
+                          "grade": "B+",
+                          "count": 0
+                        },
+                        {
+                          "grade": "B",
+                          "count": 0
+                        },
+                        {
+                          "grade": "C+",
+                          "count": 0
+                        },
+                        {
+                          "grade": "C",
+                          "count": 0
+                        },
+                        {
+                          "grade": "D+",
+                          "count": 0
+                        },
+                        {
+                          "grade": "D",
+                          "count": 0
+                        },
+                        {
+                          "grade": "F",
+                          "count": 1
+                        }
+                      ],
+                      "totalCourses": 2,
+                      "countingPolicy": "ALL_COMPLETED_ATTEMPTS"
+                    }
+                  },
+                  "error": null,
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/statistics/dashboard"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        }
+      }
+    },
+    "/grade-scale": {
+      "get": {
+        "tags": [
+          "Grade scale"
+        ],
+        "summary": "Đọc bảng quy đổi (BR-04)",
+        "operationId": "getGradeScale_grade-scale",
+        "description": "Yêu cầu Bearer token. Đọc DB; FE dùng bảng này cho What-if, không hard-code các mốc.",
+        "x-task-id": "T0694D7",
+        "x-implementation": "implemented",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradeScaleResponse"
+                },
+                "example": {
+                  "success": true,
+                  "statusCode": 200,
+                  "message": "Thành công",
+                  "data": {
+                    "items": [
+                      {
+                        "letter": "A",
+                        "min10": 8.5,
+                        "max10": 10,
+                        "grade4": 4
+                      }
+                    ]
+                  },
+                  "error": null,
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/grade-scale"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        }
+      }
+    },
+    "/goals/required-score": {
+      "get": {
+        "tags": [
+          "Goal"
+        ],
+        "summary": "Điểm trung bình cần đạt cho mục tiêu hiện tại",
+        "operationId": "getRequiredScore_goals_required-score",
+        "description": "Đọc mục tiêu đã lưu, không nhận body/query. (targetGpa × (includedCredits + remainingCredits) − weightedPoints) / remainingCredits; weightedPoints chưa làm tròn, cùng chính sách học lại với GPA. >4 IMPOSSIBLE; <=0 ALREADY_ACHIEVED; còn lại FEASIBLE. Không có điểm dùng 0 tín chỉ/0 tổng điểm; chưa có goal trả 404.",
+        "x-task-id": "T0694D7",
+        "x-implementation": "contract-only",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequiredScoreResponse"
+                },
+                "example": {
+                  "success": true,
+                  "statusCode": 200,
+                  "message": "Thành công",
+                  "data": {
+                    "targetGpa": 3,
+                    "remainingCredits": 5,
+                    "includedCredits": 5,
+                    "weightedPoints": 12,
+                    "requiredScore4": 3.6,
+                    "status": "FEASIBLE"
+                  },
+                  "error": null,
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/goals/required-score"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        }
+      }
+    },
+    "/import/grades": {
+      "post": {
+        "tags": [
+          "Import"
+        ],
+        "summary": "Lưu hàng loạt sau xem trước CSV",
+        "operationId": "postImportResult_import_grades",
+        "description": "FE đọc CSV <=2MB và chỉ gửi dòng hợp lệ sau xác nhận. JSON request <=2MiB, 1–1000 dòng. BE kiểm tra lại tất cả dòng, owner, metadata nhất quán, tổng trọng số mỗi môn=100%; một transaction: lỗi bất kỳ rollback toàn bộ. UPSERT theo (owner, semesterId, mã môn trim/uppercase, tên thành phần trim); cập nhật thành phần trùng, giữ thành phần khác; tổng trọng số sau hợp nhất phải=100. Hai dòng trùng khóa trong payload là lỗi. semester mới phải đủ ngày/năm; allowCreate=false và chưa tồn tại trả 404. Thông báo lỗi có details[{row,field,reason}]. Không có upload file hay endpoint export.",
+        "x-task-id": "T0694D7",
+        "x-implementation": "contract-only",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportResultResponse"
+                },
+                "example": {
+                  "success": true,
+                  "statusCode": 200,
+                  "message": "Thành công",
+                  "data": {
+                    "processedRows": 1,
+                    "createdSemesters": 0,
+                    "createdCourses": 1,
+                    "updatedComponents": 1
+                  },
+                  "error": null,
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/import/grades"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "IMPORT_INVALID_ROWS: không lưu dòng nào khi có lỗi; IMPORT_FILE_INVALID: số dòng sai giới hạn.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "statusCode": 400,
+                  "message": "Có dòng không hợp lệ, không lưu dữ liệu.",
+                  "data": null,
+                  "error": {
+                    "code": "IMPORT_INVALID_ROWS",
+                    "details": [
+                      {
+                        "row": 2,
+                        "field": "score",
+                        "reason": "Điểm phải trong khoảng 0–10"
+                      }
+                    ]
+                  },
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/import/grades"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportGradesRequest"
+              },
+              "example": {
+                "allowCreate": true,
+                "duplicatePolicy": "UPSERT",
+                "rows": [
+                  {
+                    "row": 2,
+                    "semesterId": 1,
+                    "courseCode": "CS1",
+                    "courseName": "Lập trình",
+                    "credits": 3,
+                    "category": "cơ sở ngành",
+                    "componentName": "Tổng kết",
+                    "weightPercent": 100,
+                    "score": 8.5
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/users": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Danh sách tài khoản (ADMIN)",
+        "operationId": "getAdminUsers_admin_users",
+        "description": "Chỉ ADMIN; q tìm email/họ tên không phân biệt hoa thường; isActive lọc trạng thái. Sắp id tăng dần; không trả password_hash/token. totalPages=ceil(totalItems/pageSize), bằng 0 khi rỗng.",
+        "x-task-id": "T0694D7",
+        "x-implementation": "contract-only",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUsersResponse"
+                },
+                "example": {
+                  "success": true,
+                  "statusCode": 200,
+                  "message": "Thành công",
+                  "data": {
+                    "items": [],
+                    "meta": {
+                      "page": 1,
+                      "pageSize": 20,
+                      "totalItems": 0,
+                      "totalPages": 0
+                    }
+                  },
+                  "error": null,
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/admin/users"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 150
+            }
+          },
+          {
+            "name": "isActive",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ]
+      }
+    },
+    "/admin/users/{userId}/status": {
+      "patch": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Khóa/mở tài khoản (ADMIN)",
+        "operationId": "patchUser_admin_users_userId_status",
+        "description": "Chỉ ADMIN; không tự khóa chính mình (403). Khóa thu hồi mọi phiên ngay; mở không khôi phục token cũ. Ghi audit actorId/targetUserId/action/timestamp trong cùng transaction. Gửi lại cùng trạng thái là idempotent, không thêm audit.",
+        "x-task-id": "T0694D7",
+        "x-implementation": "contract-only",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                },
+                "example": {
+                  "success": true,
+                  "statusCode": 200,
+                  "message": "Thành công",
+                  "data": {
+                    "id": 2,
+                    "email": "sv@example.com",
+                    "fullName": "Sinh viên",
+                    "role": "STUDENT",
+                    "isActive": false
+                  },
+                  "error": null,
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/admin/users/{userId}/status"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUserStatus"
+              },
+              "example": {
+                "isActive": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ]
+      }
+    },
+    "/admin/grade-scale": {
+      "put": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Thay toàn bộ bảng quy đổi (ADMIN)",
+        "operationId": "putGradeScale_admin_grade-scale",
+        "description": "Chỉ ADMIN. Các khoảng bao phủ 0.0–10.0 với bước 0.1, không chồng lấn/khe hở, letter duy nhất, grade4 trong 0–4. Bảo toàn ngưỡng đạt 4.0, F dưới 4.0 có hệ 4=0. Sai trả 400 GRADE_SCALE_INVALID. Cập nhật thang và tính lại grade4 của mọi môn đã đủ điểm trong một transaction; lỗi rollback toàn bộ.",
+        "x-task-id": "T0694D7",
+        "x-implementation": "contract-only",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradeScaleResponse"
+                },
+                "example": {
+                  "success": true,
+                  "statusCode": 200,
+                  "message": "Thành công",
+                  "data": {
+                    "items": [
+                      {
+                        "letter": "A",
+                        "min10": 8.5,
+                        "max10": 10,
+                        "grade4": 4
+                      }
+                    ]
+                  },
+                  "error": null,
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/admin/grade-scale"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "GRADE_SCALE_INVALID nếu các khoảng chồng lấn/khe hở hoặc sai ngưỡng; VALIDATION_ERROR nếu sai kiểu dữ liệu.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "statusCode": 400,
+                  "message": "Bảng quy đổi không hợp lệ.",
+                  "data": null,
+                  "error": {
+                    "code": "GRADE_SCALE_INVALID",
+                    "details": [
+                      {
+                        "field": "items",
+                        "reason": "Các khoảng phải phủ kín 0.0–10.0"
+                      }
+                    ]
+                  },
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/admin/grade-scale"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GradeScale"
+              },
+              "example": {
+                "items": [
+                  {
+                    "letter": "A",
+                    "min10": 8.5,
+                    "max10": 10,
+                    "grade4": 4
+                  },
+                  {
+                    "letter": "B+",
+                    "min10": 8,
+                    "max10": 8.4,
+                    "grade4": 3.5
+                  },
+                  {
+                    "letter": "B",
+                    "min10": 7,
+                    "max10": 7.9,
+                    "grade4": 3
+                  },
+                  {
+                    "letter": "C+",
+                    "min10": 6.5,
+                    "max10": 6.9,
+                    "grade4": 2.5
+                  },
+                  {
+                    "letter": "C",
+                    "min10": 5.5,
+                    "max10": 6.4,
+                    "grade4": 2
+                  },
+                  {
+                    "letter": "D+",
+                    "min10": 5,
+                    "max10": 5.4,
+                    "grade4": 1.5
+                  },
+                  {
+                    "letter": "D",
+                    "min10": 4,
+                    "max10": 4.9,
+                    "grade4": 1
+                  },
+                  {
+                    "letter": "F",
+                    "min10": 0,
+                    "max10": 3.9,
+                    "grade4": 0
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/statistics": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Thống kê toàn hệ thống (ADMIN)",
+        "operationId": "getAdminStatistics_admin_statistics",
+        "description": "Chỉ ADMIN; đếm tài khoản, tài khoản active, học kỳ và mọi lần học; không trả điểm cá nhân.",
+        "x-task-id": "T0694D7",
+        "x-implementation": "contract-only",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminStatisticsResponse"
+                },
+                "example": {
+                  "success": true,
+                  "statusCode": 200,
+                  "message": "Thành công",
+                  "data": {
+                    "totalUsers": 10,
+                    "activeUsers": 9,
+                    "totalSemesters": 20,
+                    "totalCourses": 100
+                  },
+                  "error": null,
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/admin/statistics"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        }
+      }
+    },
+    "/admin/audit-logs": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Lịch sử khóa/mở tài khoản (ADMIN)",
+        "operationId": "getAuditPage_admin_audit-logs",
+        "description": "Chỉ ADMIN. Sắp timestamp DESC, id DESC. Không có bản ghi trả items=[].",
+        "x-task-id": "T0694D7",
+        "x-implementation": "contract-only",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditPageResponse"
+                },
+                "example": {
+                  "success": true,
+                  "statusCode": 200,
+                  "message": "Thành công",
+                  "data": {
+                    "items": [],
+                    "meta": {
+                      "page": 1,
+                      "pageSize": 20,
+                      "totalItems": 0,
+                      "totalPages": 0
+                    }
+                  },
+                  "error": null,
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/admin/audit-logs"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Readiness cho staging",
+        "operationId": "getHealth_health",
+        "description": "Không yêu cầu token; SELECT 1 kiểm tra DB. DB lỗi trả 503 SERVICE_UNAVAILABLE; không lộ cấu hình kết nối.",
+        "x-task-id": "T0694D7",
+        "x-implementation": "implemented",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "example": {
+                  "success": true,
+                  "statusCode": 200,
+                  "message": "Thành công",
+                  "data": {
+                    "status": "ok",
+                    "database": "ok"
+                  },
+                  "error": null,
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/health"
+                }
+              }
+            }
+          },
+          "503": {
+            "$ref": "#/components/responses/HTTP503"
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Thông tin tài khoản hiện tại",
+        "operationId": "getMe",
+        "description": "Đọc tài khoản từ phiên đăng nhập.",
+        "x-backlog-id": "PB-22",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "x-implementation": "implemented"
       }
     }
   },
@@ -1438,8 +2490,7 @@
           },
           "row": {
             "type": "integer",
-            "description": "Dòng CSV bị lỗi, nếu có.",
-            "minimum": 1
+            "minimum": 2
           },
           "reason": {
             "type": "string",
@@ -1472,7 +2523,6 @@
         },
         "required": [
           "code",
-          "message",
           "details"
         ],
         "additionalProperties": false
@@ -3035,6 +4085,1127 @@
           "path"
         ],
         "additionalProperties": false
+      },
+      "StatisticsSummary": {
+        "type": "object",
+        "properties": {
+          "gpa4": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 4,
+            "nullable": true
+          },
+          "includedCredits": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "passedCredits": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "ranking": {
+            "type": "string",
+            "nullable": true
+          },
+          "average10": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10,
+            "nullable": true
+          },
+          "totalCourses": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "completedCourses": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "passedCourses": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "retakePolicy": {
+            "type": "string",
+            "enum": [
+              "HIGHEST_GRADE_BY_COURSE_CODE"
+            ]
+          }
+        },
+        "required": [
+          "gpa4",
+          "includedCredits",
+          "passedCredits",
+          "ranking",
+          "average10",
+          "totalCourses",
+          "completedCourses",
+          "passedCourses",
+          "retakePolicy"
+        ],
+        "additionalProperties": false
+      },
+      "StatisticsSemester": {
+        "type": "object",
+        "properties": {
+          "semesterId": {
+            "type": "integer",
+            "example": 3
+          },
+          "gpa4": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 4,
+            "nullable": true,
+            "example": 3.2
+          },
+          "includedCredits": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 18
+          },
+          "passedCredits": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 15
+          },
+          "ranking": {
+            "type": "string",
+            "description": "Phân loại theo ngưỡng GPA trong README; null nếu chưa có dữ liệu.",
+            "nullable": true,
+            "example": "Giỏi"
+          },
+          "name": {
+            "type": "string"
+          },
+          "academicYear": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "cumulativeGpa4": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 4,
+            "nullable": true
+          }
+        },
+        "required": [
+          "semesterId",
+          "gpa4",
+          "includedCredits",
+          "passedCredits",
+          "ranking",
+          "name",
+          "academicYear",
+          "startDate",
+          "cumulativeGpa4"
+        ],
+        "description": "Chỉ các môn đủ điểm tham gia mẫu số GPA; môn F tính vào GPA nhưng không cộng tín chỉ đạt.",
+        "additionalProperties": false
+      },
+      "StatisticsSemesters": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StatisticsSemester"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "Distribution": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "grade": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "grade",
+                "count"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "totalCourses": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "countingPolicy": {
+            "type": "string",
+            "enum": [
+              "ALL_COMPLETED_ATTEMPTS"
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "totalCourses",
+          "countingPolicy"
+        ],
+        "additionalProperties": false
+      },
+      "Dashboard": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/StatisticsSummary"
+          },
+          "semesters": {
+            "$ref": "#/components/schemas/StatisticsSemesters"
+          },
+          "distribution": {
+            "$ref": "#/components/schemas/Distribution"
+          }
+        },
+        "required": [
+          "summary",
+          "semesters",
+          "distribution"
+        ],
+        "additionalProperties": false
+      },
+      "GradeScale": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "letter": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2
+                },
+                "min10": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 10
+                },
+                "max10": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 10
+                },
+                "grade4": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 4
+                }
+              },
+              "required": [
+                "letter",
+                "min10",
+                "max10",
+                "grade4"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "maxItems": 20
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "RequiredScore": {
+        "type": "object",
+        "properties": {
+          "targetGpa": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 4
+          },
+          "remainingCredits": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "includedCredits": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "weightedPoints": {
+            "type": "number",
+            "minimum": 0
+          },
+          "requiredScore4": {
+            "type": "number",
+            "description": "Không clamp vào 0–4; trả giá trị thực để giải thích tính khả thi."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "FEASIBLE",
+              "IMPOSSIBLE",
+              "ALREADY_ACHIEVED"
+            ]
+          }
+        },
+        "required": [
+          "targetGpa",
+          "remainingCredits",
+          "includedCredits",
+          "weightedPoints",
+          "requiredScore4",
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "ImportGradesRequest": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "row": {
+                  "type": "integer",
+                  "minimum": 2,
+                  "description": "Số dòng CSV gốc, tính cả header."
+                },
+                "semesterId": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "semester": {
+                  "$ref": "#/components/schemas/SemesterWrite"
+                },
+                "courseCode": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 50
+                },
+                "courseName": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 150
+                },
+                "credits": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "category": {
+                  "type": "string",
+                  "enum": [
+                    "đại cương",
+                    "cơ sở ngành",
+                    "chuyên ngành"
+                  ]
+                },
+                "componentName": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 150
+                },
+                "weightPercent": {
+                  "type": "number",
+                  "exclusiveMinimum": true,
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "score": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 10
+                }
+              },
+              "required": [
+                "row",
+                "courseCode",
+                "courseName",
+                "credits",
+                "category",
+                "componentName",
+                "weightPercent",
+                "score"
+              ],
+              "additionalProperties": false,
+              "description": "Cung cấp semesterId của chính mình HOẶC semester (đủ tên, năm, ngày), không gửi cả hai.",
+              "oneOf": [
+                {
+                  "required": [
+                    "semesterId"
+                  ],
+                  "not": {
+                    "required": [
+                      "semester"
+                    ]
+                  }
+                },
+                {
+                  "required": [
+                    "semester"
+                  ],
+                  "not": {
+                    "required": [
+                      "semesterId"
+                    ]
+                  }
+                }
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 1000
+          },
+          "allowCreate": {
+            "type": "boolean",
+            "description": "FE xác nhận tạo học kỳ/môn chưa có."
+          },
+          "duplicatePolicy": {
+            "type": "string",
+            "enum": [
+              "UPSERT"
+            ]
+          }
+        },
+        "required": [
+          "rows",
+          "allowCreate",
+          "duplicatePolicy"
+        ],
+        "additionalProperties": false
+      },
+      "ImportResult": {
+        "type": "object",
+        "properties": {
+          "processedRows": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "createdSemesters": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "createdCourses": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "updatedComponents": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "processedRows",
+          "createdSemesters",
+          "createdCourses",
+          "updatedComponents"
+        ],
+        "additionalProperties": false
+      },
+      "AdminUserStatus": {
+        "type": "object",
+        "properties": {
+          "isActive": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "isActive"
+        ],
+        "additionalProperties": false
+      },
+      "PageMeta": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "pageSize": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "totalItems": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "totalPages": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "page",
+          "pageSize",
+          "totalItems",
+          "totalPages"
+        ],
+        "additionalProperties": false
+      },
+      "AdminUsers": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserPublic"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "additionalProperties": false
+      },
+      "AdminStatistics": {
+        "type": "object",
+        "properties": {
+          "totalUsers": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "activeUsers": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "totalSemesters": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "totalCourses": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "totalUsers",
+          "activeUsers",
+          "totalSemesters",
+          "totalCourses"
+        ],
+        "additionalProperties": false
+      },
+      "AuditEntry": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "actorId": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "targetUserId": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "LOCK_USER",
+              "UNLOCK_USER"
+            ]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "actorId",
+          "targetUserId",
+          "action",
+          "timestamp"
+        ],
+        "additionalProperties": false
+      },
+      "AuditPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditEntry"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "additionalProperties": false
+      },
+      "Health": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok"
+            ]
+          },
+          "database": {
+            "type": "string",
+            "enum": [
+              "ok"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "database"
+        ],
+        "additionalProperties": false
+      },
+      "StatisticsSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "statusCode": {
+            "type": "integer",
+            "example": 200
+          },
+          "message": {
+            "type": "string",
+            "example": "Thành công"
+          },
+          "data": {
+            "$ref": "#/components/schemas/StatisticsSummary"
+          },
+          "error": {
+            "type": "object",
+            "nullable": true,
+            "description": "Luôn là null khi thành công.",
+            "example": null
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "ISO 8601 có múi giờ.",
+            "format": "date-time",
+            "example": "2026-11-10T09:00:00+07:00"
+          },
+          "path": {
+            "type": "string",
+            "example": "/api/v1/semesters"
+          }
+        },
+        "required": [
+          "success",
+          "statusCode",
+          "message",
+          "data",
+          "error",
+          "timestamp",
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "StatisticsSemestersResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "statusCode": {
+            "type": "integer",
+            "example": 200
+          },
+          "message": {
+            "type": "string",
+            "example": "Thành công"
+          },
+          "data": {
+            "$ref": "#/components/schemas/StatisticsSemesters"
+          },
+          "error": {
+            "type": "object",
+            "nullable": true,
+            "description": "Luôn là null khi thành công.",
+            "example": null
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "ISO 8601 có múi giờ.",
+            "format": "date-time",
+            "example": "2026-11-10T09:00:00+07:00"
+          },
+          "path": {
+            "type": "string",
+            "example": "/api/v1/semesters"
+          }
+        },
+        "required": [
+          "success",
+          "statusCode",
+          "message",
+          "data",
+          "error",
+          "timestamp",
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "DistributionResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "statusCode": {
+            "type": "integer",
+            "example": 200
+          },
+          "message": {
+            "type": "string",
+            "example": "Thành công"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Distribution"
+          },
+          "error": {
+            "type": "object",
+            "nullable": true,
+            "description": "Luôn là null khi thành công.",
+            "example": null
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "ISO 8601 có múi giờ.",
+            "format": "date-time",
+            "example": "2026-11-10T09:00:00+07:00"
+          },
+          "path": {
+            "type": "string",
+            "example": "/api/v1/semesters"
+          }
+        },
+        "required": [
+          "success",
+          "statusCode",
+          "message",
+          "data",
+          "error",
+          "timestamp",
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "DashboardResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "statusCode": {
+            "type": "integer",
+            "example": 200
+          },
+          "message": {
+            "type": "string",
+            "example": "Thành công"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Dashboard"
+          },
+          "error": {
+            "type": "object",
+            "nullable": true,
+            "description": "Luôn là null khi thành công.",
+            "example": null
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "ISO 8601 có múi giờ.",
+            "format": "date-time",
+            "example": "2026-11-10T09:00:00+07:00"
+          },
+          "path": {
+            "type": "string",
+            "example": "/api/v1/semesters"
+          }
+        },
+        "required": [
+          "success",
+          "statusCode",
+          "message",
+          "data",
+          "error",
+          "timestamp",
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "GradeScaleResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "statusCode": {
+            "type": "integer",
+            "example": 200
+          },
+          "message": {
+            "type": "string",
+            "example": "Thành công"
+          },
+          "data": {
+            "$ref": "#/components/schemas/GradeScale"
+          },
+          "error": {
+            "type": "object",
+            "nullable": true,
+            "description": "Luôn là null khi thành công.",
+            "example": null
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "ISO 8601 có múi giờ.",
+            "format": "date-time",
+            "example": "2026-11-10T09:00:00+07:00"
+          },
+          "path": {
+            "type": "string",
+            "example": "/api/v1/semesters"
+          }
+        },
+        "required": [
+          "success",
+          "statusCode",
+          "message",
+          "data",
+          "error",
+          "timestamp",
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "RequiredScoreResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "statusCode": {
+            "type": "integer",
+            "example": 200
+          },
+          "message": {
+            "type": "string",
+            "example": "Thành công"
+          },
+          "data": {
+            "$ref": "#/components/schemas/RequiredScore"
+          },
+          "error": {
+            "type": "object",
+            "nullable": true,
+            "description": "Luôn là null khi thành công.",
+            "example": null
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "ISO 8601 có múi giờ.",
+            "format": "date-time",
+            "example": "2026-11-10T09:00:00+07:00"
+          },
+          "path": {
+            "type": "string",
+            "example": "/api/v1/semesters"
+          }
+        },
+        "required": [
+          "success",
+          "statusCode",
+          "message",
+          "data",
+          "error",
+          "timestamp",
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "ImportResultResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "statusCode": {
+            "type": "integer",
+            "example": 200
+          },
+          "message": {
+            "type": "string",
+            "example": "Thành công"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ImportResult"
+          },
+          "error": {
+            "type": "object",
+            "nullable": true,
+            "description": "Luôn là null khi thành công.",
+            "example": null
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "ISO 8601 có múi giờ.",
+            "format": "date-time",
+            "example": "2026-11-10T09:00:00+07:00"
+          },
+          "path": {
+            "type": "string",
+            "example": "/api/v1/semesters"
+          }
+        },
+        "required": [
+          "success",
+          "statusCode",
+          "message",
+          "data",
+          "error",
+          "timestamp",
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "AdminUsersResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "statusCode": {
+            "type": "integer",
+            "example": 200
+          },
+          "message": {
+            "type": "string",
+            "example": "Thành công"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminUsers"
+          },
+          "error": {
+            "type": "object",
+            "nullable": true,
+            "description": "Luôn là null khi thành công.",
+            "example": null
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "ISO 8601 có múi giờ.",
+            "format": "date-time",
+            "example": "2026-11-10T09:00:00+07:00"
+          },
+          "path": {
+            "type": "string",
+            "example": "/api/v1/semesters"
+          }
+        },
+        "required": [
+          "success",
+          "statusCode",
+          "message",
+          "data",
+          "error",
+          "timestamp",
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "AdminStatisticsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "statusCode": {
+            "type": "integer",
+            "example": 200
+          },
+          "message": {
+            "type": "string",
+            "example": "Thành công"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminStatistics"
+          },
+          "error": {
+            "type": "object",
+            "nullable": true,
+            "description": "Luôn là null khi thành công.",
+            "example": null
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "ISO 8601 có múi giờ.",
+            "format": "date-time",
+            "example": "2026-11-10T09:00:00+07:00"
+          },
+          "path": {
+            "type": "string",
+            "example": "/api/v1/semesters"
+          }
+        },
+        "required": [
+          "success",
+          "statusCode",
+          "message",
+          "data",
+          "error",
+          "timestamp",
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "AuditPageResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "statusCode": {
+            "type": "integer",
+            "example": 200
+          },
+          "message": {
+            "type": "string",
+            "example": "Thành công"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AuditPage"
+          },
+          "error": {
+            "type": "object",
+            "nullable": true,
+            "description": "Luôn là null khi thành công.",
+            "example": null
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "ISO 8601 có múi giờ.",
+            "format": "date-time",
+            "example": "2026-11-10T09:00:00+07:00"
+          },
+          "path": {
+            "type": "string",
+            "example": "/api/v1/semesters"
+          }
+        },
+        "required": [
+          "success",
+          "statusCode",
+          "message",
+          "data",
+          "error",
+          "timestamp",
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "statusCode": {
+            "type": "integer",
+            "example": 200
+          },
+          "message": {
+            "type": "string",
+            "example": "Thành công"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Health"
+          },
+          "error": {
+            "type": "object",
+            "nullable": true,
+            "description": "Luôn là null khi thành công.",
+            "example": null
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "ISO 8601 có múi giờ.",
+            "format": "date-time",
+            "example": "2026-11-10T09:00:00+07:00"
+          },
+          "path": {
+            "type": "string",
+            "example": "/api/v1/semesters"
+          }
+        },
+        "required": [
+          "success",
+          "statusCode",
+          "message",
+          "data",
+          "error",
+          "timestamp",
+          "path"
+        ],
+        "additionalProperties": false
       }
     },
     "responses": {
@@ -3292,6 +5463,50 @@
               },
               "timestamp": "2026-11-10T09:00:00+07:00",
               "path": "/api/v1/auth/login"
+            }
+          }
+        }
+      },
+      "HTTP413": {
+        "description": "Payload vượt 2 MiB",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "success": false,
+              "statusCode": 413,
+              "message": "Payload vượt 2 MiB",
+              "data": null,
+              "error": {
+                "code": "IMPORT_FILE_INVALID",
+                "details": []
+              },
+              "timestamp": "2026-11-17T09:00:00+07:00",
+              "path": "/api/v1/import/grades"
+            }
+          }
+        }
+      },
+      "HTTP503": {
+        "description": "Cơ sở dữ liệu chưa sẵn sàng",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "success": false,
+              "statusCode": 503,
+              "message": "Cơ sở dữ liệu chưa sẵn sàng",
+              "data": null,
+              "error": {
+                "code": "SERVICE_UNAVAILABLE",
+                "details": []
+              },
+              "timestamp": "2026-11-17T09:00:00+07:00",
+              "path": "/api/v1/health"
             }
           }
         }

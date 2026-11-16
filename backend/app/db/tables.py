@@ -2,6 +2,16 @@ import sqlalchemy as sa
 
 metadata = sa.MetaData()
 
+grade_scale = sa.Table(
+    "grade_scale", metadata,
+    sa.Column("letter", sa.String(2), primary_key=True),
+    sa.Column("min10", sa.Numeric(3, 1), nullable=False),
+    sa.Column("max10", sa.Numeric(3, 1), nullable=False),
+    sa.Column("grade4", sa.Numeric(3, 2), nullable=False),
+    sa.CheckConstraint("min10 >= 0 AND max10 <= 10 AND min10 <= max10", name="ck_scale_bounds"),
+    sa.CheckConstraint("grade4 BETWEEN 0 AND 4", name="ck_scale_grade4"),
+)
+
 users = sa.Table(
     "users",
     metadata,
