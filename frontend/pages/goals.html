@@ -147,14 +147,15 @@
                             <input type="number" step="0.01" min="0" max="4" id="inputTargetGpa" class="modal-input" placeholder="Ví dụ: 3.20" required>
                         </div>
                         <div class="modal-form-group">
-                            <label class="modal-label" for="inputTargetDate">Ngày dự kiến hoàn thành</label>
-                            <input type="date" id="inputTargetDate" class="modal-input">
+                            <label class="modal-label" for="inputTargetDate">Ngày dự kiến hoàn thành *</label>
+                            <input type="date" id="inputTargetDate" class="modal-input" required>
                         </div>
                         <div class="modal-form-group">
                             <label class="modal-label" for="inputRemainingCredits">Số tín chỉ còn lại dự kiến tích lũy *</label>
                             <input type="number" min="1" max="150" id="inputRemainingCredits" class="modal-input" placeholder="Ví dụ: 30" required>
                         </div>
-                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">Lưu mục tiêu GPA</button>
+                        <button type="submit" id="btnSaveGoal" class="btn btn-primary" style="width: 100%; margin-top: 8px;">Tạo mục tiêu GPA</button>
+                        <button type="button" id="btnDeleteGoal" onclick="handleDeleteGoal()" class="btn btn-secondary" style="width: 100%; margin-top: 8px; color: var(--error);" hidden>Xóa mục tiêu</button>
                     </form>
                 </div>
 

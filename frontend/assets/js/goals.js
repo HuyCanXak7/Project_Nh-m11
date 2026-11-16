@@ -15,9 +15,15 @@ function renderGoalSection() {
   const courses = StorageService.getCourses();
   const cum = GradeCalculator.calculateCumulativeGPA(courses);
 
-  document.getElementById('inputTargetGpa').value = goal.target_gpa;
-  document.getElementById('inputTargetDate').value = goal.target_date;
-  document.getElementById('inputRemainingCredits').value = goal.remaining_credits;
+  document.getElementById('inputTargetGpa').value = goal?.target_gpa ?? '';
+  document.getElementById('inputTargetDate').value = goal?.target_date ?? '';
+  document.getElementById('inputRemainingCredits').value = goal?.remaining_credits ?? '';
+  // Ngày mục tiêu không được ở quá khứ
+  document.getElementById('inputTargetDate').min = todayStr();
+
+  // Chưa có mục tiêu → chế độ Tạo; đã có → chế độ Sửa + cho phép Xóa
+  document.getElementById('btnSaveGoal').textContent = goal ? 'Cập nhật mục tiêu GPA' : 'Tạo mục tiêu GPA';
+  document.getElementById('btnDeleteGoal').hidden = !goal;
 
   document.getElementById('displayCurrentGpa').textContent = cum.formattedGPA;
   document.getElementById('displayEarnedCredits').textContent = `${cum.passedCredits} TC`;
@@ -26,39 +32,61 @@ function renderGoalSection() {
 }
 
 function calculateRequiredScore(cum, goal) {
-  const targetGpa = Number(goal.target_gpa) || 0;
-  const remainingCredits = Number(goal.remaining_credits) || 0;
-  const earnedCredits = cum.passedCredits;
-  const currentGpa = cum.cumulativeGPA;
-
   const scoreEl = document.getElementById('requiredScoreValue');
   const msgEl = document.getElementById('requiredScoreMsg');
 
-  if (remainingCredits <= 0) {
+  if (!goal) {
     scoreEl.textContent = '--';
-    msgEl.textContent = 'Vui lòng nhập số tín chỉ còn lại dự kiến > 0.';
+    scoreEl.style.color = 'var(--text-gray)';
+    msgEl.textContent = 'Bạn chưa có mục tiêu GPA. Hãy tạo mục tiêu để xem điểm cần đạt.';
     return;
   }
 
-  // Công thức: Required = (Target * (Earned + Remaining) - Current * Earned) / Remaining (BR-13)
-  const totalWeightedGoal = targetGpa * (earnedCredits + remainingCredits);
-  const earnedWeighted = currentGpa * earnedCredits;
-  const requiredScore = (totalWeightedGoal - earnedWeighted) / remainingCredits;
-  const roundedRequired = Math.round(requiredScore * 100) / 100;
+  // Không ép thiếu dữ liệu về 0 (sẽ bị báo nhầm "đã đạt mục tiêu")
+  const targetGpa = Number(goal.target_gpa);
+  const remainingCredits = Number(goal.remaining_credits);
+  if (goal.target_gpa === '' || goal.target_gpa == null || !(targetGpa >= 0 && targetGpa <= 4)) {
+    scoreEl.textContent = '--';
+    scoreEl.style.color = 'var(--text-gray)';
+    msgEl.textContent = 'Mục tiêu thiếu GPA mục tiêu hợp lệ (0 – 4.0). Hãy cập nhật mục tiêu.';
+    return;
+  }
+  if (!(remainingCredits > 0)) {
+    scoreEl.textContent = '--';
+    scoreEl.style.color = 'var(--text-gray)';
+    msgEl.textContent = 'Mục tiêu thiếu số tín chỉ còn lại dự kiến (phải > 0). Hãy cập nhật mục tiêu.';
+    return;
+  }
 
-  if (roundedRequired > 4.0) {
-    scoreEl.textContent = roundedRequired.toFixed(2);
+  // PB-23: (Mục tiêu × (TC đã học + TC còn lại) − Σ(điểm hệ 4 × TC)) / TC còn lại
+  // TC đã học = mọi môn đủ điểm đã vào GPA, kể cả môn F (giống PB-19)
+  const earnedCredits = cum.totalCredits;
+  const earnedWeighted = cum.totalPoints4;
+  const requiredScore = (targetGpa * (earnedCredits + remainingCredits) - earnedWeighted) / remainingCredits;
+  // Không có môn đủ điểm thì công thức vẫn đúng (= GPA mục tiêu), chỉ cần nói rõ
+  const noDataNote = earnedCredits === 0
+    ? '<br><em>Chưa có môn nào đủ điểm, nên điểm cần đạt bằng GPA mục tiêu.</em>'
+    : '';
+
+  // So sánh trên giá trị chưa làm tròn; chỉ làm tròn khi hiển thị
+  if (requiredScore > 4.0) {
+    scoreEl.textContent = requiredScore.toFixed(2);
     scoreEl.style.color = 'var(--error)';
-    msgEl.innerHTML = '<strong>MỤC TIÊU KHÔNG KHẢ THI!</strong> Điểm trung bình cần đạt vượt quá thang 4.0 tối đa.';
-  } else if (roundedRequired <= 0) {
+    msgEl.innerHTML = '<strong>MỤC TIÊU KHÔNG KHẢ THI!</strong> Điểm trung bình cần đạt vượt quá thang 4.0 tối đa.' + noDataNote;
+  } else if (requiredScore <= 0) {
     scoreEl.textContent = '0.00';
     scoreEl.style.color = '#10B981';
-    msgEl.innerHTML = '<strong>XIN CHÚC MỪNG!</strong> Bạn đã hoàn thành vượt mục tiêu GPA từ các môn đã tích lũy!';
+    msgEl.innerHTML = '<strong>XIN CHÚC MỪNG!</strong> Bạn đã đạt mục tiêu GPA từ các môn đã học!';
   } else {
-    scoreEl.textContent = roundedRequired.toFixed(2);
+    scoreEl.textContent = requiredScore.toFixed(2);
     scoreEl.style.color = 'var(--primary)';
-    msgEl.innerHTML = `Cần đạt trung bình <strong>${roundedRequired.toFixed(2)} / 4.0</strong> ở các môn còn lại.`;
+    msgEl.innerHTML = `Cần đạt trung bình <strong>${requiredScore.toFixed(2)} / 4.0</strong> ở ${remainingCredits} tín chỉ còn lại.` + noDataNote;
   }
+}
+
+// Ngày hôm nay theo giờ máy, dạng YYYY-MM-DD (so sánh chuỗi được với input date)
+function todayStr() {
+  return new Date().toLocaleDateString('sv-SE');
 }
 
 function handleSaveGoal(e) {
@@ -67,18 +95,45 @@ function handleSaveGoal(e) {
   const target_date = document.getElementById('inputTargetDate').value;
   const remaining_credits = Number(document.getElementById('inputRemainingCredits').value);
 
-  if (target_gpa < 0 || target_gpa > 4.0) {
+  if (isNaN(target_gpa) || target_gpa < 0 || target_gpa > 4.0) {
     showToast('GPA mục tiêu phải trong khoảng từ 0.0 đến 4.0!', true);
     return;
   }
-  if (remaining_credits <= 0) {
+  if (!target_date || target_date < todayStr()) {
+    showToast('Ngày mục tiêu không được ở quá khứ!', true);
+    return;
+  }
+  if (!(remaining_credits > 0)) {
     showToast('Số tín chỉ còn lại dự kiến phải lớn hơn 0!', true);
     return;
   }
 
-  StorageService.saveGoal({ target_gpa, target_date, remaining_credits });
+  const goal = { target_gpa, target_date, remaining_credits };
+  // Nút đang ở chế độ Tạo hay Sửa tùy theo lúc render (chưa có / đã có mục tiêu)
+  const isUpdate = !document.getElementById('btnDeleteGoal').hidden;
+  try {
+    if (isUpdate) StorageService.updateGoal(goal);
+    else StorageService.createGoal(goal);
+  } catch (err) {
+    if (err.message === 'GOAL_EXISTS') {
+      // Tương ứng 409: đã có mục tiêu (vd. tạo ở tab khác) → chuyển sang chế độ Sửa
+      showToast('Bạn đã có mục tiêu GPA. Hãy dùng chức năng Cập nhật để chỉnh sửa.', true);
+    } else {
+      showToast('Mục tiêu không còn tồn tại. Hãy tạo mục tiêu mới.', true);
+    }
+    renderGoalSection();
+    return;
+  }
+
   renderGoalSection();
-  showToast('Đã lưu cấu hình mục tiêu GPA thành công!');
+  showToast(isUpdate ? 'Đã cập nhật mục tiêu GPA!' : 'Đã tạo mục tiêu GPA!');
+}
+
+function handleDeleteGoal() {
+  if (!confirm('Bạn có chắc chắn muốn xóa mục tiêu GPA?')) return;
+  StorageService.deleteGoal();
+  renderGoalSection();
+  showToast('Đã xóa mục tiêu GPA!');
 }
 
 function initSimulation() {
