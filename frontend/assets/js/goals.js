@@ -15,9 +15,15 @@ function renderGoalSection() {
   const courses = StorageService.getCourses();
   const cum = GradeCalculator.calculateCumulativeGPA(courses);
 
-  document.getElementById('inputTargetGpa').value = goal.target_gpa;
-  document.getElementById('inputTargetDate').value = goal.target_date;
-  document.getElementById('inputRemainingCredits').value = goal.remaining_credits;
+  document.getElementById('inputTargetGpa').value = goal?.target_gpa ?? '';
+  document.getElementById('inputTargetDate').value = goal?.target_date ?? '';
+  document.getElementById('inputRemainingCredits').value = goal?.remaining_credits ?? '';
+  // Ngày mục tiêu không được ở quá khứ
+  document.getElementById('inputTargetDate').min = todayStr();
+
+  // Chưa có mục tiêu → chế độ Tạo; đã có → chế độ Sửa + cho phép Xóa
+  document.getElementById('btnSaveGoal').textContent = goal ? 'Cập nhật mục tiêu GPA' : 'Tạo mục tiêu GPA';
+  document.getElementById('btnDeleteGoal').hidden = !goal;
 
   document.getElementById('displayCurrentGpa').textContent = cum.formattedGPA;
   document.getElementById('displayEarnedCredits').textContent = `${cum.passedCredits} TC`;
@@ -26,13 +32,20 @@ function renderGoalSection() {
 }
 
 function calculateRequiredScore(cum, goal) {
+  const scoreEl = document.getElementById('requiredScoreValue');
+  const msgEl = document.getElementById('requiredScoreMsg');
+
+  if (!goal) {
+    scoreEl.textContent = '--';
+    scoreEl.style.color = 'var(--text-gray)';
+    msgEl.textContent = 'Bạn chưa có mục tiêu GPA. Hãy tạo mục tiêu để xem điểm cần đạt.';
+    return;
+  }
+
   const targetGpa = Number(goal.target_gpa) || 0;
   const remainingCredits = Number(goal.remaining_credits) || 0;
   const earnedCredits = cum.passedCredits;
   const currentGpa = cum.cumulativeGPA;
-
-  const scoreEl = document.getElementById('requiredScoreValue');
-  const msgEl = document.getElementById('requiredScoreMsg');
 
   if (remainingCredits <= 0) {
     scoreEl.textContent = '--';
@@ -61,24 +74,56 @@ function calculateRequiredScore(cum, goal) {
   }
 }
 
+// Ngày hôm nay theo giờ máy, dạng YYYY-MM-DD (so sánh chuỗi được với input date)
+function todayStr() {
+  return new Date().toLocaleDateString('sv-SE');
+}
+
 function handleSaveGoal(e) {
   e.preventDefault();
   const target_gpa = Number(document.getElementById('inputTargetGpa').value);
   const target_date = document.getElementById('inputTargetDate').value;
   const remaining_credits = Number(document.getElementById('inputRemainingCredits').value);
 
-  if (target_gpa < 0 || target_gpa > 4.0) {
+  if (isNaN(target_gpa) || target_gpa < 0 || target_gpa > 4.0) {
     showToast('GPA mục tiêu phải trong khoảng từ 0.0 đến 4.0!', true);
     return;
   }
-  if (remaining_credits <= 0) {
+  if (!target_date || target_date < todayStr()) {
+    showToast('Ngày mục tiêu không được ở quá khứ!', true);
+    return;
+  }
+  if (!(remaining_credits > 0)) {
     showToast('Số tín chỉ còn lại dự kiến phải lớn hơn 0!', true);
     return;
   }
 
-  StorageService.saveGoal({ target_gpa, target_date, remaining_credits });
+  const goal = { target_gpa, target_date, remaining_credits };
+  // Nút đang ở chế độ Tạo hay Sửa tùy theo lúc render (chưa có / đã có mục tiêu)
+  const isUpdate = !document.getElementById('btnDeleteGoal').hidden;
+  try {
+    if (isUpdate) StorageService.updateGoal(goal);
+    else StorageService.createGoal(goal);
+  } catch (err) {
+    if (err.message === 'GOAL_EXISTS') {
+      // Tương ứng 409: đã có mục tiêu (vd. tạo ở tab khác) → chuyển sang chế độ Sửa
+      showToast('Bạn đã có mục tiêu GPA. Hãy dùng chức năng Cập nhật để chỉnh sửa.', true);
+    } else {
+      showToast('Mục tiêu không còn tồn tại. Hãy tạo mục tiêu mới.', true);
+    }
+    renderGoalSection();
+    return;
+  }
+
   renderGoalSection();
-  showToast('Đã lưu cấu hình mục tiêu GPA thành công!');
+  showToast(isUpdate ? 'Đã cập nhật mục tiêu GPA!' : 'Đã tạo mục tiêu GPA!');
+}
+
+function handleDeleteGoal() {
+  if (!confirm('Bạn có chắc chắn muốn xóa mục tiêu GPA?')) return;
+  StorageService.deleteGoal();
+  renderGoalSection();
+  showToast('Đã xóa mục tiêu GPA!');
 }
 
 function initSimulation() {

@@ -387,16 +387,28 @@ const StorageService = {
     localStorage.setItem(this.studentKey(), JSON.stringify(student));
   },
 
+  // PB-22: mỗi tài khoản tối đa 1 mục tiêu; null = chưa có
   getGoal() {
     try {
-      return JSON.parse(localStorage.getItem(this.goalKey())) || { target_gpa: 3.2, target_date: '2026-12-31', remaining_credits: 30 };
+      return JSON.parse(localStorage.getItem(this.goalKey()));
     } catch {
-      return { target_gpa: 3.2, target_date: '2026-12-31', remaining_credits: 30 };
+      return null;
     }
   },
 
-  saveGoal(goal) {
+  createGoal(goal) {
+    // Mô phỏng 409 Conflict của BE khi đã có mục tiêu
+    if (this.getGoal()) throw new Error('GOAL_EXISTS');
     localStorage.setItem(this.goalKey(), JSON.stringify(goal));
+  },
+
+  updateGoal(goal) {
+    if (!this.getGoal()) throw new Error('GOAL_NOT_FOUND');
+    localStorage.setItem(this.goalKey(), JSON.stringify(goal));
+  },
+
+  deleteGoal() {
+    localStorage.removeItem(this.goalKey());
   }
 };
 
