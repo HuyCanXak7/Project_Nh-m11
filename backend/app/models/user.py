@@ -9,6 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.database import Base
 
 if TYPE_CHECKING:
+    from app.models.goal import Goal
     from app.models.auth_session import AuthSession
     from app.models.semester import Semester
 
@@ -41,3 +42,4 @@ class User(Base):
     auth_sessions: Mapped[list["AuthSession"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
+    goal: Mapped["Goal | None"] = relationship(back_populates="user", cascade="all, delete-orphan")

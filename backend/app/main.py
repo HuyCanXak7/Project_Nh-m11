@@ -24,6 +24,7 @@ from app.routers.grades import router as grade_router
 from app.routers.grade_scale import router as grade_scale_router
 from app.routers.semesters import router as semester_router
 from app.routers.statistics import router as statistics_router
+from app.routers.goals import router as goals_router
 from app.utils.responses import api_response
 
 logger = logging.getLogger(__name__)
@@ -91,6 +92,7 @@ app.include_router(grade_router)
 app.include_router(grade_scale_router)
 app.include_router(gpa_router)
 app.include_router(statistics_router)
+app.include_router(goals_router)
 
 
 @app.get("/api/v1/health", tags=["Health"])

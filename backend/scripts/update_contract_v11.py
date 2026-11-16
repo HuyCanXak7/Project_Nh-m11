@@ -293,6 +293,31 @@ def merge_runtime(spec):
         if not full_path.startswith("/api/v1"):
             continue
         path = full_path.removeprefix("/api/v1")
+        if path == "/goals":
+            spec["paths"][path] = draft_paths[path]
+            schemas["GoalWrite"] = copy.deepcopy(schemas["LiveGoalWrite"])
+            schemas["GoalWrite"]["description"] = "GPA 0–4 hữu hạn; ngày YYYY-MM-DD không ở quá khứ theo UTC+7; remainingCredits là số nguyên 1–2147483647. Từ chối trường thừa và kiểu chuỗi/bool cho trường số."
+            descriptions = {
+                "get": "Chỉ đọc mục tiêu của tài khoản trong Bearer token. Chưa tạo: 404 NOT_FOUND. Mục tiêu đã qua ngày vẫn được đọc để người dùng sửa hoặc xóa.",
+                "post": "Tạo một mục tiêu cho tài khoản trong token. Unique constraint ở DB ngăn tạo trùng, kể cả request đồng thời. Đã có: 409 GOAL_EXISTS, hướng dẫn dùng PUT /api/v1/goals. Ngày mục tiêu tính theo giờ Việt Nam UTC+7.",
+                "put": "Thay toàn bộ ba trường của mục tiêu hiện tại; giữ nguyên id. Không tạo mới khi chưa có: 404 NOT_FOUND. Cùng validation với POST, kể cả ngày theo UTC+7.",
+                "delete": "Xóa duy nhất mục tiêu của tài khoản trong token; trả 200 với data=null. Chưa có hoặc đã xóa: 404 NOT_FOUND. Có thể POST lại sau khi xóa.",
+            }
+            for method, operation in spec["paths"][path].items():
+                operation["x-implementation"] = "implemented"
+                operation["x-backlog-id"] = "PB-22"
+                operation["description"] = descriptions[method]
+                if method in {"post", "put"}:
+                    media = operation["requestBody"]["content"]["application/json"]
+                    media["schema"] = ref("GoalWrite")
+                    media["example"] = {"targetGpa": 3.5, "targetDate": "2027-06-30", "remainingCredits": 30}
+                status = "201" if method == "post" else "200"
+                operation["responses"][status]["content"]["application/json"]["example"] = {
+                    "success": True, "statusCode": int(status), "message": "Thành công", "error": None,
+                    "data": None if method == "delete" else {"id": 7, "targetGpa": 3.5, "targetDate": "2027-06-30", "remainingCredits": 30},
+                    "timestamp": "2026-11-17T09:00:00+07:00", "path": "/api/v1/goals",
+                }
+            continue
         if path.startswith("/statistics/") or path in {"/health", "/auth/me"}:
             spec["paths"][path] = draft_paths[path]
             continue
