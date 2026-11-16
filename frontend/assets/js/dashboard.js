@@ -141,6 +141,7 @@ async function loadDashboardData() {
     if (typeof USE_MOCK !== 'undefined' && !USE_MOCK) {
         try {
             const gpa = await apiFetch('/gpa/cumulative');
+            data.stats.hasData ||= gpa.gpa4 !== null;
             data.stats.gpa = gpa.gpa4 ?? 0;
             data.stats.credits = gpa.passedCredits;
         } catch (err) {
