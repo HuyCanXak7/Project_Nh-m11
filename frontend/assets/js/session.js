@@ -10,7 +10,7 @@
  * Khi BE xong: đổi USE_MOCK = false và chỉnh API_BASE. Định dạng lỗi theo PB-41: { code, message, details }.
  */
 
-const API_BASE = 'http://localhost:8000/api';
+const API_BASE = 'http://localhost:8000/api/v1';
 const USE_MOCK = true;
 
 const SESSION_KEY = 'session';
@@ -143,12 +143,14 @@ async function request(path, { method = 'GET', body, token } = {}) {
         throw new ApiError(0, 'NETWORK_ERROR', MESSAGES.network);
     }
 
-    const data = await res.json().catch(() => ({}));
+    const json = await res.json().catch(() => ({}));
+    // BE bọc mọi response trong { success, message, data, error: { code, details } }
+    const err = json.error || json;
     if (!res.ok) {
-        const retryAfter = Number(res.headers.get('Retry-After')) || data.details?.retryAfter;
-        throw new ApiError(res.status, data.code, data.message, { ...data.details, retryAfter });
+        const retryAfter = Number(res.headers.get('Retry-After')) || err.details?.retryAfter;
+        throw new ApiError(res.status, err.code, json.message, { ...err.details, retryAfter });
     }
-    return data;
+    return 'success' in json ? json.data : json;
 }
 
 // Nhiều request cùng gặp 401 thì chỉ refresh MỘT lần

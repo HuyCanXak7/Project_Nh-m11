@@ -137,6 +137,17 @@ async function loadDashboardData() {
         }
     }
 
+    // PB-19: có BE thật thì lấy GPA + tín chỉ tích lũy từ server (đã xử lý môn F và học lại)
+    if (typeof USE_MOCK !== 'undefined' && !USE_MOCK) {
+        try {
+            const gpa = await apiFetch('/gpa/cumulative');
+            data.stats.gpa = gpa.gpa4 ?? 0;
+            data.stats.credits = gpa.passedCredits;
+        } catch (err) {
+            console.warn('Không lấy được GPA từ server, dùng số tính cục bộ:', err);
+        }
+    }
+
     return data;
 }
 
