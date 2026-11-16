@@ -180,6 +180,7 @@ const GradeCalculator = {
       cumulativeGPA,
       cumulativeAvg10,
       totalCredits,
+      totalPoints4, // Σ(điểm hệ 4 × tín chỉ) chưa làm tròn, dùng cho PB-23
       passedCredits,
       rank,
       formattedGPA: cumulativeGPA.toFixed(2),

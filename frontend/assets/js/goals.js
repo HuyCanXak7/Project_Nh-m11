@@ -42,35 +42,45 @@ function calculateRequiredScore(cum, goal) {
     return;
   }
 
-  const targetGpa = Number(goal.target_gpa) || 0;
-  const remainingCredits = Number(goal.remaining_credits) || 0;
-  const earnedCredits = cum.passedCredits;
-  const currentGpa = cum.cumulativeGPA;
-
-  if (remainingCredits <= 0) {
+  // Không ép thiếu dữ liệu về 0 (sẽ bị báo nhầm "đã đạt mục tiêu")
+  const targetGpa = Number(goal.target_gpa);
+  const remainingCredits = Number(goal.remaining_credits);
+  if (goal.target_gpa === '' || goal.target_gpa == null || !(targetGpa >= 0 && targetGpa <= 4)) {
     scoreEl.textContent = '--';
-    msgEl.textContent = 'Vui lòng nhập số tín chỉ còn lại dự kiến > 0.';
+    scoreEl.style.color = 'var(--text-gray)';
+    msgEl.textContent = 'Mục tiêu thiếu GPA mục tiêu hợp lệ (0 – 4.0). Hãy cập nhật mục tiêu.';
+    return;
+  }
+  if (!(remainingCredits > 0)) {
+    scoreEl.textContent = '--';
+    scoreEl.style.color = 'var(--text-gray)';
+    msgEl.textContent = 'Mục tiêu thiếu số tín chỉ còn lại dự kiến (phải > 0). Hãy cập nhật mục tiêu.';
     return;
   }
 
-  // Công thức: Required = (Target * (Earned + Remaining) - Current * Earned) / Remaining (BR-13)
-  const totalWeightedGoal = targetGpa * (earnedCredits + remainingCredits);
-  const earnedWeighted = currentGpa * earnedCredits;
-  const requiredScore = (totalWeightedGoal - earnedWeighted) / remainingCredits;
-  const roundedRequired = Math.round(requiredScore * 100) / 100;
+  // PB-23: (Mục tiêu × (TC đã học + TC còn lại) − Σ(điểm hệ 4 × TC)) / TC còn lại
+  // TC đã học = mọi môn đủ điểm đã vào GPA, kể cả môn F (giống PB-19)
+  const earnedCredits = cum.totalCredits;
+  const earnedWeighted = cum.totalPoints4;
+  const requiredScore = (targetGpa * (earnedCredits + remainingCredits) - earnedWeighted) / remainingCredits;
+  // Không có môn đủ điểm thì công thức vẫn đúng (= GPA mục tiêu), chỉ cần nói rõ
+  const noDataNote = earnedCredits === 0
+    ? '<br><em>Chưa có môn nào đủ điểm, nên điểm cần đạt bằng GPA mục tiêu.</em>'
+    : '';
 
-  if (roundedRequired > 4.0) {
-    scoreEl.textContent = roundedRequired.toFixed(2);
+  // So sánh trên giá trị chưa làm tròn; chỉ làm tròn khi hiển thị
+  if (requiredScore > 4.0) {
+    scoreEl.textContent = requiredScore.toFixed(2);
     scoreEl.style.color = 'var(--error)';
-    msgEl.innerHTML = '<strong>MỤC TIÊU KHÔNG KHẢ THI!</strong> Điểm trung bình cần đạt vượt quá thang 4.0 tối đa.';
-  } else if (roundedRequired <= 0) {
+    msgEl.innerHTML = '<strong>MỤC TIÊU KHÔNG KHẢ THI!</strong> Điểm trung bình cần đạt vượt quá thang 4.0 tối đa.' + noDataNote;
+  } else if (requiredScore <= 0) {
     scoreEl.textContent = '0.00';
     scoreEl.style.color = '#10B981';
-    msgEl.innerHTML = '<strong>XIN CHÚC MỪNG!</strong> Bạn đã hoàn thành vượt mục tiêu GPA từ các môn đã tích lũy!';
+    msgEl.innerHTML = '<strong>XIN CHÚC MỪNG!</strong> Bạn đã đạt mục tiêu GPA từ các môn đã học!';
   } else {
-    scoreEl.textContent = roundedRequired.toFixed(2);
+    scoreEl.textContent = requiredScore.toFixed(2);
     scoreEl.style.color = 'var(--primary)';
-    msgEl.innerHTML = `Cần đạt trung bình <strong>${roundedRequired.toFixed(2)} / 4.0</strong> ở các môn còn lại.`;
+    msgEl.innerHTML = `Cần đạt trung bình <strong>${requiredScore.toFixed(2)} / 4.0</strong> ở ${remainingCredits} tín chỉ còn lại.` + noDataNote;
   }
 }
 
