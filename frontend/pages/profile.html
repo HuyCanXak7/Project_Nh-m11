@@ -109,8 +109,8 @@
                 <!-- Menu tài khoản -->
                 <div class="user-menu" id="userMenu">
                     <button type="button" class="user-chip" id="userMenuToggle" aria-haspopup="menu" aria-expanded="false" aria-controls="userMenuList">
-                        <span class="user-chip__avatar" id="userAvatar">HN</span>
-                        <span class="user-chip__name" id="userChipName">Huỳnh Nhơn Nguyên Nghiệp</span>
+                        <span class="user-chip__avatar" id="userAvatar">SV</span>
+                        <span class="user-chip__name" id="userChipName">Sinh viên</span>
                         <svg class="user-chip__caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
                     </button>
 
@@ -134,14 +134,14 @@
 
         <!-- MAIN CARD -->
         <div class="app-card" style="margin-top: 0; box-shadow: var(--shadow-soft); border-radius: var(--radius-lg);">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 28px;">
+            <div class="profile-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 28px;">
                 <!-- Cột 1: Thông tin sinh viên -->
                 <div style="background: var(--bg-main); border-radius: 24px; padding: 26px;">
                     <!-- KHUNG ĐỔI ẢNH ĐẠI DIỆN AVATAR -->
                     <div class="profile-avatar-card">
                         <div class="profile-avatar-wrap">
                             <div class="profile-avatar-circle" id="profileAvatarDisplay" onclick="triggerAvatarUpload()" title="Nhấp để tải ảnh đại diện mới">
-                                <span id="profileAvatarInitials">HN</span>
+                                <span id="profileAvatarInitials">SV</span>
                                 <div class="profile-avatar-overlay">
                                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                                     <span>Đổi ảnh</span>

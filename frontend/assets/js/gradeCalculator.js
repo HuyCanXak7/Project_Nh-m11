@@ -27,10 +27,14 @@ const GradeCalculator = {
   },
 
   convertScore10(score10) {
-    if (score10 === null || score10 === undefined || isNaN(score10)) {
+    if (score10 === null || score10 === undefined || score10 === '' || isNaN(Number(score10))) {
       return { letter: '--', scale4: 0.0, status: 'Chưa đủ điểm', colorClass: 'badge-gray', label: '--' };
     }
-    const rounded = this.round1(score10);
+    const num = Number(score10);
+    if (num < 0 || num > 10) {
+      return { letter: '--', scale4: 0.0, status: 'Điểm lỗi', colorClass: 'badge-red', label: 'Không hợp lệ' };
+    }
+    const rounded = this.round1(num);
     for (const item of this.GRADE_SCALE) {
       if (rounded >= item.min && rounded <= item.max) {
         return item;
@@ -40,57 +44,76 @@ const GradeCalculator = {
     return this.GRADE_SCALE[0];
   },
 
+  getGradeScale(score10) {
+    return this.convertScore10(score10);
+  },
+
   calculateCourseFinalScore(components) {
-    if (!components || components.length === 0) {
-      return { finalScore10: null, isComplete: false, totalWeight: 0 };
+    if (!Array.isArray(components) || components.length === 0) {
+      return { finalScore10: null, isComplete: false, totalWeight: 0, hasInvalidScore: false };
     }
     let totalWeight = 0;
     let weightedSum = 0;
     let allEntered = true;
+    let hasInvalidScore = false;
 
     components.forEach(c => {
       const w = Number(c.weight_percent) || 0;
       totalWeight += w;
-      if (c.score === null || c.score === undefined || isNaN(c.score)) {
+      if (c.score === null || c.score === undefined || c.score === '' || isNaN(Number(c.score))) {
         allEntered = false;
       } else {
-        weightedSum += Number(c.score) * (w / 100);
+        const s = Number(c.score);
+        if (s < 0 || s > 10 || w <= 0 || w > 100) {
+          hasInvalidScore = true;
+          allEntered = false;
+        } else {
+          weightedSum += s * (w / 100);
+        }
       }
     });
 
-    if (totalWeight !== 100 || !allEntered) {
-      return { finalScore10: null, isComplete: false, totalWeight };
+    if (Math.round(totalWeight) !== 100 || !allEntered || hasInvalidScore) {
+      return { finalScore10: null, isComplete: false, totalWeight: Math.round(totalWeight), hasInvalidScore };
     }
-    return { finalScore10: this.round1(weightedSum), isComplete: true, totalWeight };
+    return { finalScore10: this.round1(weightedSum), isComplete: true, totalWeight: 100, hasInvalidScore: false };
   },
 
   calculateSemesterGPA(coursesInSemester) {
-    let totalWeightedPoints = 0;
+    let totalWeightedPoints4 = 0;
+    let totalWeightedPoints10 = 0;
     let totalCredits = 0;
     let passedCredits = 0;
+    let registeredCredits = 0;
     let completedCourseCount = 0;
 
-    coursesInSemester.forEach(course => {
+    (coursesInSemester || []).forEach(course => {
+      const cr = Number(course.credits) || 0;
+      if (cr > 0) registeredCredits += cr;
       const calc = this.calculateCourseFinalScore(course.components);
-      if (calc.isComplete && calc.finalScore10 !== null) {
+      if (calc.isComplete && calc.finalScore10 !== null && cr > 0) {
         completedCourseCount++;
         const grade = this.convertScore10(calc.finalScore10);
-        const cr = Number(course.credits) || 0;
         totalCredits += cr;
-        totalWeightedPoints += grade.scale4 * cr;
+        totalWeightedPoints4 += grade.scale4 * cr;
+        totalWeightedPoints10 += calc.finalScore10 * cr;
         if (grade.scale4 > 0) {
           passedCredits += cr;
         }
       }
     });
 
-    const gpa = totalCredits > 0 ? this.round2(totalWeightedPoints / totalCredits) : 0;
+    const gpa = totalCredits > 0 ? this.round2(totalWeightedPoints4 / totalCredits) : 0;
+    const avg10 = totalCredits > 0 ? this.round2(totalWeightedPoints10 / totalCredits) : 0;
     return {
       gpa,
+      avg10,
       totalCredits,
+      registeredCredits,
       passedCredits,
       completedCourseCount,
-      formattedGPA: gpa.toFixed(2)
+      formattedGPA: gpa.toFixed(2),
+      formattedAvg10: avg10.toFixed(2)
     };
   },
 
@@ -98,13 +121,15 @@ const GradeCalculator = {
   calculateCumulativeGPA(allCourses) {
     const courseMap = new Map();
 
-    allCourses.forEach(course => {
+    (allCourses || []).forEach(course => {
       const calc = this.calculateCourseFinalScore(course.components);
       if (!calc.isComplete || calc.finalScore10 === null) return;
 
       const code = (course.course_code || '').trim().toUpperCase();
+      if (!code) return;
       const grade = this.convertScore10(calc.finalScore10);
       const entry = {
+        id: course.id,
         code,
         name: course.course_name,
         credits: Number(course.credits) || 0,
@@ -118,25 +143,30 @@ const GradeCalculator = {
         courseMap.set(code, entry);
       } else {
         const existing = courseMap.get(code);
-        if (entry.scale4 > existing.scale4 || (entry.scale4 === existing.scale4 && entry.finalScore10 > existing.finalScore10)) {
+        if (entry.scale4 > existing.scale4 || (entry.scale4 === existing.scale4 && entry.finalScore10 >= existing.finalScore10)) {
           courseMap.set(code, entry);
         }
       }
     });
 
-    let totalPoints = 0;
+    let totalPoints4 = 0;
+    let totalPoints10 = 0;
     let totalCredits = 0;
     let passedCredits = 0;
+    const countedCourseIds = new Set();
 
     courseMap.forEach(item => {
+      countedCourseIds.add(item.id);
       totalCredits += item.credits;
-      totalPoints += item.scale4 * item.credits;
+      totalPoints4 += item.scale4 * item.credits;
+      totalPoints10 += item.finalScore10 * item.credits;
       if (item.scale4 > 0) {
         passedCredits += item.credits;
       }
     });
 
-    const cumulativeGPA = totalCredits > 0 ? this.round2(totalPoints / totalCredits) : 0;
+    const cumulativeGPA = totalCredits > 0 ? this.round2(totalPoints4 / totalCredits) : 0;
+    const cumulativeAvg10 = totalCredits > 0 ? this.round2(totalPoints10 / totalCredits) : 0;
     let rank = '--';
     if (totalCredits > 0) {
       if (cumulativeGPA >= 3.6) rank = 'Xuất sắc';
@@ -148,11 +178,14 @@ const GradeCalculator = {
 
     return {
       cumulativeGPA,
+      cumulativeAvg10,
       totalCredits,
       passedCredits,
       rank,
       formattedGPA: cumulativeGPA.toFixed(2),
-      courseCount: courseMap.size
+      formattedAvg10: cumulativeAvg10.toFixed(2),
+      courseCount: courseMap.size,
+      countedCourseIds
     };
   }
 };

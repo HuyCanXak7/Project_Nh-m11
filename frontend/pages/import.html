@@ -94,13 +94,16 @@
             </button>
 
             <div class="dash-header__greeting">
-                <h1 class="dash-header__title">Nhập Dữ Liệu Điểm Từ CSV</h1>
-                <p class="dash-header__subtitle">Tải tệp mẫu, kéo thả tệp điểm, kiểm tra tính hợp lệ từng dòng và lưu tự động vào CSDL</p>
+                <h1 class="dash-header__title">Nhập Dữ Liệu Điểm Từ CSV / Excel</h1>
+                <p class="dash-header__subtitle">Tải tệp mẫu (.csv / .xlsx), kiểm tra hợp lệ từng dòng và tự động tạo học kỳ hoặc môn học mới khi xác nhận</p>
             </div>
 
             <div class="dash-header__actions">
                 <button type="button" onclick="CSVHelper.downloadTemplate()" class="btn-outline btn-outline--sm" title="Tải file mẫu CSV">
-                    Tải file mẫu CSV
+                    Tải mẫu CSV
+                </button>
+                <button type="button" onclick="CSVHelper.downloadTemplateExcel()" class="btn-outline btn-outline--sm" title="Tải file mẫu Excel (.xlsx)">
+                    Tải mẫu Excel (.xlsx)
                 </button>
                 <button type="button" onclick="handleResetData()" class="btn-reset" title="Khôi phục dữ liệu mẫu ban đầu">
                      Khôi phục
@@ -112,8 +115,8 @@
                 <!-- Menu tài khoản -->
                 <div class="user-menu" id="userMenu">
                     <button type="button" class="user-chip" id="userMenuToggle" aria-haspopup="menu" aria-expanded="false" aria-controls="userMenuList">
-                        <span class="user-chip__avatar" id="userAvatar">HN</span>
-                        <span class="user-chip__name" id="userChipName">Huỳnh Nhơn Nguyên Nghiệp</span>
+                        <span class="user-chip__avatar" id="userAvatar">SV</span>
+                        <span class="user-chip__name" id="userChipName">Sinh viên</span>
                         <svg class="user-chip__caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
                     </button>
 
@@ -137,14 +140,35 @@
 
         <!-- MAIN CARD -->
         <div class="app-card" style="margin-top: 0; box-shadow: var(--shadow-soft); border-radius: var(--radius-lg);">
-            <!-- VÙNG KÉO THẢ CSV -->
+            <!-- HƯỚNG DẪN CẤU TRÚC CỘT MẪU (PB-25) -->
+            <div style="background: var(--bg-main); border-radius: 16px; padding: 14px 18px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div style="font-size: 13px; color: var(--text-dark); line-height: 1.55;">
+                    <strong style="color: var(--text-black);">Cấu trúc 8 cột chuẩn (PB-25):</strong>
+                    <code style="background: #fff; padding: 3px 8px; border-radius: 6px; font-weight: 700; color: var(--primary); display: inline-block; margin-top: 4px; word-break: break-all;">semester_name, course_code, course_name, credits, category, component_name, weight_percent, score</code>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button type="button" onclick="CSVHelper.downloadTemplate()" class="btn btn-secondary btn-sm">Tải mẫu .CSV</button>
+                    <button type="button" onclick="CSVHelper.downloadTemplateExcel()" class="btn btn-secondary btn-sm">Tải mẫu .XLSX</button>
+                </div>
+            </div>
+
+            <!-- BANNER TRẠNG THÁI ĐANG TẢI / LỖI TỆP (PB-25, PB-40) -->
+            <div id="importStatusBanner" style="display: none; margin-bottom: 20px;" role="alert" aria-live="polite"></div>
+
+            <!-- VÙNG KÉO THẢ CSV / EXCEL -->
             <div id="dropZone" class="empty-state" style="cursor: pointer; margin-bottom: 28px;">
-                <div class="empty-state__icon"></div>
-                <h3 class="empty-state__title">Kéo & Thả tệp CSV vào đây</h3>
-                <p class="empty-state__desc">hoặc bấm vào nút bên dưới để chọn file từ máy tính của bạn.<br>Định dạng .csv, dung lượng tối đa 2 MB, không quá 1.000 dòng.</p>
-                <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
-                <button type="button" onclick="document.getElementById('csvFileInput').click()" class="btn btn-primary">
-                    Chọn file CSV từ máy tính...
+                <div class="empty-state__icon">
+                    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto;">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                </div>
+                <h3 class="empty-state__title">Kéo & Thả tệp CSV hoặc Excel (.xlsx) vào đây</h3>
+                <p class="empty-state__desc">hoặc bấm vào nút bên dưới để chọn tệp từ máy tính của bạn.<br>Hỗ trợ định dạng <strong>.csv</strong> và <strong>.xlsx</strong>, dung lượng tối đa <strong>2 MB</strong>, không quá <strong>1.000 dòng</strong>.</p>
+                <input type="file" id="csvFileInput" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display: none;">
+                <button type="button" onclick="event.stopPropagation(); document.getElementById('csvFileInput').click()" class="btn btn-primary">
+                    Chọn tệp CSV / Excel (.xlsx)...
                 </button>
             </div>
 

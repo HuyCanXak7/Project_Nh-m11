@@ -323,17 +323,17 @@ function initAppShell() {
     
     if (!user && typeof StorageService !== 'undefined') {
         const student = StorageService.getStudent();
-        if (student) {
+        if (student && (student.name || student.email)) {
             user = {
-                fullName: student.name || 'Huỳnh Nhơn Nguyên Nghiệp',
-                email: student.email || 'nghiephn25@gmail.com',
+                fullName: student.name || 'Sinh viên',
+                email: student.email || '',
                 avatar_url: student.avatar_url || ''
             };
         }
     }
     
     if (!user) {
-        user = { fullName: 'Huỳnh Nhơn Nguyên Nghiệp', email: 'nghiephn25@gmail.com' };
+        user = { fullName: 'Sinh viên', email: '' };
     }
 
     renderUser(user);

@@ -86,38 +86,62 @@ const StorageService = {
     }
   ],
 
+  currentUserId() {
+    if (typeof getSession === 'function') {
+      const u = getSession()?.user;
+      if (u?.id) return String(u.id);
+      if (u?.email) return String(u.email).toLowerCase();
+    }
+    for (const store of [sessionStorage, localStorage]) {
+      try {
+        const raw = store.getItem('session');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed?.user?.id) return String(parsed.user.id);
+          if (parsed?.user?.email) return String(parsed.user.email).toLowerCase();
+        }
+      } catch { /* ignore */ }
+    }
+    return 'guest';
+  },
+
+  semestersKey() { return STORAGE_KEYS.SEMESTERS + '_' + this.currentUserId(); },
+  coursesKey()   { return STORAGE_KEYS.COURSES + '_' + this.currentUserId(); },
+  goalKey()      { return STORAGE_KEYS.GOAL + '_' + this.currentUserId(); },
+  studentKey()   { return STORAGE_KEYS.STUDENT + '_' + this.currentUserId(); },
+
   init() {
-    if (!localStorage.getItem(STORAGE_KEYS.SEMESTERS)) {
-      localStorage.setItem(STORAGE_KEYS.SEMESTERS, JSON.stringify(this.DEFAULT_SEMESTERS));
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.COURSES)) {
-      localStorage.setItem(STORAGE_KEYS.COURSES, JSON.stringify(this.DEFAULT_COURSES));
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.GOAL)) {
-      localStorage.setItem(STORAGE_KEYS.GOAL, JSON.stringify({
-        target_gpa: 3.2,
-        target_date: '2026-12-31',
-        remaining_credits: 30
-      }));
-    }
+    // Không tự động chèn dữ liệu mẫu cứng khi khởi tạo tài khoản mới.
+    // Dữ liệu được đọc trực tiếp từ localStorage của người dùng hiện tại.
   },
 
   resetToDefault() {
-    localStorage.setItem(STORAGE_KEYS.SEMESTERS, JSON.stringify(this.DEFAULT_SEMESTERS));
-    localStorage.setItem(STORAGE_KEYS.COURSES, JSON.stringify(this.DEFAULT_COURSES));
-    localStorage.setItem(STORAGE_KEYS.GOAL, JSON.stringify({
+    localStorage.setItem(this.semestersKey(), JSON.stringify(this.DEFAULT_SEMESTERS));
+    localStorage.setItem(this.coursesKey(), JSON.stringify(this.DEFAULT_COURSES));
+    localStorage.setItem(this.goalKey(), JSON.stringify({
       target_gpa: 3.2,
       target_date: '2026-12-31',
       remaining_credits: 30
     }));
   },
 
+  clearAllData() {
+    localStorage.setItem(this.semestersKey(), JSON.stringify([]));
+    localStorage.setItem(this.coursesKey(), JSON.stringify([]));
+    localStorage.removeItem(this.goalKey());
+  },
+
   // === QUẢN LÝ HỌC KỲ (PB-06..09) ===
   getSemesters() {
-    this.init();
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEYS.SEMESTERS)) || [];
-    } catch {
+      const raw = localStorage.getItem(this.semestersKey());
+      if (raw !== null) {
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      }
+      return [];
+    } catch (err) {
+      console.error('Lỗi đọc dữ liệu học kỳ từ localStorage:', err);
       return [];
     }
   },
@@ -141,7 +165,7 @@ const StorageService = {
       };
       list.push(newSem);
     }
-    localStorage.setItem(STORAGE_KEYS.SEMESTERS, JSON.stringify(list));
+    localStorage.setItem(this.semestersKey(), JSON.stringify(list));
     return true;
   },
 
@@ -163,20 +187,25 @@ const StorageService = {
   deleteSemesterCascade(semesterId) {
     let semesters = this.getSemesters();
     semesters = semesters.filter(s => s.id !== semesterId);
-    localStorage.setItem(STORAGE_KEYS.SEMESTERS, JSON.stringify(semesters));
+    localStorage.setItem(this.semestersKey(), JSON.stringify(semesters));
 
     let courses = this.getCourses();
     courses = courses.filter(c => c.semester_id !== semesterId);
-    localStorage.setItem(STORAGE_KEYS.COURSES, JSON.stringify(courses));
+    localStorage.setItem(this.coursesKey(), JSON.stringify(courses));
     return true;
   },
 
   // === QUẢN LÝ MÔN HỌC & ĐIỂM (PB-10..17, PB-50) ===
   getCourses() {
-    this.init();
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEYS.COURSES)) || [];
-    } catch {
+      const raw = localStorage.getItem(this.coursesKey());
+      if (raw !== null) {
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      }
+      return [];
+    } catch (err) {
+      console.error('Lỗi đọc dữ liệu môn học từ localStorage:', err);
       return [];
     }
   },
@@ -205,7 +234,7 @@ const StorageService = {
       };
       list.push(newCourse);
     }
-    localStorage.setItem(STORAGE_KEYS.COURSES, JSON.stringify(list));
+    localStorage.setItem(this.coursesKey(), JSON.stringify(list));
     return true;
   },
 
@@ -222,7 +251,7 @@ const StorageService = {
   deleteCourseCascade(courseId) {
     let courses = this.getCourses();
     courses = courses.filter(c => c.id !== courseId);
-    localStorage.setItem(STORAGE_KEYS.COURSES, JSON.stringify(courses));
+    localStorage.setItem(this.coursesKey(), JSON.stringify(courses));
     return true;
   },
 
@@ -231,7 +260,7 @@ const StorageService = {
     const course = courses.find(c => c.id === courseId);
     if (course) {
       course.components = components;
-      localStorage.setItem(STORAGE_KEYS.COURSES, JSON.stringify(courses));
+      localStorage.setItem(this.coursesKey(), JSON.stringify(courses));
       return true;
     }
     return false;
@@ -246,43 +275,80 @@ const StorageService = {
           comp.score = scoreMap[comp.id];
         }
       });
-      localStorage.setItem(STORAGE_KEYS.COURSES, JSON.stringify(courses));
+      localStorage.setItem(this.coursesKey(), JSON.stringify(courses));
       return true;
     }
     return false;
+  },
+
+  // Phân tích trước khi import để báo cho người dùng biết học kỳ/môn nào sẽ được tạo mới (PB-25, PB-26)
+  analyzeImportRows(validRows) {
+    const existingSemesters = this.getSemesters();
+    const existingCourses = this.getCourses();
+    const semSet = new Set(existingSemesters.map(s => s.name.trim().toLowerCase()));
+    const courseKeySet = new Set(existingCourses.map(c => {
+      const sem = existingSemesters.find(s => s.id === c.semester_id);
+      const semName = sem ? sem.name.trim().toLowerCase() : '';
+      return `${semName}::${c.course_code.trim().toUpperCase()}`;
+    }));
+
+    const newSemesters = new Set();
+    const newCourses = new Set();
+
+    return (validRows || []).map(row => {
+      const semLower = (row.semester_name || '').trim().toLowerCase();
+      const codeUpper = (row.course_code || '').trim().toUpperCase();
+      const cKey = `${semLower}::${codeUpper}`;
+
+      const isNewSemester = !semSet.has(semLower);
+      const isNewCourse = !courseKeySet.has(cKey);
+      if (isNewSemester) newSemesters.add(row.semester_name.trim());
+      if (isNewCourse) newCourses.add(`${codeUpper} (${row.semester_name.trim()})`);
+
+      return {
+        ...row,
+        isNewSemester,
+        isNewCourse
+      };
+    });
   },
 
   // Batch import Upsert (PB-26, PB-46)
   batchImportRows(validRows) {
     const semesters = this.getSemesters();
     const courses = this.getCourses();
+    let createdSemCount = 0;
+    let createdCourseCount = 0;
+    let updatedCompCount = 0;
 
-    validRows.forEach(row => {
+    validRows.forEach((row, idx) => {
       let sem = semesters.find(s => s.name.trim().toLowerCase() === row.semester_name.trim().toLowerCase());
       if (!sem) {
         sem = {
-          id: 'sem_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+          id: 'sem_' + Date.now() + '_' + idx + '_' + Math.floor(Math.random() * 1000),
           name: row.semester_name.trim(),
           academic_year: '2025-2026',
           start_date: '2025-09-01',
           end_date: '2026-01-15'
         };
         semesters.push(sem);
+        createdSemCount++;
       }
 
       let course = courses.find(c => c.semester_id === sem.id && c.course_code.trim().toUpperCase() === row.course_code.trim().toUpperCase());
       if (!course) {
         course = {
-          id: 'c_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+          id: 'c_' + Date.now() + '_' + idx + '_' + Math.floor(Math.random() * 1000),
           semester_id: sem.id,
           course_code: row.course_code.trim().toUpperCase(),
           course_name: row.course_name.trim(),
           credits: Number(row.credits),
-          category: row.category.trim(),
+          category: (row.category || 'Đại cương').trim(),
           is_retake: false,
           components: []
         };
         courses.push(course);
+        createdCourseCount++;
       }
 
       let comp = (course.components || []).find(cp => cp.name.trim().toLowerCase() === row.component_name.trim().toLowerCase());
@@ -292,22 +358,26 @@ const StorageService = {
       } else {
         if (!course.components) course.components = [];
         course.components.push({
-          id: 'comp_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+          id: 'comp_' + Date.now() + '_' + idx + '_' + Math.floor(Math.random() * 1000),
           name: row.component_name.trim(),
           weight_percent: Number(row.weight_percent),
           score: Number(row.score)
         });
       }
+      updatedCompCount++;
     });
 
-    localStorage.setItem(STORAGE_KEYS.SEMESTERS, JSON.stringify(semesters));
-    localStorage.setItem(STORAGE_KEYS.COURSES, JSON.stringify(courses));
-    return true;
+    localStorage.setItem(this.semestersKey(), JSON.stringify(semesters));
+    localStorage.setItem(this.coursesKey(), JSON.stringify(courses));
+    return {
+      success: true,
+      createdSemCount,
+      createdCourseCount,
+      updatedCompCount
+    };
   },
 
   // Profile & Goals
-  studentKey() { return STORAGE_KEYS.STUDENT + '_' + (getSession()?.user?.id ?? 'guest'); },
-
   getStudent() {
     try { return JSON.parse(localStorage.getItem(this.studentKey())) || { ...this.DEFAULT_STUDENT }; }
     catch { return { ...this.DEFAULT_STUDENT }; }
@@ -318,16 +388,15 @@ const StorageService = {
   },
 
   getGoal() {
-    this.init();
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEYS.GOAL)) || { target_gpa: 3.2, target_date: '2026-12-31', remaining_credits: 30 };
+      return JSON.parse(localStorage.getItem(this.goalKey())) || { target_gpa: 3.2, target_date: '2026-12-31', remaining_credits: 30 };
     } catch {
       return { target_gpa: 3.2, target_date: '2026-12-31', remaining_credits: 30 };
     }
   },
 
   saveGoal(goal) {
-    localStorage.setItem(STORAGE_KEYS.GOAL, JSON.stringify(goal));
+    localStorage.setItem(this.goalKey(), JSON.stringify(goal));
   }
 };
 

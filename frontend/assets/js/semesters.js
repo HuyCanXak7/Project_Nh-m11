@@ -10,27 +10,35 @@ document.addEventListener('DOMContentLoaded', () => {
   renderSemesters();
 });
 
-// === 1. XEM DANH SÁCH HỌC KỲ & EMPTY STATE (PB-07) ===
+// === 1. XEM DANH SÁCH HỌC KỲ & EMPTY / ERROR STATE (PB-07, PB-40) ===
 function renderSemesters() {
   const container = document.getElementById('semesterGrid');
   if (!container) return;
 
-  const semesters = StorageService.getSemesters();
-  const allCourses = StorageService.getCourses();
+  try {
+    const semesters = StorageService.getSemesters();
+    const allCourses = StorageService.getCourses();
 
-  if (semesters.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state__icon"></div>
-        <h3 class="empty-state__title">Chưa có học kỳ nào</h3>
-        <p class="empty-state__desc">Hệ thống chưa ghi nhận học kỳ của bạn. Hãy tạo học kỳ đầu tiên để bắt đầu thêm môn học và theo dõi chỉ số điểm nhé!</p>
-        <button type="button" onclick="openCreateSemesterModal()" class="btn btn-primary">+ Tạo học kỳ đầu tiên</button>
-      </div>
-    `;
-    return;
-  }
+    if (semesters.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1;">
+          <div class="empty-state__icon">
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" style="margin: 0 auto;">
+              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </div>
+          <h3 class="empty-state__title">Chưa có học kỳ nào</h3>
+          <p class="empty-state__desc">Hệ thống chưa ghi nhận học kỳ của bạn. Hãy tạo học kỳ đầu tiên hoặc nạp dữ liệu mẫu để bắt đầu thêm môn học và theo dõi chỉ số điểm nhé!</p>
+          <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <button type="button" onclick="openCreateSemesterModal()" class="btn btn-primary">+ Tạo học kỳ đầu tiên</button>
+            <button type="button" onclick="handleResetData()" class="btn btn-secondary">Nạp dữ liệu mẫu</button>
+          </div>
+        </div>
+      `;
+      return;
+    }
 
-  container.innerHTML = semesters.map(sem => {
+    container.innerHTML = semesters.map(sem => {
     const semCourses = allCourses.filter(c => c.semester_id === sem.id);
     const semGpaData = GradeCalculator.calculateSemesterGPA(semCourses);
     const totalCredits = semCourses.reduce((sum, c) => sum + (Number(c.credits) || 0), 0);
@@ -65,7 +73,7 @@ function renderSemesters() {
           </div>
         </div>
 
-        <div class="semester-card__actions" style="display: flex; gap: 8px; align-items: center;">
+        <div class="semester-card__actions" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
           <a href="courses.html?semId=${sem.id}" class="btn btn-primary btn-sm" style="flex: 1; justify-content: center;">
             Quản lý môn
           </a>
@@ -80,7 +88,17 @@ function renderSemesters() {
         </div>
       </article>
     `;
-  }).join('');
+    }).join('');
+  } catch (err) {
+    console.error('Lỗi tải danh sách học kỳ:', err);
+    container.innerHTML = `
+      <div class="empty-state" style="grid-column: 1 / -1; border-color: rgba(239, 68, 68, 0.45); background: #FEF2F2;">
+        <h3 class="empty-state__title" style="color: #991B1B;">Không thể tải danh sách học kỳ</h3>
+        <p class="empty-state__desc">Đã xảy ra lỗi khi đọc dữ liệu cục bộ. Vui lòng thử tải lại.</p>
+        <button type="button" onclick="renderSemesters()" class="btn btn-primary btn-sm">Thử tải lại</button>
+      </div>
+    `;
+  }
 }
 
 // === TẠO HỌC KỲ (Task: T0694C9 | PB-06) ===
