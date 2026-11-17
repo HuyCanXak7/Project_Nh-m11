@@ -220,6 +220,19 @@ const authApi = {
         if (session) saveSession({ ...session, user });
         return user;
     },
+
+    /** Đổi mật khẩu (PB-05 / T0694E4): xác thực mật khẩu cũ, băm mật khẩu mới và thu hồi refresh token cũ */
+    async changePassword({ currentPassword, newPassword }) {
+        const res = await apiFetch('/auth/change-password', {
+            method: 'POST',
+            body: { currentPassword, newPassword },
+        });
+        const session = getSession();
+        if (session && res && res.accessToken && res.refreshToken) {
+            saveSession(toSession(res, session));
+        }
+        return res;
+    },
 };
 
 /** Đăng xuất (PB-03): thu hồi refresh token ở BE rồi xóa phiên phía client */
@@ -361,6 +374,27 @@ const mockServer = (() => {
         async 'GET /auth/me'(db, body, token) {
             const user = userFromAccess(db, token);
             return { id: user.id, email: user.email, fullName: user.fullName };
+        },
+
+        async 'POST /auth/change-password'(db, { currentPassword, newPassword }, token) {
+            const user = userFromAccess(db, token);
+            if (!currentPassword || user.passwordHash !== await hash(user.email, currentPassword)) {
+                fail(400, 'INVALID_PASSWORD', 'Mật khẩu hiện tại không đúng.');
+            }
+            if (!newPassword || newPassword.length < 8) {
+                fail(400, 'VALIDATION_ERROR', 'Mật khẩu mới phải có ít nhất 8 ký tự.');
+            }
+            if (newPassword === currentPassword) {
+                fail(400, 'VALIDATION_ERROR', 'Mật khẩu mới không được trùng với mật khẩu hiện tại.');
+            }
+
+            // Băm mật khẩu mới khi lưu và thu hồi toàn bộ refresh token cũ của tài khoản
+            user.passwordHash = await hash(user.email, newPassword);
+            Object.values(db.refreshTokens).forEach((entry) => {
+                if (entry.userId === user.id) entry.revoked = true;
+            });
+
+            return issueTokens(db, user);
         },
     };
 

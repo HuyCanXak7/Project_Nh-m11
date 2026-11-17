@@ -204,6 +204,7 @@
                         </div>
 
                         <form onsubmit="handleChangePassword(event)">
+                            <div id="changePasswordStatus" role="alert" aria-live="polite" style="display: none; margin-bottom: 14px; padding: 10px 14px; font-size: 13px; font-weight: 600;"></div>
                             <div class="modal-form-group">
                                 <label class="modal-label" for="currentPasswordInput">Mật khẩu hiện tại *</label>
                                 <input type="password" id="currentPasswordInput" class="modal-input" required placeholder="Nhập mật khẩu hiện tại">
@@ -216,7 +217,7 @@
                                 <label class="modal-label" for="confirmPasswordInput">Xác nhận mật khẩu mới *</label>
                                 <input type="password" id="confirmPasswordInput" class="modal-input" minlength="8" required placeholder="Nhập lại mật khẩu mới">
                             </div>
-                            <button type="submit" class="btn btn-secondary" style="width: 100%; margin-top: 10px;">Đổi mật khẩu</button>
+                            <button type="submit" id="btnChangePassword" class="btn btn-secondary" style="width: 100%; margin-top: 10px;">Đổi mật khẩu</button>
                             <div style="text-align: center; margin-top: 14px; font-size: 13px; color: var(--text-gray);">
                                 Bạn quên mật khẩu hiện tại? <a href="forgot-password.html" style="color: var(--primary); font-weight: 700; text-decoration: none;">Khôi phục mật khẩu</a>
                             </div>
