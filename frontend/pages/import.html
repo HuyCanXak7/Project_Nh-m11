@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../assets/css/common.css">
     <link rel="stylesheet" href="../assets/css/model.css">
     <link rel="stylesheet" href="../assets/css/app.css">
+    <link rel="stylesheet" href="../assets/css/theme-e.css">
 </head>
 <body class="app-page page-import">
     <!-- Nền trang trí floating circles -->
@@ -94,19 +95,22 @@
             </button>
 
             <div class="dash-header__greeting">
-                <h1 class="dash-header__title">Nhập Dữ Liệu Điểm Từ CSV / Excel</h1>
-                <p class="dash-header__subtitle">Tải tệp mẫu (.csv / .xlsx), kiểm tra hợp lệ từng dòng và tự động tạo học kỳ hoặc môn học mới khi xác nhận</p>
+                <h1 class="dash-header__title">
+                    <span>Nhập điểm</span>
+                    <span class="dash-header__slash">/</span>
+                    <span class="dash-header__sub-inline">Tệp CSV & Excel (.xlsx) · Tối đa 2 MB, 1.000 dòng</span>
+                </h1>
             </div>
 
             <div class="dash-header__actions">
-                <button type="button" onclick="CSVHelper.downloadTemplate()" class="btn-outline btn-outline--sm" title="Tải file mẫu CSV">
+                <button type="button" onclick="CSVHelper.downloadTemplate()" class="btn-figma-outline" title="Tải file mẫu CSV">
                     Tải mẫu CSV
                 </button>
-                <button type="button" onclick="CSVHelper.downloadTemplateExcel()" class="btn-outline btn-outline--sm" title="Tải file mẫu Excel (.xlsx)">
+                <button type="button" onclick="CSVHelper.downloadTemplateExcel()" class="btn-figma-primary" title="Tải file mẫu Excel (.xlsx)">
                     Tải mẫu Excel (.xlsx)
                 </button>
-                <button type="button" onclick="handleResetData()" class="btn-reset" title="Khôi phục dữ liệu mẫu ban đầu">
-                     Khôi phục
+                <button type="button" onclick="handleResetData()" class="btn-reset" title="Nạp dữ liệu mẫu">
+                     Dữ liệu mẫu
                 </button>
                 <button type="button" class="icon-btn" aria-label="Thông báo" title="Thông báo">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 17V11a6 6 0 0 1 12 0v6l2 2H4Z"/><path d="M10 21a2.5 2.5 0 0 0 4 0"/></svg>

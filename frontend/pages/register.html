@@ -5,137 +5,124 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng ký - Quản lí chỉ số học tập</title>
     <link rel="stylesheet" href="../assets/css/variables.css">
-    <link rel="stylesheet" href="../assets/css/common.css">
     <link rel="stylesheet" href="../assets/css/auth.css">
     <link rel="stylesheet" href="../assets/css/model.css">
 </head>
-<body class="page-register">
-    <div class="bg-decoration" aria-hidden="true">
-        <div class="bg-circle bg-circle--1"></div>
-        <div class="bg-circle bg-circle--2"></div>
-        <div class="bg-circle bg-circle--3"></div>
-    </div>
+<body class="page-auth page-register">
+    <div class="auth-split">
+        <!-- Nửa trái -->
+        <aside class="auth-side auth-side--mint">
+            <div class="auth-side__bg" aria-hidden="true">A</div>
+            <a href="../index.html" class="auth-brand"><i></i><i></i>StudyTrack</a>
+            <h1 class="auth-side__title">Bắt đầu ghi lại<br><em>hành trình học.</em></h1>
+            <p class="auth-side__text">Một tài khoản cho mọi học kỳ, môn học và điểm thành phần. GPA tính đúng theo quy chế của trường.</p>
+            <ol class="auth-steps">
+                <li><b>01</b>Tạo tài khoản<small>1 phút</small></li>
+                <li><b>02</b>Thêm học kỳ và môn học<small>hoặc nhập CSV</small></li>
+                <li><b>03</b>Nhập điểm, xem GPA tự động<small>theo thời gian thực</small></li>
+            </ol>
+        </aside>
 
-    <main class="auth-container">
-        <!-- Register Card -->
-        <section class="auth-card auth-card--register">
-            <a href="../index.html" class="auth-card__tab">Đăng Nhập</a>
+        <!-- Nửa phải: form -->
+        <main class="auth-main">
+            <div class="auth-top">
+                Đã có tài khoản?
+                <a href="../index.html" class="auth-btn-outline">Đăng nhập
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </a>
+            </div>
 
-            <h2 class="auth-card__title">Tạo tài khoản</h2>
-            <p class="auth-card__desc">Tham gia ngay để bắt đầu hành trình của bạn</p>
+            <section class="auth-wrap">
+                <div class="auth-kicker">02 — Đăng ký</div>
+                <h2 class="auth-title">Tạo tài khoản.</h2>
+                <p class="auth-sub">Thông tin có thể chỉnh lại trong mục Hồ sơ.</p>
 
-            <form class="auth-form auth-form--register" id="registerForm" novalidate>
-                <div class="input-wrapper">
-                    <div class="input-group">
-                        <svg class="input-group__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 12V7a2.5 2.5 0 0 0-2.5-2.5h-13A2.5 2.5 0 0 0 3 7v10a2.5 2.5 0 0 0 2.5 2.5H14"/>
-                            <path d="M3.5 6.5l8.5 6 8.5-6"/>
-                            <path d="M17.6 16.2a1.6 1.6 0 1 1 2.3 1.4c-.5.3-.7.6-.7 1.1"/>
-                            <circle cx="19.2" cy="21" r=".35" fill="currentColor"/>
-                        </svg>
-                        <input type="email" class="input-group__input" placeholder="Email của bạn" id="regEmail" autocomplete="email" required>
-                    </div>
-                    <span class="input-error" id="regEmailError"></span>
-                </div>
-
-                <div class="input-wrapper">
-                    <div class="input-group">
-                        <svg class="input-group__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="8" r="4"/>
-                            <path d="M4.5 21a7.5 7.5 0 0 1 15 0"/>
-                        </svg>
-                        <input type="text" class="input-group__input" placeholder="Tên người dùng" id="regUsername" autocomplete="username" required>
-                    </div>
-                    <span class="input-error" id="regUsernameError"></span>
-                </div>
-
-                <div class="input-wrapper">
-                    <div class="input-group">
-                        <svg class="input-group__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="4" y="11" width="16" height="10.5" rx="2.5"/>
-                            <path d="M8 11V7.5a4 4 0 0 1 8 0V11"/>
-                        </svg>
-                        <input type="password" class="input-group__input" placeholder="Mật khẩu có ít nhất 8 kí tự" id="regPassword" minlength="8" autocomplete="new-password" required>
-                        <button type="button" class="input-group__toggle" data-toggle-password="regPassword" aria-label="Hiện/ẩn mật khẩu">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-                                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-                                <line x1="1" y1="1" x2="23" y2="23"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <span class="input-error" id="regPasswordError"></span>
-                </div>
-
-                <div class="input-wrapper">
-                    <div class="input-group">
-                        <svg class="input-group__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="4" y="11" width="16" height="10.5" rx="2.5"/>
-                            <path d="M8 11V7.5a4 4 0 0 1 8 0V11"/>
-                        </svg>
-                        <input type="password" class="input-group__input" placeholder="Nhập lại mật khẩu của bạn" id="regConfirmPassword" minlength="6" autocomplete="new-password" required>
-                        <button type="button" class="input-group__toggle" data-toggle-password="regConfirmPassword" aria-label="Hiện/ẩn mật khẩu">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-                                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-                                <line x1="1" y1="1" x2="23" y2="23"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <span class="input-error" id="regConfirmPasswordError"></span>
-                </div>
-
-                <div class="input-wrapper">
-                    <label class="auth-form__terms">
-                        <input type="checkbox" id="agreeTerms" required>
-                        <span>Tôi đồng ý với <a href="#">Điều khoản dịch vụ</a> và <a href="#">Chính sách bảo mật</a></span>
-                    </label>
-                    <span class="input-error" id="agreeTermsError"></span>
-                </div>
-
-                <button type="submit" class="auth-form__submit">
-                    Đăng ký
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 12h16M14 6l6 6-6 6"/>
-                    </svg>
-                </button>
-            </form>
-        </section>
-
-        <!-- Right side -->
-        <aside class="auth-side auth-side--register">
-            <h1 class="auth-side__title">
-                Chào mừng! <span>Đăng ký ngay</span>
-            </h1>
-            <p class="auth-side__subtitle">Để khám phá thêm nhiều<br>điều thú vị nhé</p>
-
-            <div class="auth-side__illustration" aria-hidden="true">
-                <!-- Doodle lines (vàng / xanh dương / xanh lá) -->
-                <svg class="illustration-doodle" viewBox="0 0 380 290" fill="none" stroke-linecap="round" stroke-width="2">
-                    <path d="M6 112 Q14 140 26 168" stroke="#F5C518"/>
-                    <path d="M26 82 Q24 118 30 150" stroke="#F5C518"/>
-                    <path d="M298 18 Q292 46 288 70" stroke="#3B82F6"/>
-                    <path d="M300 88 Q320 70 346 64" stroke="#3B82F6"/>
-                    <path d="M312 104 Q344 92 376 92" stroke="#3B82F6"/>
-                    <path d="M166 288 Q216 284 274 270" stroke="#22C55E"/>
-                    <path d="M222 286 Q250 266 268 252" stroke="#22C55E"/>
-                </svg>
-
-                <div class="illustration-card">
-                    <div class="illustration-card__inner">
-                        <div class="illustration-card__avatar">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+                <form class="auth-form auth-form--register" id="registerForm" novalidate>
+                    <label class="auth-form__label" for="regUsername">Họ và tên</label>
+                    <div class="input-wrapper">
+                        <div class="input-group">
+                            <svg class="input-group__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="8" r="4"/>
                                 <path d="M4.5 21a7.5 7.5 0 0 1 15 0"/>
                             </svg>
+                            <input type="text" class="input-group__input" placeholder="Nguyễn Văn A" id="regUsername" autocomplete="name" required>
                         </div>
-                        <div class="illustration-card__bar illustration-card__bar--long"></div>
-                        <div class="illustration-card__bar illustration-card__bar--short"></div>
+                        <span class="input-error" id="regUsernameError"></span>
                     </div>
-                </div>
-            </div>
-        </aside>
-    </main>
+
+                    <label class="auth-form__label" for="regEmail">Email</label>
+                    <div class="input-wrapper">
+                        <div class="input-group">
+                            <svg class="input-group__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2.5" y="4.5" width="19" height="15" rx="2"/>
+                                <path d="M3 6.5l9 6.5 9-6.5"/>
+                            </svg>
+                            <input type="email" class="input-group__input" placeholder="ten.cua.ban@gmail.com" id="regEmail" autocomplete="email" required>
+                        </div>
+                        <span class="input-error" id="regEmailError"></span>
+                    </div>
+
+                    <div class="auth-form__row">
+                        <div>
+                            <label class="auth-form__label" for="regPassword">Mật khẩu</label>
+                            <div class="input-wrapper">
+                                <div class="input-group">
+                                    <svg class="input-group__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="4" y="11" width="16" height="10" rx="2"/>
+                                        <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+                                    </svg>
+                                    <input type="password" class="input-group__input" placeholder="Ít nhất 8 ký tự" id="regPassword" minlength="8" autocomplete="new-password" required>
+                                    <button type="button" class="input-group__toggle" data-toggle-password="regPassword" aria-label="Hiện/ẩn mật khẩu">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                                            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                                            <line x1="1" y1="1" x2="23" y2="23"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <span class="input-error" id="regPasswordError"></span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="auth-form__label" for="regConfirmPassword">Nhập lại mật khẩu</label>
+                            <div class="input-wrapper">
+                                <div class="input-group">
+                                    <svg class="input-group__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="4" y="11" width="16" height="10" rx="2"/>
+                                        <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+                                    </svg>
+                                    <input type="password" class="input-group__input" placeholder="••••••••" id="regConfirmPassword" minlength="6" autocomplete="new-password" required>
+                                    <button type="button" class="input-group__toggle" data-toggle-password="regConfirmPassword" aria-label="Hiện/ẩn mật khẩu">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                                            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                                            <line x1="1" y1="1" x2="23" y2="23"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <span class="input-error" id="regConfirmPasswordError"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-wrapper" style="margin-top: 18px;">
+                        <label class="auth-check">
+                            <input type="checkbox" id="agreeTerms" required>
+                            <span>Tôi đồng ý với <a href="#">Điều khoản dịch vụ</a> và <a href="#">Chính sách bảo mật</a></span>
+                        </label>
+                        <span class="input-error" id="agreeTermsError"></span>
+                    </div>
+
+                    <button type="submit" class="auth-form__submit auth-form__submit--mint">
+                        Tạo tài khoản
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                    </button>
+                </form>
+            </section>
+
+            <div class="auth-foot"><span>© 2026 Nhóm 11</span><span>Mật khẩu được mã hóa bcrypt</span></div>
+        </main>
+    </div>
 
     <script src="../assets/js/auth_common.js"></script>
     <script src="../assets/js/session.js"></script>

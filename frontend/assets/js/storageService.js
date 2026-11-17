@@ -22,66 +22,226 @@ const StorageService = {
   },
 
   DEFAULT_SEMESTERS: [
-    { id: 'sem_1', name: 'Học kỳ 1', academic_year: '2025-2026', start_date: '2025-09-05', end_date: '2026-01-15' },
-    { id: 'sem_2', name: 'Học kỳ 2', academic_year: '2025-2026', start_date: '2026-02-15', end_date: '2026-06-30' },
-    { id: 'sem_3', name: 'Học kỳ Hè', academic_year: '2025-2026', start_date: '2026-07-05', end_date: '2026-08-25' }
+    { id: 'sem_1', name: 'Học kỳ 1', academic_year: '2025-2026', start_date: '2025-09-01', end_date: '2026-01-15' },
+    { id: 'sem_2', name: 'Học kỳ 2', academic_year: '2025-2026', start_date: '2026-02-01', end_date: '2026-06-15' },
+    { id: 'sem_3', name: 'Học kỳ hè', academic_year: '2025-2026', start_date: '2026-06-20', end_date: '2026-08-15' },
+    { id: 'sem_4', name: 'Học kỳ 1', academic_year: '2026-2027', start_date: '2026-09-01', end_date: '2027-01-15' }
   ],
 
   DEFAULT_COURSES: [
+    // ===== HK1 25–26 (6 môn, 20 TC, GPA = 3.05: 2 A, 1 B+, 1 B, 1 C+, 1 D+) =====
     {
-      id: 'c_1',
-      semester_id: 'sem_1',
-      course_code: 'INT1001',
-      course_name: 'Nhập môn lập trình',
-      credits: 3,
-      category: 'Đại cương',
-      is_retake: false,
+      id: 'c_101', semester_id: 'sem_1', course_code: 'BAS1103', course_name: 'Vật lý 1 và thí nghiệm', credits: 3, category: 'Đại cương', is_retake: false,
       components: [
-        { id: 'comp_1_1', name: 'Chuyên cần', weight_percent: 10, score: 9.0 },
-        { id: 'comp_1_2', name: 'Giữa kỳ', weight_percent: 30, score: 8.0 },
-        { id: 'comp_1_3', name: 'Cuối kỳ', weight_percent: 60, score: 8.5 }
+        { id: 'cp_101_1', name: 'Quá trình', weight_percent: 10, score: 8.5 },
+        { id: 'cp_101_2', name: 'Giữa kỳ', weight_percent: 30, score: 8.5 },
+        { id: 'cp_101_3', name: 'Cuối kỳ', weight_percent: 60, score: 8.6 }
       ]
     },
     {
-      id: 'c_2',
-      semester_id: 'sem_1',
-      course_code: 'MAT1010',
-      course_name: 'Giải tích 1',
-      credits: 4,
-      category: 'Đại cương',
-      is_retake: false,
+      id: 'c_102', semester_id: 'sem_1', course_code: 'INT1101', course_name: 'Tin học cơ sở 1', credits: 3, category: 'Cơ sở ngành', is_retake: false,
       components: [
-        { id: 'comp_2_1', name: 'Chuyên cần', weight_percent: 10, score: 8.0 },
-        { id: 'comp_2_2', name: 'Giữa kỳ', weight_percent: 30, score: 3.5 },
-        { id: 'comp_2_3', name: 'Cuối kỳ', weight_percent: 60, score: 3.8 }
+        { id: 'cp_102_1', name: 'Quá trình', weight_percent: 10, score: 8.5 },
+        { id: 'cp_102_2', name: 'Giữa kỳ', weight_percent: 30, score: 8.5 },
+        { id: 'cp_102_3', name: 'Cuối kỳ', weight_percent: 60, score: 8.5 }
       ]
     },
     {
-      id: 'c_3',
-      semester_id: 'sem_2',
-      course_code: 'INT1002',
-      course_name: 'Cấu trúc dữ liệu và giải thuật',
-      credits: 3,
-      category: 'Cơ sở ngành',
-      is_retake: false,
+      id: 'c_103', semester_id: 'sem_1', course_code: 'BAS1102', course_name: 'Đại số tuyến tính', credits: 3, category: 'Đại cương', is_retake: false,
       components: [
-        { id: 'comp_3_1', name: 'Chuyên cần', weight_percent: 10, score: 10.0 },
-        { id: 'comp_3_2', name: 'Bài tập lớn', weight_percent: 40, score: 8.5 },
-        { id: 'comp_3_3', name: 'Cuối kỳ', weight_percent: 50, score: 8.0 }
+        { id: 'cp_103_1', name: 'Quá trình', weight_percent: 10, score: 8.5 },
+        { id: 'cp_103_2', name: 'Giữa kỳ', weight_percent: 30, score: 8.0 },
+        { id: 'cp_103_3', name: 'Cuối kỳ', weight_percent: 60, score: 8.2 }
       ]
     },
     {
-      id: 'c_4',
-      semester_id: 'sem_3',
-      course_code: 'MAT1010',
-      course_name: 'Giải tích 1 (Học cải thiện)',
-      credits: 4,
-      category: 'Đại cương',
-      is_retake: true,
+      id: 'c_104', semester_id: 'sem_1', course_code: 'BAS1101', course_name: 'Giải tích 1', credits: 4, category: 'Đại cương', is_retake: false,
       components: [
-        { id: 'comp_4_1', name: 'Chuyên cần', weight_percent: 10, score: 9.0 },
-        { id: 'comp_4_2', name: 'Giữa kỳ', weight_percent: 30, score: 8.5 },
-        { id: 'comp_4_3', name: 'Cuối kỳ', weight_percent: 60, score: 8.5 }
+        { id: 'cp_104_1', name: 'Quá trình', weight_percent: 10, score: 7.5 },
+        { id: 'cp_104_2', name: 'Giữa kỳ', weight_percent: 30, score: 7.5 },
+        { id: 'cp_104_3', name: 'Cuối kỳ', weight_percent: 60, score: 7.5 }
+      ]
+    },
+    {
+      id: 'c_105', semester_id: 'sem_1', course_code: 'BAS1105', course_name: 'Triết học Mác - Lênin', credits: 4, category: 'Đại cương', is_retake: false,
+      components: [
+        { id: 'cp_105_1', name: 'Quá trình', weight_percent: 10, score: 7.0 },
+        { id: 'cp_105_2', name: 'Giữa kỳ', weight_percent: 30, score: 6.5 },
+        { id: 'cp_105_3', name: 'Cuối kỳ', weight_percent: 60, score: 6.8 }
+      ]
+    },
+    {
+      id: 'c_106', semester_id: 'sem_1', course_code: 'BAS1106', course_name: 'Pháp luật đại cương', credits: 3, category: 'Đại cương', is_retake: false,
+      components: [
+        { id: 'cp_106_1', name: 'Quá trình', weight_percent: 10, score: 6.0 },
+        { id: 'cp_106_2', name: 'Giữa kỳ', weight_percent: 30, score: 5.0 },
+        { id: 'cp_106_3', name: 'Cuối kỳ', weight_percent: 60, score: 5.2 }
+      ]
+    },
+
+    // ===== HK2 25–26 (6 môn, 21 TC, GPA = 3.38: 2 A, 2 B+, 1 B, 1 C+) =====
+    {
+      id: 'c_201', semester_id: 'sem_2', course_code: 'INT1201', course_name: 'Kỹ thuật lập trình', credits: 3, category: 'Cơ sở ngành', is_retake: false,
+      components: [
+        { id: 'cp_201_1', name: 'Quá trình', weight_percent: 10, score: 9.0 },
+        { id: 'cp_201_2', name: 'Giữa kỳ', weight_percent: 30, score: 8.5 },
+        { id: 'cp_201_3', name: 'Cuối kỳ', weight_percent: 60, score: 8.6 }
+      ]
+    },
+    {
+      id: 'c_202', semester_id: 'sem_2', course_code: 'BAS1201', course_name: 'Xác suất thống kê', credits: 3, category: 'Đại cương', is_retake: false,
+      components: [
+        { id: 'cp_202_1', name: 'Quá trình', weight_percent: 10, score: 8.5 },
+        { id: 'cp_202_2', name: 'Giữa kỳ', weight_percent: 30, score: 8.5 },
+        { id: 'cp_202_3', name: 'Cuối kỳ', weight_percent: 60, score: 8.5 }
+      ]
+    },
+    {
+      id: 'c_203', semester_id: 'sem_2', course_code: 'INT1202', course_name: 'Kiến trúc máy tính', credits: 4, category: 'Cơ sở ngành', is_retake: false,
+      components: [
+        { id: 'cp_203_1', name: 'Quá trình', weight_percent: 10, score: 8.5 },
+        { id: 'cp_203_2', name: 'Giữa kỳ', weight_percent: 30, score: 8.0 },
+        { id: 'cp_203_3', name: 'Cuối kỳ', weight_percent: 60, score: 8.2 }
+      ]
+    },
+    {
+      id: 'c_204', semester_id: 'sem_2', course_code: 'INT1203', course_name: 'Hệ điều hành', credits: 4, category: 'Cơ sở ngành', is_retake: false,
+      components: [
+        { id: 'cp_204_1', name: 'Quá trình', weight_percent: 10, score: 8.0 },
+        { id: 'cp_204_2', name: 'Giữa kỳ', weight_percent: 30, score: 8.0 },
+        { id: 'cp_204_3', name: 'Cuối kỳ', weight_percent: 60, score: 8.2 }
+      ]
+    },
+    {
+      id: 'c_205', semester_id: 'sem_2', course_code: 'BAS1202', course_name: 'Kinh tế chính trị Mác - Lênin', credits: 3, category: 'Đại cương', is_retake: false,
+      components: [
+        { id: 'cp_205_1', name: 'Quá trình', weight_percent: 10, score: 8.0 },
+        { id: 'cp_205_2', name: 'Giữa kỳ', weight_percent: 30, score: 7.5 },
+        { id: 'cp_205_3', name: 'Cuối kỳ', weight_percent: 60, score: 7.5 }
+      ]
+    },
+    {
+      id: 'c_206', semester_id: 'sem_2', course_code: 'INT1204', course_name: 'Mạng máy tính', credits: 4, category: 'Cơ sở ngành', is_retake: false,
+      components: [
+        { id: 'cp_206_1', name: 'Quá trình', weight_percent: 10, score: 7.0 },
+        { id: 'cp_206_2', name: 'Giữa kỳ', weight_percent: 30, score: 6.5 },
+        { id: 'cp_206_3', name: 'Cuối kỳ', weight_percent: 60, score: 6.8 }
+      ]
+    },
+
+    // ===== HK hè 26 (6 môn, 20 TC, GPA = 3.20: 2 A, 2 B+, 1 B, 1 C) =====
+    {
+      id: 'c_301', semester_id: 'sem_3', course_code: 'INT1301', course_name: 'Lập trình hướng đối tượng', credits: 3, category: 'Chuyên ngành', is_retake: false,
+      components: [
+        { id: 'cp_301_1', name: 'Quá trình', weight_percent: 10, score: 9.0 },
+        { id: 'cp_301_2', name: 'Giữa kỳ', weight_percent: 30, score: 8.5 },
+        { id: 'cp_301_3', name: 'Cuối kỳ', weight_percent: 60, score: 8.6 }
+      ]
+    },
+    {
+      id: 'c_302', semester_id: 'sem_3', course_code: 'SKD1101', course_name: 'Kỹ năng làm việc nhóm', credits: 2, category: 'Tự chọn & Thực tập', is_retake: false,
+      components: [
+        { id: 'cp_302_1', name: 'Quá trình', weight_percent: 10, score: 8.5 },
+        { id: 'cp_302_2', name: 'Giữa kỳ', weight_percent: 30, score: 8.5 },
+        { id: 'cp_302_3', name: 'Cuối kỳ', weight_percent: 60, score: 8.5 }
+      ]
+    },
+    {
+      id: 'c_303', semester_id: 'sem_3', course_code: 'INT1302', course_name: 'Phát triển ứng dụng Web', credits: 3, category: 'Chuyên ngành', is_retake: false,
+      components: [
+        { id: 'cp_303_1', name: 'Quá trình', weight_percent: 10, score: 8.5 },
+        { id: 'cp_303_2', name: 'Giữa kỳ', weight_percent: 30, score: 8.0 },
+        { id: 'cp_303_3', name: 'Cuối kỳ', weight_percent: 60, score: 8.2 }
+      ]
+    },
+    {
+      id: 'c_304', semester_id: 'sem_3', course_code: 'ENG1101', course_name: 'Tiếng Anh chuyên ngành 1', credits: 3, category: 'Tự chọn & Thực tập', is_retake: false,
+      components: [
+        { id: 'cp_304_1', name: 'Quá trình', weight_percent: 10, score: 8.0 },
+        { id: 'cp_304_2', name: 'Giữa kỳ', weight_percent: 30, score: 8.0 },
+        { id: 'cp_304_3', name: 'Cuối kỳ', weight_percent: 60, score: 8.2 }
+      ]
+    },
+    {
+      id: 'c_305', semester_id: 'sem_3', course_code: 'INT1303', course_name: 'Công nghệ phần mềm', credits: 5, category: 'Chuyên ngành', is_retake: false,
+      components: [
+        { id: 'cp_305_1', name: 'Quá trình', weight_percent: 10, score: 8.0 },
+        { id: 'cp_305_2', name: 'Giữa kỳ', weight_percent: 30, score: 7.5 },
+        { id: 'cp_305_3', name: 'Cuối kỳ', weight_percent: 60, score: 7.5 }
+      ]
+    },
+    {
+      id: 'c_306', semester_id: 'sem_3', course_code: 'INT1304', course_name: 'Phân tích thiết kế hệ thống', credits: 4, category: 'Chuyên ngành', is_retake: false,
+      components: [
+        { id: 'cp_306_1', name: 'Quá trình', weight_percent: 10, score: 6.5 },
+        { id: 'cp_306_2', name: 'Giữa kỳ', weight_percent: 30, score: 6.0 },
+        { id: 'cp_306_3', name: 'Cuối kỳ', weight_percent: 60, score: 6.2 }
+      ]
+    },
+
+    // ===== HK1 26–27 (8 môn chuẩn Figma StudyTrack-E-04-mon-hoc 1: 23 TC, 17 đã có điểm, 2 đang học, ĐTB 7.99, GPA 3.41) =====
+    {
+      id: 'c_401', semester_id: 'sem_4', course_code: 'INT1306', course_name: 'Cấu trúc dữ liệu và giải thuật', credits: 3, category: 'Cơ sở ngành', is_retake: false,
+      components: [
+        { id: 'cp_401_1', name: 'Quá trình', weight_percent: 10, score: 9.0 },
+        { id: 'cp_401_2', name: 'Giữa kỳ', weight_percent: 30, score: 8.5 },
+        { id: 'cp_401_3', name: 'Cuối kỳ', weight_percent: 60, score: 8.9 }
+      ]
+    },
+    {
+      id: 'c_402', semester_id: 'sem_4', course_code: 'INT1340', course_name: 'Lập trình iOS', credits: 3, category: 'Chuyên ngành', is_retake: false,
+      components: [
+        { id: 'cp_402_1', name: 'Quá trình', weight_percent: 10, score: 8.5 },
+        { id: 'cp_402_2', name: 'Giữa kỳ', weight_percent: 30, score: 8.0 },
+        { id: 'cp_402_3', name: 'Cuối kỳ', weight_percent: 60, score: null }
+      ]
+    },
+    {
+      id: 'c_403', semester_id: 'sem_4', course_code: 'INT1313', course_name: 'Cơ sở dữ liệu', credits: 3, category: 'Cơ sở ngành', is_retake: false,
+      components: [
+        { id: 'cp_403_1', name: 'Quá trình', weight_percent: 10, score: 8.0 },
+        { id: 'cp_403_2', name: 'Giữa kỳ', weight_percent: 30, score: 8.0 },
+        { id: 'cp_403_3', name: 'Cuối kỳ', weight_percent: 60, score: 8.3 }
+      ]
+    },
+    {
+      id: 'c_404', semester_id: 'sem_4', course_code: 'INT1339', course_name: 'Ngôn ngữ lập trình C++', credits: 3, category: 'Cơ sở ngành', is_retake: false,
+      components: [
+        { id: 'cp_404_1', name: 'Quá trình', weight_percent: 10, score: 9.5 },
+        { id: 'cp_404_2', name: 'Giữa kỳ', weight_percent: 30, score: 9.0 },
+        { id: 'cp_404_3', name: 'Cuối kỳ', weight_percent: 60, score: 9.2 }
+      ]
+    },
+    {
+      id: 'c_405', semester_id: 'sem_4', course_code: 'BAS1204', course_name: 'Giải tích 2', credits: 3, category: 'Đại cương', is_retake: false,
+      components: [
+        { id: 'cp_405_1', name: 'Quá trình', weight_percent: 10, score: 7.0 },
+        { id: 'cp_405_2', name: 'Giữa kỳ', weight_percent: 30, score: 6.0 },
+        { id: 'cp_405_3', name: 'Cuối kỳ', weight_percent: 60, score: 6.8 }
+      ]
+    },
+    {
+      id: 'c_406', semester_id: 'sem_4', course_code: 'BAS1227', course_name: 'Vật lý 3 và thí nghiệm', credits: 4, category: 'Đại cương', is_retake: false,
+      components: [
+        { id: 'cp_406_1', name: 'Quá trình', weight_percent: 10, score: 7.5 },
+        { id: 'cp_406_2', name: 'Giữa kỳ', weight_percent: 30, score: 7.0 },
+        { id: 'cp_406_3', name: 'Cuối kỳ', weight_percent: 60, score: 7.2 }
+      ]
+    },
+    {
+      id: 'c_407', semester_id: 'sem_4', course_code: 'SKD1102', course_name: 'Kỹ năng tạo lập văn bản', credits: 1, category: 'Đại cương', is_retake: false,
+      components: [
+        { id: 'cp_407_1', name: 'Quá trình', weight_percent: 10, score: 8.0 },
+        { id: 'cp_407_2', name: 'Giữa kỳ', weight_percent: 30, score: 8.5 },
+        { id: 'cp_407_3', name: 'Cuối kỳ', weight_percent: 60, score: 8.9 }
+      ]
+    },
+    {
+      id: 'c_408', semester_id: 'sem_4', course_code: 'INT1358', course_name: 'Toán rời rạc 1', credits: 3, category: 'Cơ sở ngành', is_retake: false,
+      components: [
+        { id: 'cp_408_1', name: 'Quá trình', weight_percent: 10, score: 7.5 },
+        { id: 'cp_408_2', name: 'Giữa kỳ', weight_percent: 30, score: 7.0 },
+        { id: 'cp_408_3', name: 'Cuối kỳ', weight_percent: 60, score: null }
       ]
     }
   ],
@@ -111,16 +271,30 @@ const StorageService = {
   studentKey()   { return STORAGE_KEYS.STUDENT + '_' + this.currentUserId(); },
 
   init() {
-    // Không tự động chèn dữ liệu mẫu cứng khi khởi tạo tài khoản mới.
-    // Dữ liệu được đọc trực tiếp từ localStorage của người dùng hiện tại.
+    try {
+      const rawCourses = localStorage.getItem(this.coursesKey());
+      const rawSems = localStorage.getItem(this.semestersKey());
+      if (rawCourses === null && rawSems === null) {
+        this.resetToDefault();
+        return;
+      }
+      if (rawCourses) {
+        const parsed = JSON.parse(rawCourses);
+        const isOld4 = Array.isArray(parsed) && parsed.length === 4 && parsed[0]?.id === 'c_1';
+        const isOld17 = Array.isArray(parsed) && parsed.length === 17 && parsed[0]?.id === 'c_101' && parsed[0]?.course_code === 'INT1001';
+        if (isOld4 || isOld17) {
+          this.resetToDefault();
+        }
+      }
+    } catch { /* ignore */ }
   },
 
   resetToDefault() {
     localStorage.setItem(this.semestersKey(), JSON.stringify(this.DEFAULT_SEMESTERS));
     localStorage.setItem(this.coursesKey(), JSON.stringify(this.DEFAULT_COURSES));
     localStorage.setItem(this.goalKey(), JSON.stringify({
-      target_gpa: 3.2,
-      target_date: '2026-12-31',
+      target_gpa: 3.60,
+      target_date: '2027-06-30',
       remaining_credits: 30
     }));
   },
@@ -295,7 +469,7 @@ const StorageService = {
     const newSemesters = new Set();
     const newCourses = new Set();
 
-    return (validRows || []).map(row => {
+    const annotatedRows = (validRows || []).map(row => {
       const semLower = (row.semester_name || '').trim().toLowerCase();
       const codeUpper = (row.course_code || '').trim().toUpperCase();
       const cKey = `${semLower}::${codeUpper}`;
@@ -311,6 +485,7 @@ const StorageService = {
         isNewCourse
       };
     });
+    return { annotatedRows, newSemesterCount: newSemesters.size, newCourseCount: newCourses.size };
   },
 
   // Batch import Upsert (PB-26, PB-46)

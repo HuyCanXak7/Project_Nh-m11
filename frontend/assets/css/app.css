@@ -901,28 +901,599 @@ body.app-body {
     }
 }
 
-/* ===== BẢN IN A4 CHUẨN (PB-28) ===== */
+/* ===== GIAO DIỆN MÔN HỌC & CÁC TRANG NỘI BỘ CHUẨN FIGMA STUDYTRACK-E ===== */
+.app-card {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: 1px solid var(--e-border, #CBD5E1);
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    padding: 24px;
+    margin-bottom: 0;
+}
+
+.app-card:last-of-type {
+    flex: 1 1 auto;
+    border-bottom: none;
+}
+
+.btn {
+    border-radius: 0 !important;
+}
+
+.btn-primary {
+    background: #0F1F38 !important;
+    color: #FFFFFF !important;
+    box-shadow: none !important;
+}
+
+.btn-primary:hover {
+    background: #1B3358 !important;
+    transform: none !important;
+}
+
+.btn-action {
+    padding: 5px 10px;
+    border-radius: 0 !important;
+    font-size: 11.5px;
+    font-weight: 700;
+    box-shadow: none !important;
+}
+
+.btn-action--score {
+    background: #0F1F38;
+    color: #FFFFFF;
+    border-color: #0F1F38;
+}
+
+.btn-action--score:hover {
+    background: #1B3358;
+    border-color: #1B3358;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-action--edit,
+.btn-action--delete {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.filter-bar {
+    border-radius: 0 !important;
+    border: 1px solid #CBD5E1;
+    background: #F8FAFC;
+}
+
+.semester-card {
+    border-radius: 0 !important;
+    border: 1px solid #CBD5E1;
+    box-shadow: none !important;
+}
+
+.semester-card:hover {
+    border-color: #0F1F38;
+    box-shadow: none !important;
+    transform: none;
+}
+
+.semester-card__year,
+.semester-card__stats,
+.table-wrap,
+.empty-state,
+.alert-box,
+.badge {
+    border-radius: 0 !important;
+}
+
+.course-sem-tabs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid #CBD5E1;
+    background: #FFFFFF;
+}
+
+.course-sem-tab {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    height: 44px;
+    padding: 0 18px;
+    border-radius: 0;
+    background: #FFFFFF;
+    border-right: 1px solid #CBD5E1;
+    color: #475569;
+    font-size: 12.5px;
+    font-weight: 600;
+    transition: background 0.15s ease, color 0.15s ease;
+    cursor: pointer;
+}
+
+.course-sem-tab:last-child {
+    border-right: none;
+}
+
+.course-sem-tab:hover {
+    background: #F8FAFC;
+    color: #0F1F38;
+}
+
+.course-sem-tab__gpa {
+    font-size: 14px;
+    font-weight: 800;
+    color: #0F1F38;
+}
+
+.course-sem-tab.is-active {
+    background: #0F1F38;
+    color: #FFFFFF;
+    font-weight: 700;
+}
+
+.course-sem-tab.is-active .course-sem-tab__gpa {
+    color: #FFFFFF;
+}
+
+.course-sem-tab--add {
+    justify-content: center;
+    color: #0F1F38;
+    font-weight: 700;
+    background: #FFFFFF;
+}
+
+/* Dải 5 ô tóm tắt học kỳ nối liền */
+.course-sem-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1.1fr 1.35fr;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid #CBD5E1;
+    background: #FFFFFF;
+}
+
+.course-sem-strip__cell {
+    padding: 18px 20px;
+    border-right: 1px solid #CBD5E1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+}
+
+.course-sem-strip__cell:last-child {
+    border-right: none;
+}
+
+.course-sem-strip__cell--gpa {
+    background: #3EE09B;
+    color: #0F1F38;
+}
+
+.course-sem-strip__label {
+    font-size: 10.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748B;
+}
+
+.course-sem-strip__cell--gpa .course-sem-strip__label {
+    color: rgba(15, 31, 56, 0.72);
+}
+
+.course-sem-strip__val-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.course-sem-strip__val {
+    font-size: 32px;
+    font-weight: 800;
+    color: #0F1F38;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+}
+
+.course-sem-strip__val--date {
+    font-size: 22px;
+}
+
+.course-sem-strip__sub,
+.sem-strip-rank {
+    font-size: 12px;
+    color: #64748B;
+    font-weight: 500;
+}
+
+.course-sem-strip__cell--gpa .sem-strip-rank {
+    color: #0F1F38;
+    font-weight: 600;
+}
+
+/* Thanh lọc và tìm kiếm nối liền chuẩn StudyTrack-E */
+.course-toolbar {
+    display: flex;
+    align-items: stretch;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid #CBD5E1;
+    background: #FFFFFF;
+    flex-wrap: wrap;
+}
+
+.course-toolbar__search {
+    position: relative;
+    flex: 1;
+    min-width: 220px;
+    display: flex;
+    align-items: center;
+    border-right: 1px solid #CBD5E1;
+}
+
+.course-toolbar__search svg {
+    position: absolute;
+    left: 16px;
+    width: 15px;
+    height: 15px;
+    color: #94A3B8;
+    pointer-events: none;
+}
+
+.course-toolbar__search input {
+    width: 100%;
+    height: 44px;
+    padding: 0 14px 0 40px;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 12.5px;
+    color: #0F1F38;
+    outline: none;
+}
+
+.course-status-tabs {
+    display: inline-flex;
+    align-items: stretch;
+    background: #FFFFFF;
+}
+
+.course-status-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 44px;
+    padding: 0 16px;
+    border-right: 1px solid #CBD5E1;
+    border-bottom: 2.5px solid transparent;
+    font-size: 12px;
+    font-weight: 500;
+    color: #64748B;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.course-status-tab span {
+    font-weight: 700;
+}
+
+.course-status-tab.is-active {
+    color: #0F1F38;
+    font-weight: 800;
+    border-bottom-color: #10B981;
+}
+
+.course-toolbar__select {
+    height: 44px;
+    padding: 0 16px;
+    border: none;
+    background: #FFFFFF;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    outline: none;
+    cursor: pointer;
+}
+
+.course-toolbar__clear {
+    height: 44px;
+    padding: 0 14px;
+    border-left: 1px solid #CBD5E1;
+    font-size: 12px;
+    font-weight: 700;
+    color: #EF4444;
+    background: #FEF2F2;
+}
+
+/* Bảng môn học chuẩn StudyTrack-E - Tự động giãn khít màn hình */
+.course-table-card {
+    background: #FFFFFF;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+}
+
+.course-table-card > .table-wrap {
+    flex: 1 1 auto;
+}
+
+.course-figma-table th {
+    background: #F8FAFC;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748B;
+    padding: 11px 14px;
+    border-bottom: 1px solid #CBD5E1;
+}
+
+.course-figma-table td {
+    padding: 13px 14px;
+    border-bottom: 1px solid #E2E8F0;
+    font-size: 12.5px;
+}
+
+.course-row--inprogress {
+    background: #F4F7FB;
+    box-shadow: inset 3px 0 0 #0F1F38;
+}
+
+.course-code-cell {
+    font-family: 'Be Vietnam Pro', monospace;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #64748B;
+}
+
+.course-name-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.course-name-text {
+    font-weight: 700;
+    color: #0F1F38;
+}
+
+.score-cell {
+    font-weight: 500;
+    color: #0F1F38;
+    font-variant-numeric: tabular-nums;
+}
+
+.score-dash {
+    color: #CBD5E1;
+    font-weight: 500;
+}
+
+.e-grade-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: #0F1F38;
+}
+
+.e-grade-sq {
+    width: 7px;
+    height: 7px;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.course-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.course-state--pass { color: #0F1F38; font-weight: 700; }
+.course-state--prog { color: #64748B; }
+.course-state--fail { color: #EF4444; font-weight: 700; }
+
+.course-table-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 18px;
+    background: #F8FAFC;
+    border-top: 1px solid #CBD5E1;
+    font-size: 12px;
+    color: #64748B;
+}
+
+@media (max-width: 1024px) {
+    .course-sem-strip {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .course-sem-strip__cell {
+        border-bottom: 1px solid #CBD5E1;
+    }
+    .course-sem-strip__cell--gpa {
+        grid-column: 1 / -1;
+        border-bottom: none;
+    }
+}
+
+@media (max-width: 600px) {
+    .course-sem-tabs {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .course-sem-tab {
+        border-bottom: 1px solid #CBD5E1;
+        padding: 0 12px;
+        font-size: 12px;
+    }
+    .course-sem-strip {
+        grid-template-columns: 1fr;
+    }
+    .course-sem-strip__cell {
+        border-right: none;
+        padding: 12px 14px;
+    }
+    .course-toolbar__search {
+        min-width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #CBD5E1;
+    }
+    .course-status-tabs {
+        width: 100%;
+        overflow-x: auto;
+        border-bottom: 1px solid #CBD5E1;
+    }
+}
+
+/* ===== BẢN IN A4 CHUẨN (PB-28 · T0694E7) ===== */
+.print-only {
+    display: none !important;
+}
+
+@page {
+    size: A4 portrait;
+    margin: 12mm 10mm;
+}
+
 @media print {
+    body.app-page,
     body.app-body {
-        background: #fff !important;
-        padding: 0 !important;
-        color: #000 !important;
-    }
-    .bg-decoration, .app-navbar, .mobile-nav, .app-actions, .filter-bar, .no-print {
-        display: none !important;
-    }
-    .app-wrapper {
-        max-width: 100% !important;
+        display: block !important;
+        min-height: auto !important;
+        height: auto !important;
+        overflow: visible !important;
+        background: #FFFFFF !important;
         padding: 0 !important;
         margin: 0 !important;
+        color: #000000 !important;
+        font-size: 10.5pt !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
+
+    .bg-decoration,
+    .dash-bg,
+    .sidebar,
+    .sidebar-overlay,
+    .dash-header,
+    .app-navbar,
+    .mobile-nav,
+    .app-actions,
+    .filter-bar,
+    .no-print,
+    button,
+    .btn {
+        display: none !important;
+    }
+
+    .dash,
+    .app-wrapper,
     .app-card {
+        display: block !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        min-height: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
         box-shadow: none !important;
         border: none !important;
-        padding: 0 !important;
     }
+
     .print-only {
         display: block !important;
     }
+
+    .print-only.print-signature {
+        display: flex !important;
+        justify-content: space-between !important;
+        text-align: center !important;
+        margin-top: 28px !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .print-signature__col {
+        width: 240px;
+    }
+
+    .stats {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        border: 1px solid #000000 !important;
+        margin-bottom: 16px !important;
+        page-break-inside: avoid !important;
+    }
+
+    .stat-card,
+    .stat-card--navy,
+    .stat-card--mint {
+        background: #FFFFFF !important;
+        color: #000000 !important;
+        border-right: 1px solid #000000 !important;
+        min-height: auto !important;
+        padding: 10px 12px !important;
+    }
+
+    .stat-card:last-child {
+        border-right: none !important;
+    }
+
+    .stat-card__label,
+    .stat-card__value,
+    .stat-card__note {
+        color: #000000 !important;
+    }
+
+    .stat-card__value {
+        font-size: 18pt !important;
+    }
+
+    .transcript-sem-card {
+        border: 1px solid #000000 !important;
+        margin-bottom: 16px !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .table-wrap {
+        overflow: visible !important;
+        border: none !important;
+    }
+
+    .app-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        table-layout: auto !important;
+    }
+
+    .app-table th,
+    .app-table td {
+        white-space: normal !important;
+        word-break: break-word !important;
+        padding: 6px 8px !important;
+        font-size: 9.5pt !important;
+        border: 1px solid #64748B !important;
+        color: #000000 !important;
+    }
+
+    .app-table tr {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
 }
-.print-only { display: none; }

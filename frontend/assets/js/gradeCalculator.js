@@ -16,14 +16,19 @@ const GradeCalculator = {
     { min: 0.0, max: 3.9, letter: 'F', scale4: 0.0, status: 'Rớt', label: 'Kém (Học lại)', colorClass: 'badge-red' }
   ],
 
+  // toPrecision(12) khử sai số số thực (8.45*10 = 84.4999…) để khớp Decimal ROUND_HALF_UP của BE
+  roundHalfUp(val, factor) {
+    return Math.round(Number((Number(val) * factor).toPrecision(12))) / factor;
+  },
+
   round1(val) {
     if (val === null || val === undefined || isNaN(val)) return null;
-    return Math.round(Number(val) * 10) / 10;
+    return this.roundHalfUp(val, 10);
   },
 
   round2(val) {
     if (val === null || val === undefined || isNaN(val)) return 0;
-    return Math.round(Number(val) * 100) / 100;
+    return this.roundHalfUp(val, 100);
   },
 
   convertScore10(score10) {
@@ -48,9 +53,19 @@ const GradeCalculator = {
     return this.convertScore10(score10);
   },
 
+  getAcademicRank(gpa4) {
+    if (gpa4 === null || gpa4 === undefined || isNaN(Number(gpa4))) return '--';
+    const g = Number(gpa4);
+    if (g >= 3.6) return 'Xuất sắc';
+    if (g >= 3.2) return 'Giỏi';
+    if (g >= 2.5) return 'Khá';
+    if (g >= 2.0) return 'Trung bình';
+    return 'Yếu';
+  },
+
   calculateCourseFinalScore(components) {
     if (!Array.isArray(components) || components.length === 0) {
-      return { finalScore10: null, isComplete: false, totalWeight: 0, hasInvalidScore: false };
+      return { finalScore10: null, isComplete: false, totalWeight: 0, isValidWeight: false, hasInvalidScore: false };
     }
     let totalWeight = 0;
     let weightedSum = 0;
@@ -73,10 +88,13 @@ const GradeCalculator = {
       }
     });
 
-    if (Math.round(totalWeight) !== 100 || !allEntered || hasInvalidScore) {
-      return { finalScore10: null, isComplete: false, totalWeight: Math.round(totalWeight), hasInvalidScore };
+    const roundedWeight = Math.round(totalWeight);
+    const isValidWeight = roundedWeight === 100;
+
+    if (!isValidWeight || !allEntered || hasInvalidScore) {
+      return { finalScore10: null, isComplete: false, totalWeight: roundedWeight, isValidWeight, hasInvalidScore };
     }
-    return { finalScore10: this.round1(weightedSum), isComplete: true, totalWeight: 100, hasInvalidScore: false };
+    return { finalScore10: this.round1(weightedSum), isComplete: true, totalWeight: 100, isValidWeight: true, hasInvalidScore: false };
   },
 
   calculateSemesterGPA(coursesInSemester) {
@@ -179,6 +197,7 @@ const GradeCalculator = {
     return {
       cumulativeGPA,
       cumulativeAvg10,
+      avg10: cumulativeAvg10,
       totalCredits,
       totalPoints4, // Σ(điểm hệ 4 × tín chỉ) chưa làm tròn, dùng cho PB-23
       passedCredits,

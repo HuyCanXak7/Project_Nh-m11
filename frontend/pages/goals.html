@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../assets/css/common.css">
     <link rel="stylesheet" href="../assets/css/model.css">
     <link rel="stylesheet" href="../assets/css/app.css">
+    <link rel="stylesheet" href="../assets/css/theme-e.css">
 </head>
 <body class="app-page page-goals">
     <!-- Nền trang trí floating circles -->
@@ -94,13 +95,16 @@
             </button>
 
             <div class="dash-header__greeting">
-                <h1 class="dash-header__title">Mục Tiêu & Mô Phỏng GPA</h1>
-                <p class="dash-header__subtitle">Đặt GPA mục tiêu, tính điểm cần đạt và thử nghiệm các kịch bản cải thiện kết quả</p>
+                <h1 class="dash-header__title">
+                    <span>Mục tiêu</span>
+                    <span class="dash-header__slash">/</span>
+                    <span class="dash-header__sub-inline">Tính điểm cần đạt & mô phỏng What-If GPA</span>
+                </h1>
             </div>
 
             <div class="dash-header__actions">
-                <button type="button" onclick="handleResetData()" class="btn-reset" title="Khôi phục dữ liệu mẫu ban đầu">
-                     Khôi phục
+                <button type="button" onclick="handleResetData()" class="btn-reset" title="Nạp dữ liệu mẫu">
+                     Dữ liệu mẫu
                 </button>
                 <button type="button" class="icon-btn" aria-label="Thông báo" title="Thông báo">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 17V11a6 6 0 0 1 12 0v6l2 2H4Z"/><path d="M10 21a2.5 2.5 0 0 0 4 0"/></svg>

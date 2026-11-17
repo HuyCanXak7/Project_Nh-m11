@@ -145,3 +145,23 @@
         flex-direction: column-reverse;
     }
 }
+/* ===== Giao diện bản E: modal vuông góc, màu mực / bạc hà / san hô ===== */
+.modal {
+    border-radius: 0;
+    background: #F4F7FB;
+    border: 1px solid #0F1B3D;
+    box-shadow: 0 24px 60px rgba(15, 27, 61, 0.28);
+}
+.modal__icon { border-radius: 0; background: #3EE6A8; color: #0F1B3D; }
+.modal--error .modal__icon,
+.modal--danger .modal__icon { background: #FF5A5F; color: #FFFFFF; }
+.modal--confirm .modal__icon { background: #0F1B3D; color: #3EE6A8; }
+.modal__title { font-family: 'Bricolage Grotesque', 'Be Vietnam Pro', sans-serif; letter-spacing: -0.03em; color: #0F1B3D; }
+.modal__message { color: #66708A; }
+.modal__btn { border-radius: 0; background: #0F1B3D; color: #F4F7FB; }
+.modal__btn:hover { background: #1E2B52; }
+.modal--error .modal__btn,
+.modal__btn--danger { background: #FF5A5F; color: #FFFFFF; }
+.modal__btn--danger:hover { background: #E8484D; }
+.modal__btn--ghost { background: transparent; color: #0F1B3D; border: 1px solid #0F1B3D; }
+.modal__btn--ghost:hover { background: #E9EEF6; }

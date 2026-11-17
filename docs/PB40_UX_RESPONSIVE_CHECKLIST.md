@@ -32,14 +32,14 @@
 
 ## 2. Kết Quả Kiểm Tra Giao Diện Responsive (`PB-34` · `[T0694EC]`)
 
-Đã kiểm tra trên 3 mốc kích thước màn hình mục tiêu:
+Đã kiểm tra trên 3 mốc kích thước màn hình mục tiêu theo thiết kế **StudyTrack-E (Swiss Grid)**:
 1. **Điện thoại (`360px × 800px`)**:
-   - Sidebar thu gọn thành ngăn kéo trượt (`drawer`) mở bằng nút menu (`#menuToggle`) kèm lớp phủ `#sidebarOverlay`.
-   - Các lưới thẻ (`.stats`, `.semester-grid`, `.goals-top-grid`, `.profile-grid`, `.transcript-summary-grid`) tự động chuyển về 1 cột (`minmax(min(100%, ...), 1fr)`), không gây tràn ngang trang (`overflow-x: hidden`).
-   - Toàn bộ bảng dữ liệu (`courses.html`, `transcript.html`, `import.html`, `goals.html`) nằm trong khung `.table-wrap` có thanh cuộn ngang độc lập (`overflow-x: auto`).
-   - Thanh công cụ lọc (`.filter-bar`) và các nút hành động trên header tự động xuống dòng gọn gàng.
+   - Thanh điều hướng trên cùng (`.sidebar` Top Bar) thu gọn các mục `01..07` vào menu trượt xuống khi bấm nút `#menuToggle`, giữ logo và cụm tài khoản gọn trong chiều rộng `360px`.
+   - Các lưới thẻ (`.stats`, `.dash-row--hero`, `.dash-row--bottom`, `.stats-row--top`, `.stats-row--bottom`, `.course-sem-strip`, `.semester-grid`, `.goals-top-grid`, `.profile-grid`) tự động chuyển về 1 cột (`grid-template-columns: 1fr`), không gây tràn ngang trang (`overflow-x: hidden`).
+   - Toàn bộ bảng dữ liệu (`courses.html`, `transcript.html`, `import.html`, `goals.html`, `schedule.html`) nằm trong khung `.table-wrap` có thanh cuộn ngang độc lập (`overflow-x: auto; -webkit-overflow-scrolling: touch`).
+   - Thanh công cụ lọc (`.course-toolbar`, `.filter-bar`) và các nút hành động trên header tự động xuống dòng gọn gàng ở mốc `360px`.
 2. **Máy tính bảng (`768px × 1024px`)**:
-   - Thẻ thống kê hiển thị lưới 2×2 cân đối.
-   - Bảng dữ liệu và biểu đồ SVG tự động co giãn theo `clientWidth` khi xoay màn hình (`resize`).
-3. **Máy tính để bàn (`1280px – 1440px+`)**:
-   - Sidebar cố định bên trái (`220px`), bố cục 4 thẻ thống kê ngang, biểu đồ và bảng dữ liệu hiển thị đầy đủ.
+   - Thẻ thống kê (`.stats`, `.course-sem-strip`) hiển thị lưới 2×2 cân đối.
+   - Bảng dữ liệu và biểu đồ cột/đường `.e-html-chart` tự động co giãn theo khung nhìn khi xoay màn hình (`resize`).
+3. **Máy tính để bàn (`1280px – 1920px+`)**:
+   - Thanh điều hướng ngang cố định phía trên (`54px`), khung lưới `<main class="dash">` tự động co giãn vừa khít 100% chiều rộng và chiều cao màn hình (`min-height: calc(100vh - 54px)`), không để lại khoảng trống thừa bên dưới và tự động giãn khi thêm môn học.

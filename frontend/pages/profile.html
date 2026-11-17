@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../assets/css/common.css">
     <link rel="stylesheet" href="../assets/css/model.css">
     <link rel="stylesheet" href="../assets/css/app.css">
+    <link rel="stylesheet" href="../assets/css/theme-e.css">
 </head>
 <body class="app-page page-profile">
     <!-- Nền trang trí floating circles -->
@@ -94,13 +95,16 @@
             </button>
 
             <div class="dash-header__greeting">
-                <h1 class="dash-header__title">Cài Đặt & Hồ Sơ Cá Nhân</h1>
-                <p class="dash-header__subtitle">Cập nhật thông tin sinh viên, ảnh đại diện và thay đổi mật khẩu</p>
+                <h1 class="dash-header__title">
+                    <span>Hồ sơ cá nhân</span>
+                    <span class="dash-header__slash">/</span>
+                    <span class="dash-header__sub-inline">Thông tin sinh viên & bảo mật tài khoản</span>
+                </h1>
             </div>
 
             <div class="dash-header__actions">
-                <button type="button" onclick="handleResetData()" class="btn-reset" title="Khôi phục dữ liệu mẫu ban đầu">
-                    Khôi phục
+                <button type="button" onclick="handleResetData()" class="btn-reset" title="Nạp dữ liệu mẫu">
+                    Dữ liệu mẫu
                 </button>
                 <button type="button" class="icon-btn" aria-label="Thông báo" title="Thông báo">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 17V11a6 6 0 0 1 12 0v6l2 2H4Z"/><path d="M10 21a2.5 2.5 0 0 0 4 0"/></svg>

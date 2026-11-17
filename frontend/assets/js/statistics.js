@@ -1,63 +1,64 @@
 /*
- * Trang Thống kê.
- * Dữ liệu mẫu: khi BE xong, thay loadStatisticsData() bằng gọi API thống kê (PB-21, Swagger v1.1).
- * GPA tích lũy, xếp loại, % tín chỉ được TÍNH từ dữ liệu bên dưới, không gõ cứng,
- * nên các số trên trang luôn khớp nhau.
+ * LOGIC TRANG THỐNG KÊ HỌC TẬP CHUẨN FIGMA STUDYTRACK-E (StudyTrack-E-05-thong-ke 1)
+ * Đọc trực tiếp dữ liệu từ localStorage của người dùng hiện tại (StorageService)
+ * Hỗ trợ đầy đủ trạng thái Loading, Empty State và Error State (PB-40 / [T0694ED])
  */
-const MOCK_STATS = {
-    cohorts: [{ id: 'k2025', name: 'Khóa 2025 - 2030' }],
-    programCredits: 140,
-    average10: 8.12,
-    average10Delta: 0.10,
-    // planned: true = học kỳ chưa học (cột nét đứt "Dự kiến")
-    semesters: [
-        { name: 'HK1 25-26', year: '2025-2026', gpa: 3.05, credits: 20 },
-        { name: 'HK2 25-26', year: '2025-2026', gpa: 3.38, credits: 22 },
-        { name: 'HK hè',     year: '2025-2026', gpa: 3.20, credits: 12 },
-        { name: 'HK1 26-27', year: '2026-2027', gpa: 3.42, credits: 24 },
-        { name: 'HK2 26-27', year: '2026-2027', planned: true },
-        { name: 'HK3 26-27', year: '2026-2027', planned: true },
-    ],
-    programYears: ['2025-2026', '2026-2027', '2027-2028', '2028-2029', '2029-2030'],
-    gradeDistribution: [
-        { grade: 'A+', count: 4 }, { grade: 'A', count: 7 },
-        { grade: 'B+', count: 6 }, { grade: 'B', count: 4 },
-        { grade: 'C+', count: 2 }, { grade: 'C', count: 1 },
-        { grade: 'D', count: 1 },  { grade: 'F', count: 1 },
-    ],
-    creditBlocks: [
-        { name: 'Giáo dục đại cương',  earned: 30, required: 35, color: 'green' },
-        { name: 'Cơ sở ngành',         earned: 28, required: 45, color: 'blue' },
-        { name: 'Chuyên ngành',        earned: 15, required: 45, color: 'purple' },
-        { name: 'Tự chọn & Thực tập',  earned: 5,  required: 15, color: 'orange' },
-    ],
-    highlights: [
-        { name: 'Ngôn ngữ lập trình C++',         semester: 'HK1 · 2026-2027', score: 9.2, grade: 'A+' },
-        { name: 'Cấu trúc dữ liệu và giải thuật', semester: 'HK1 · 2026-2027', score: 8.8, grade: 'A' },
-        { name: 'Vật lý 3 và thí nghiệm',         semester: 'HK1 · 2026-2027', score: 4.2, grade: 'F' },
-    ],
-};
+
+// $() dùng chung từ app_shell.js (khai báo lại ở đây làm cả file lỗi)
+
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function trendHtml(delta) {
+    const val = Number(delta) || 0;
+    const sign = val >= 0 ? '+' : '';
+    const cls = val >= 0 ? 'trend--up' : 'trend--down';
+    return `<strong class="trend ${cls}">${sign}${val.toFixed(2)}</strong>`;
+}
+
+function formatShortSemLabel(sem) {
+    if (!sem) return '';
+    const rawName = (sem.name || '').trim();
+    const yr = (sem.academic_year || '2025-2026').trim();
+    if (/hè/i.test(rawName)) {
+        const endYr = yr.split('-')[1]?.trim().slice(-2) || '26';
+        return `HK hè ${endYr}`;
+    }
+    const shortName = rawName.replace(/Học kỳ\s*/i, 'HK');
+    const shortYr = yr.replace(/20(\d{2})\s*-\s*20(\d{2})/, '$1–$2');
+    return shortYr ? `${shortName} ${shortYr}` : shortName;
+}
 
 async function loadStatisticsData(/* cohortId */) {
     const blockRequirements = {
-        'Đại cương': { req: 35, color: 'green' },
-        'Cơ sở ngành': { req: 45, color: 'blue' },
-        'Chuyên ngành': { req: 45, color: 'purple' },
-        'Tự chọn & Thực tập': { req: 15, color: 'orange' }
+        'Đại cương': { label: 'Giáo dục đại cương', req: 35, sqColor: '#0F1F38' },
+        'Cơ sở ngành': { label: 'Cơ sở ngành', req: 45, sqColor: '#CBD5E8' },
+        'Chuyên ngành': { label: 'Chuyên ngành', req: 45, sqColor: '#3EE09B' },
+        'Tự chọn & Thực tập': { label: 'Tự chọn và thực tập', req: 15, sqColor: '#7DD3FC' }
     };
 
-    const gradeCounts = { 'A+': 0, 'A': 0, 'B+': 0, 'B': 0, 'C+': 0, 'C': 0, 'D': 0, 'F': 0 };
+    const gradeCounts = { 'A': 0, 'B+': 0, 'B': 0, 'C+': 0, 'C': 0, 'D+': 0, 'D': 0, 'F': 0 };
 
     if (typeof StorageService !== 'undefined' && typeof GradeCalculator !== 'undefined') {
         const rawSemesters = StorageService.getSemesters();
         const rawCourses = StorageService.getCourses();
+        const goal = StorageService.getGoal();
+        const targetGpa = Number(goal?.target_gpa) > 0 ? Number(goal.target_gpa) : 3.60;
 
         const semesters = rawSemesters.map(s => {
             const semCourses = rawCourses.filter(c => c.semester_id === s.id);
             const semCalc = GradeCalculator.calculateSemesterGPA(semCourses);
             const credits = semCalc.totalCredits || 0;
             return {
-                name: s.name.replace('Học kỳ ', 'HK'),
+                id: s.id,
+                name: formatShortSemLabel(s),
                 year: s.academic_year || '2025-2026',
                 gpa: semCalc.gpa !== null && credits > 0 ? semCalc.gpa : 0,
                 credits: credits,
@@ -65,11 +66,19 @@ async function loadStatisticsData(/* cohortId */) {
             };
         });
 
+        if (semesters.some(s => !s.planned) && semesters.filter(s => s.planned).length === 0) {
+            semesters.push(
+                { name: 'HK2 26–27', year: '2026-2027', planned: true },
+                { name: 'HK hè 27', year: '2026-2027', planned: true }
+            );
+        }
+
         rawCourses.forEach(c => {
             const calc = GradeCalculator.calculateCourseFinalScore(c.components || []);
             if (calc.isComplete && calc.finalScore10 !== null) {
-                const letter = GradeCalculator.getGradeScale(calc.finalScore10).letter;
-                if (gradeCounts[letter] !== undefined) gradeCounts[letter]++;
+                const rawLetter = GradeCalculator.getGradeScale(calc.finalScore10).letter;
+                const key = rawLetter === 'A+' ? 'A' : rawLetter;
+                if (gradeCounts[key] !== undefined) gradeCounts[key]++;
             }
         });
         const gradeDistribution = Object.entries(gradeCounts).map(([grade, count]) => ({ grade, count }));
@@ -86,35 +95,54 @@ async function loadStatisticsData(/* cohortId */) {
                 }
             }
         });
-        const creditBlocks = Object.entries(blockRequirements).map(([name, conf]) => ({
-            name,
-            earned: blockEarned[name] || 0,
+        const creditBlocks = Object.entries(blockRequirements).map(([key, conf]) => ({
+            name: conf.label,
+            earned: blockEarned[key] || 0,
             required: conf.req,
-            color: conf.color
+            sqColor: conf.sqColor
         }));
 
-        const evaluatedCourses = rawCourses.map(c => {
+        // Ưu tiên lấy môn nổi bật của học kỳ gần nhất có đủ điểm (khớp chuẩn StudyTrack-E-05-thong-ke 1)
+        const latestGradedSem = [...rawSemesters].reverse().find(s => {
+            const sc = rawCourses.filter(c => c.semester_id === s.id);
+            return sc.filter(c => GradeCalculator.calculateCourseFinalScore(c.components || []).isComplete).length >= 3;
+        });
+        const sourceCoursesForHighlight = latestGradedSem
+            ? rawCourses.filter(c => c.semester_id === latestGradedSem.id)
+            : rawCourses;
+
+        const evaluatedCourses = sourceCoursesForHighlight.map(c => {
             const calc = GradeCalculator.calculateCourseFinalScore(c.components || []);
             if (!calc.isComplete || calc.finalScore10 === null) return null;
             const scale = GradeCalculator.getGradeScale(calc.finalScore10);
             const sem = rawSemesters.find(s => s.id === c.semester_id);
             return {
                 name: c.course_name,
-                semester: sem ? `${sem.name} · ${sem.academic_year || ''}` : '',
+                semester: sem ? `${sem.name.replace(/Học kỳ\s*/i, 'HK')} ${(sem.academic_year || '').replace('-', '–')}` : '',
                 score: calc.finalScore10,
                 grade: scale.letter
             };
         }).filter(Boolean);
+
         evaluatedCourses.sort((a, b) => b.score - a.score);
-        const highlights = evaluatedCourses.slice(0, 3);
+        let highlights = [];
+        if (evaluatedCourses.length <= 4) {
+            highlights = evaluatedCourses.map((c, idx) => ({
+                ...c,
+                isWarn: c.score < 7.0 || (evaluatedCourses.length >= 3 && idx === evaluatedCourses.length - 1)
+            }));
+        } else {
+            const top3 = evaluatedCourses.slice(0, 3).map(c => ({ ...c, isWarn: false }));
+            const lowest = { ...evaluatedCourses[evaluatedCourses.length - 1], isWarn: true };
+            highlights = [...top3, lowest];
+        }
 
         const uniqueYears = Array.from(new Set(rawSemesters.map(s => s.academic_year).filter(Boolean)));
         if (uniqueYears.length === 0) uniqueYears.push('2025-2026');
 
         const cum = GradeCalculator.calculateCumulativeGPA(rawCourses);
-        const avg10 = cum.avg10 || 0;
+        const avg10 = cum.cumulativeAvg10 || cum.avg10 || 0;
 
-        // Tính chênh lệch hệ 10 giữa kỳ mới nhất và kỳ liền trước
         let avg10Delta = 0;
         if (rawSemesters.length >= 2) {
             const lastSemCourses = rawCourses.filter(c => c.semester_id === rawSemesters[rawSemesters.length - 1].id);
@@ -127,8 +155,9 @@ async function loadStatisticsData(/* cohortId */) {
         return {
             cohorts: [{ id: 'k2025', name: 'Khóa 2025 - 2030' }],
             programCredits: 140,
+            targetGpa,
             average10: Number(avg10.toFixed(2)),
-            average10Delta,
+            average10Delta: avg10Delta,
             semesters,
             programYears: uniqueYears.length >= 5 ? uniqueYears : ['2025-2026', '2026-2027', '2027-2028', '2028-2029', '2029-2030'],
             gradeDistribution,
@@ -140,26 +169,29 @@ async function loadStatisticsData(/* cohortId */) {
     return {
         cohorts: [{ id: 'k2025', name: 'Khóa 2025 - 2030' }],
         programCredits: 140,
+        targetGpa: 3.60,
         average10: 0,
         average10Delta: 0,
         semesters: [],
         programYears: ['2025-2026', '2026-2027', '2027-2028', '2028-2029', '2029-2030'],
         gradeDistribution: Object.entries(gradeCounts).map(([grade, count]) => ({ grade, count })),
-        creditBlocks: Object.entries(blockRequirements).map(([name, conf]) => ({ name, earned: 0, required: conf.req, color: conf.color })),
+        creditBlocks: Object.entries(blockRequirements).map(([, conf]) => ({
+            name: conf.label,
+            earned: 0,
+            required: conf.req,
+            sqColor: conf.sqColor
+        })),
         highlights: []
     };
 }
 
 /* ===== Tính toán ===== */
-
-/** GPA trung bình có trọng số tín chỉ */
 function weightedGpa(list) {
     const credits = list.reduce((sum, s) => sum + s.credits, 0);
     if (!credits) return null;
     return list.reduce((sum, s) => sum + s.gpa * s.credits, 0) / credits;
 }
 
-/** Thêm GPA tích lũy sau mỗi học kỳ đã học */
 function withCumulative(semesters) {
     const done = [];
     return semesters.map((s) => {
@@ -169,7 +201,6 @@ function withCumulative(semesters) {
     });
 }
 
-/** Gộp học kỳ thành năm học */
 function groupByYear(semesters, years) {
     const done = [];
     return years.map((year) => {
@@ -185,7 +216,6 @@ function groupByYear(semesters, years) {
     });
 }
 
-// Xếp loại theo thang 4 (đối chiếu lại với quy chế đã chốt ở PB-46)
 const RANKS = [
     { min: 3.6, name: 'Xuất sắc' },
     { min: 3.2, name: 'Giỏi' },
@@ -199,126 +229,160 @@ function rankOf(gpa) {
     return { current: RANKS[index], next: RANKS[index - 1] || null };
 }
 
-const GRADE_COLOR = { 'A+': 'green', A: 'green', 'B+': 'blue', B: 'blue', 'C+': 'orange', C: 'orange', 'D+': 'red', D: 'red', F: 'red' };
+const GRADE_BAR_COLOR = {
+    'A+': 'emerald',
+    'A':  'emerald',
+    'B+': 'slate',
+    'B':  'slate',
+    'C+': 'coral',
+    'C':  'coral',
+    'D+': 'coral',
+    'D':  'slate',
+    'F':  'slate'
+};
 
-/* ===== Thẻ tổng hợp ===== */
+/* ===== Thẻ tổng hợp (4 Ô nối liền chuẩn StudyTrack-E) ===== */
 function renderSummary(data, semesters) {
     const done = semesters.filter((s) => !s.planned);
     const gpa = weightedGpa(done);
     const prevGpa = weightedGpa(done.slice(0, -1));
     const credits = done.reduce((sum, s) => sum + s.credits, 0);
 
-    $('statGpa').textContent = gpa !== null ? gpa.toFixed(2) : '--';
-    $('statGpaNote').innerHTML = prevGpa !== null ? `${trendHtml(gpa - prevGpa)} so với kỳ trước` : 'Chưa có kỳ trước';
+    $('statGpa').textContent = gpa !== null ? gpa.toFixed(2) : '0.00';
+    $('statGpaNote').innerHTML = prevGpa !== null
+        ? `${trendHtml(gpa - prevGpa)} so với kỳ trước`
+        : 'Chưa có kỳ trước';
 
     $('statAvg10').textContent = data.average10.toFixed(2);
-    $('statAvg10Note').innerHTML = `${trendHtml(data.average10Delta)} so với kỳ trước`;
+    $('statAvg10Note').innerHTML = done.length > 0
+        ? `${trendHtml(data.average10Delta)} so với kỳ trước`
+        : 'Thang điểm 10';
 
-    $('statCredits').textContent = `${credits} / ${data.programCredits}`;
-    const percent = Math.round((credits / data.programCredits) * 100);
-    $('statCreditsNote').innerHTML = `<span class="note-strong">${percent}%</span> chương trình đào tạo`;
+    $('statCredits').innerHTML = `${credits} <span class="stat-card__value-sub">/ ${data.programCredits}</span>`;
+    const percent = Math.min(100, Math.round((credits / data.programCredits) * 100));
+    $('statCreditsNote').innerHTML = `${percent}% chương trình đào tạo`;
+
+    const credBarFill = $('statCreditsBarFill');
+    if (credBarFill) {
+        credBarFill.style.width = `${percent}%`;
+    }
 
     if (gpa === null) {
         $('statRank').textContent = '--';
         $('statRankNote').textContent = 'Chưa đủ dữ liệu để xếp loại';
         return;
     }
+
     const { current, next } = rankOf(gpa);
     $('statRank').textContent = current.name;
     $('statRankNote').innerHTML = next
-        ? `<span class="note-strong">Cần ${next.min.toFixed(2)}</span> để đạt ${next.name}`
-        : '<span class="note-strong">Thành tích cao nhất</span>';
+        ? `Cần <span class="note-mint">${next.min.toFixed(2)}</span> để đạt ${next.name}`
+        : '<span class="note-mint">Đã đạt hạng cao nhất</span>';
 }
 
-/* ===== Biểu đồ GPA: cột = GPA kỳ/năm, đường = GPA tích lũy ===== */
-const GPA_CHART = { max: 4, step: 1, padLeft: 40, padRight: 10, padTop: 26, padBottom: 30 };
-
-function renderGpaChart(items) {
+/* ===== Biểu đồ GPA chuẩn StudyTrack-E (HTML/CSS Bars + Đường #0F1F38 + Đường đỏ MỤC TIÊU XUẤT SẮC 3.60) ===== */
+function renderGpaChart(items, targetGpa = 3.60) {
     const box = $('gpaChart');
+    if (!box) return;
     box.innerHTML = '';
 
     if (!items.length || items.every((i) => i.planned)) {
-        box.innerHTML = '<p class="chart__empty">Chưa có học kỳ nào đủ điểm.<br>Hãy nhập điểm môn học để xem biểu đồ.</p>';
+        box.innerHTML = `
+            <div class="chart__empty">
+                <p style="margin-bottom: 10px;">Chưa có học kỳ nào đủ điểm. Hãy nhập điểm môn học để xem biểu đồ.</p>
+                <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+                    <a href="courses.html" class="btn-figma-primary" style="text-decoration: none; height: 32px; font-size: 12px;">+ Thêm môn học</a>
+                    <button type="button" onclick="handleResetData()" class="btn-figma-outline" style="height: 32px; font-size: 12px;">Nạp dữ liệu mẫu</button>
+                </div>
+            </div>
+        `;
         return;
     }
 
-    const width = box.clientWidth;
-    const height = box.clientHeight;
-    const { max, step, padLeft, padRight, padTop, padBottom } = GPA_CHART;
-    const plotW = width - padLeft - padRight;
-    const plotH = height - padTop - padBottom - (plotW / items.length < 70 ? 14 : 0);
-    const slot = plotW / items.length;
-    const barW = Math.min(40, slot * 0.4);
-    const compact = slot < 70;           // màn hẹp: nhãn trục X xuống 2 dòng
+    const lastRealIdx = items.map((it, idx) => (!it.planned ? idx : -1)).filter(i => i >= 0).pop();
 
-    const xCenter = (i) => padLeft + slot * i + slot / 2;
-    const yAt = (v) => padTop + plotH - (v / max) * plotH;
+    const yAxisHtml = [4, 3, 2, 1, 0].map(v => {
+        const bottomPct = (v / 4.0) * 100;
+        return `<span class="e-html-chart__ylabel" style="bottom: ${bottomPct}%;">${v.toFixed(1)}</span>`;
+    }).join('');
 
-    const svg = svgEl('svg', { viewBox: `0 0 ${width} ${height}` });
+    const gridLinesHtml = [4, 3, 2, 1].map(v => {
+        const bottomPct = (v / 4.0) * 100;
+        return `<div class="e-html-chart__gridline" style="bottom: ${bottomPct}%;"></div>`;
+    }).join('');
 
-    // Lưới ngang + nhãn trục Y
-    for (let v = 0; v <= max; v += step) {
-        svg.append(svgEl('line', { x1: padLeft, x2: width - padRight, y1: yAt(v), y2: yAt(v), class: 'gpa-chart__grid' }));
-        const label = svgEl('text', { x: 0, y: yAt(v) + 4, class: 'gpa-chart__label' });
-        label.textContent = v.toFixed(1);
-        svg.append(label);
-    }
+    const targetPct = Math.min(96, Math.max(10, (targetGpa / 4.0) * 100));
 
-    let plannedLabelShown = false;
-    items.forEach((item, i) => {
-        const x = xCenter(i) - barW / 2;
-        let bar;
+    const colsHtml = items.map((item, i) => {
         if (item.planned) {
-            // Cột dự kiến: nét đứt, cao tới mốc 3.5
-            bar = svgEl('rect', { x, y: yAt(3.5), width: barW, height: yAt(0) - yAt(3.5), rx: 4, class: 'gpa-chart__bar gpa-chart__bar--planned' });
-            if (!plannedLabelShown && !compact) {
-                const t = svgEl('text', { x: xCenter(i), y: yAt(3.5) - 8, 'text-anchor': 'middle', class: 'gpa-chart__value' });
-                t.textContent = 'Dự kiến';
-                svg.append(t);
-                plannedLabelShown = true;
-            }
-        } else {
-            bar = svgEl('rect', { x, y: yAt(item.gpa), width: barW, height: yAt(0) - yAt(item.gpa), rx: 4, class: 'gpa-chart__bar' });
-            const value = svgEl('text', { x: xCenter(i), y: yAt(item.gpa) - 9, 'text-anchor': 'middle', class: 'gpa-chart__value' });
-            value.textContent = item.gpa.toFixed(2);
-            svg.append(value);
+            const hPct = (3.35 / 4.0) * 100;
+            return `
+                <div class="e-html-chart__col">
+                    <div class="e-html-chart__bar e-html-chart__bar--planned" style="height: ${hPct}%;">
+                        <span class="e-html-chart__bar-val">Dự kiến</span>
+                    </div>
+                </div>
+            `;
         }
-        const tip = svgEl('title');
-        tip.textContent = item.planned
-            ? `${item.name}: chưa có điểm`
-            : `${item.name}: GPA ${item.gpa.toFixed(2)} · ${item.credits} tín chỉ · tích lũy ${item.cumulative.toFixed(2)}`;
-        bar.append(tip);
-        svg.insertBefore(bar, svg.querySelector('.gpa-chart__value'));
+        const val = Number(item.gpa) || 0;
+        const cumVal = Number(item.cumulative || item.gpa) || 0;
+        const hPct = Math.max(12, Math.min(100, (val / 4.0) * 100));
+        const dotPct = Math.max(4, Math.min(98, (cumVal / 4.0) * 100));
+        const isLatest = i === lastRealIdx;
 
-        const label = svgEl('text', { x: xCenter(i), y: compact ? height - 20 : height - 6, 'text-anchor': 'middle', class: 'gpa-chart__label' });
-        if (compact && item.name.includes(' ')) {
-            // "HK1 25-26" -> 2 dòng: "HK1" / "25-26"
-            const [first, ...rest] = item.name.split(' ');
-            const line1 = svgEl('tspan', { x: xCenter(i) });
-            const line2 = svgEl('tspan', { x: xCenter(i), dy: 14 });
-            line1.textContent = first;
-            line2.textContent = rest.join(' ');
-            label.append(line1, line2);
-        } else {
-            label.textContent = item.name;
-        }
-        svg.append(label);
+        return `
+            <div class="e-html-chart__col">
+                <div class="e-html-chart__bar ${isLatest ? 'e-html-chart__bar--latest' : ''}" style="height: ${hPct}%;">
+                    <span class="e-html-chart__bar-val">${val.toFixed(2)}</span>
+                </div>
+                <span class="e-html-chart__dot" style="bottom: ${dotPct}%;"></span>
+            </div>
+        `;
+    }).join('');
+
+    const xAxisHtml = items.map(item => `
+        <span class="e-html-chart__xlabel">${escapeHtml(item.name)}</span>
+    `).join('');
+
+    box.innerHTML = `
+        <div class="e-html-chart">
+            <div class="e-html-chart__yaxis">${yAxisHtml}</div>
+            <div class="e-html-chart__plot" id="statsChartPlot">
+                ${gridLinesHtml}
+                <div class="e-html-chart__target" style="bottom: ${targetPct}%;">
+                    <span class="e-html-chart__target-label">MỤC TIÊU XUẤT SẮC ${targetGpa.toFixed(2)}</span>
+                </div>
+                <svg class="e-html-chart__svg-line" id="statsChartLineSvg"></svg>
+                <div class="e-html-chart__cols">${colsHtml}</div>
+            </div>
+            <div class="e-html-chart__xaxis">${xAxisHtml}</div>
+        </div>
+    `;
+
+    requestAnimationFrame(() => {
+        const plot = document.getElementById('statsChartPlot');
+        const svg = document.getElementById('statsChartLineSvg');
+        if (!plot || !svg) return;
+        const plotRect = plot.getBoundingClientRect();
+        const dots = Array.from(plot.querySelectorAll('.e-html-chart__dot'));
+        if (dots.length < 2 || plotRect.width <= 0) return;
+
+        const pts = dots.map(d => {
+            const r = d.getBoundingClientRect();
+            const x = (r.left - plotRect.left) + r.width / 2;
+            const y = (r.top - plotRect.top) + r.height / 2;
+            return `${x.toFixed(1)},${y.toFixed(1)}`;
+        }).join(' ');
+
+        svg.setAttribute('viewBox', `0 0 ${plotRect.width} ${plotRect.height}`);
+        svg.innerHTML = `<polyline points="${pts}" fill="none" stroke="#0F1F38" stroke-width="1.6"/>`;
     });
-
-    // Đường GPA tích lũy (chỉ qua các kỳ đã học)
-    const points = items
-        .map((item, i) => (item.planned ? null : { x: xCenter(i), y: yAt(item.cumulative) }))
-        .filter(Boolean);
-    svg.append(svgEl('polyline', { points: points.map((p) => `${p.x},${p.y}`).join(' '), class: 'gpa-chart__line' }));
-    points.forEach((p) => svg.append(svgEl('circle', { cx: p.x, cy: p.y, r: 4.5, class: 'gpa-chart__point' })));
-
-    box.append(svg);
 }
 
 const VIEW_LABELS = {
-    semester: { title: 'GPA theo học kỳ', legend: 'học kỳ' },
-    year:     { title: 'GPA theo năm học', legend: 'năm học' },
-    all:      { title: 'GPA toàn khóa', legend: 'năm học' },
+    semester: { title: 'GPA theo học kỳ', legend: 'Học kỳ' },
+    year:     { title: 'GPA theo năm học', legend: 'Năm học' },
+    all:      { title: 'GPA toàn khóa', legend: 'Năm học' },
 };
 
 function chartItemsFor(view, data, semesters) {
@@ -333,8 +397,8 @@ function setupViewTabs(data, semesters) {
 
     const draw = () => {
         $('gpaChartTitle').textContent = VIEW_LABELS[view].title;
-        $('legendTermLabel').textContent = `GPA ${VIEW_LABELS[view].legend}`;
-        renderGpaChart(chartItemsFor(view, data, semesters));
+        $('legendTermLabel').textContent = VIEW_LABELS[view].legend;
+        renderGpaChart(chartItemsFor(view, data, semesters), data.targetGpa || 3.60);
     };
 
     tabs.forEach((tab) => {
@@ -360,62 +424,84 @@ function setupViewTabs(data, semesters) {
 /* ===== Phân bố điểm chữ ===== */
 function renderGradeDistribution(list) {
     const total = list.reduce((sum, g) => sum + g.count, 0);
-    $('gradeTotal').textContent = `${total} môn`;
+    $('gradeTotal').textContent = `${total} MÔN`;
 
     if (!total) {
         $('gradeDist').innerHTML = '<li class="list-empty">Chưa có môn nào đủ điểm</li>';
         return;
     }
-    const maxCount = Math.max(...list.map((g) => g.count));
+    const maxCount = Math.max(1, ...list.map((g) => g.count));
     $('gradeDist').innerHTML = list.map((g) => `
         <li class="grade-row">
             <span class="grade-row__label">${escapeHtml(g.grade)}</span>
             <span class="bar" title="${g.count} môn điểm ${escapeHtml(g.grade)}">
-                <span class="bar__fill bar__fill--${GRADE_COLOR[g.grade] || 'blue'}" style="width:${(g.count / maxCount) * 100}%"></span>
+                <span class="bar__fill bar__fill--${GRADE_BAR_COLOR[g.grade] || 'slate'}" style="width:${(g.count / maxCount) * 100}%"></span>
             </span>
             <span class="grade-row__count">${g.count}</span>
         </li>`).join('');
 }
 
-/* ===== Tiến độ tín chỉ ===== */
+/* ===== Tiến độ tín chỉ theo khối kiến thức chuẩn StudyTrack-E (Stacked Bar + Table Rows) ===== */
 function renderCreditProgress(blocks, earnedTotal, programCredits) {
-    $('creditPill').textContent = `${earnedTotal} / ${programCredits} TC`;
+    $('creditPill').textContent = `${earnedTotal} / ${programCredits}`;
+
+    const stackedEl = $('creditStackedBar');
+    if (stackedEl) {
+        stackedEl.innerHTML = blocks.map(b => {
+            const w = Math.max(0, (b.earned / programCredits) * 100);
+            return `<span style="width:${w.toFixed(2)}%; background:${b.sqColor};" title="${escapeHtml(b.name)}: ${b.earned}/${b.required} TC"></span>`;
+        }).join('');
+    }
+
     $('creditProgress').innerHTML = blocks.map((b) => {
-        const percent = Math.min(100, (b.earned / b.required) * 100);
+        const percent = Math.min(100, Math.round((b.earned / b.required) * 100));
         return `
-        <li>
-            <div class="credit-row__head">
-                <span class="credit-row__name">${escapeHtml(b.name)}</span>
-                <span class="credit-row__value">${b.earned}/${b.required} tín chỉ</span>
-            </div>
-            <span class="bar"><span class="bar__fill bar__fill--${b.color}" style="width:${percent}%"></span></span>
+        <li class="credit-row">
+            <span class="credit-row__name">
+                <i class="credit-row__sq" style="background:${b.sqColor}"></i>
+                ${escapeHtml(b.name)}
+            </span>
+            <span class="credit-row__ratio">${b.earned} / ${b.required}</span>
+            <span class="credit-row__pct">${percent}%</span>
         </li>`;
     }).join('');
 }
 
-/* ===== Môn học nổi bật ===== */
+/* ===== Môn nổi bật chuẩn StudyTrack-E (01, 02, 03, !) ===== */
 function renderHighlights(list) {
     if (!list.length) {
-        $('highlightList').innerHTML = '<li class="list-empty">Chưa có môn học nào</li>';
+        $('highlightList').innerHTML = '<li class="list-empty">Chưa có môn học nào đủ điểm</li>';
         return;
     }
-    $('highlightList').innerHTML = list.map((c) => {
-        const failed = c.grade === 'F';
+    $('highlightList').innerHTML = list.map((c, idx) => {
+        const isWarn = c.isWarn || c.grade === 'F' || c.score < 7.0;
+        const badgeText = isWarn && idx === list.length - 1 && list.length >= 2
+            ? '!'
+            : String(idx + 1).padStart(2, '0');
+        const subText = c.grade === 'F'
+            ? 'Cần học lại'
+            : (isWarn ? 'Điểm thấp nhất kỳ' : escapeHtml(c.semester));
+        const sqColor = (c.grade === 'A+' || c.grade === 'A')
+            ? '#10B981'
+            : ((c.grade === 'B+' || c.grade === 'B') ? '#0F1F38' : '#EF4444');
+
         return `
-        <li class="highlight">
+        <li class="highlight ${isWarn ? 'highlight--warn' : ''}">
+            <span class="highlight__rank">${badgeText}</span>
             <div class="highlight__info">
                 <p class="highlight__name" title="${escapeHtml(c.name)}">${escapeHtml(c.name)}</p>
-                <p class="highlight__sub${failed ? ' highlight__sub--danger' : ''}">${failed ? 'Cần học lại' : escapeHtml(c.semester)}</p>
+                <p class="highlight__sub${isWarn ? ' highlight__sub--danger' : ''}">${subText}</p>
             </div>
             <span class="highlight__score">${c.score.toFixed(1)}</span>
-            <span class="grade-badge grade-badge--${GRADE_COLOR[c.grade] || 'blue'}">${escapeHtml(c.grade)}</span>
+            <span class="highlight__grade">
+                <i class="highlight__grade-sq" style="background:${sqColor}"></i>
+                ${escapeHtml(c.grade)}
+            </span>
         </li>`;
     }).join('');
 }
 
 /* ===== Xuất báo cáo CSV (tạo tại FE, theo PB-27) ===== */
-
-/** Chống CSV injection: ô bắt đầu bằng = + - @ thì thêm dấu ' phía trước */
 function csvCell(value) {
     let text = String(value ?? '');
     if (/^[=+\-@]/.test(text)) text = `'${text}`;
@@ -423,7 +509,7 @@ function csvCell(value) {
 }
 
 function exportReport(data, semesters) {
-    const rows = [['BÁO CÁO THỐNG KÊ HỌC TẬP'], [`Khóa: ${$('cohortSelect').selectedOptions[0]?.textContent || ''}`], []];
+    const rows = [['BÁO CÁO THỐNG KÊ HỌC TẬP'], [`Khóa: ${$('cohortSelect').selectedOptions[0]?.textContent || 'Khóa 2025 - 2030'}`], []];
 
     rows.push(['Học kỳ', 'Năm học', 'Tín chỉ', 'GPA học kỳ', 'GPA tích lũy']);
     semesters.filter((s) => !s.planned).forEach((s) => {
@@ -437,8 +523,7 @@ function exportReport(data, semesters) {
     data.creditBlocks.forEach((b) => rows.push([b.name, b.earned, b.required]));
 
     const csv = rows.map((r) => r.map(csvCell).join(',')).join('\r\n');
-    // ﻿ (BOM) để Excel đọc đúng tiếng Việt
-    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `thong-ke-hoc-tap-${new Date().toISOString().slice(0, 10)}.csv`;
@@ -473,12 +558,12 @@ async function initStatistics() {
             expBtn.addEventListener('click', () => exportReport(data, semesters));
         }
     } catch (err) {
-        console.error('Statistics error:', err);
+        console.error('Statistics error: - statistics.js:561', err);
         if (chartBox) {
             chartBox.innerHTML = `
-                <div class="chart__empty" style="text-align: center; color: var(--error);">
+                <div class="chart__empty" style="text-align: center; color: var(--danger);">
                     <p style="margin-bottom: 8px;">Không tải được dữ liệu thống kê. Vui lòng thử lại.</p>
-                    <button type="button" onclick="initStatistics()" class="btn btn-primary btn-sm">Thử tải lại</button>
+                    <button type="button" onclick="initStatistics()" class="btn-figma-primary">Thử tải lại</button>
                 </div>
             `;
         }
