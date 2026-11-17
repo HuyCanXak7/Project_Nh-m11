@@ -152,35 +152,32 @@
             </div>
         </header>
 
+        <!-- DẢI 4 Ô CHỈ SỐ TÍCH LŨY TOÀN KHÓA CHUẨN STUDYTRACK-E (PB-52 · T0694E5) -->
+        <section class="stats" aria-label="Tóm tắt bảng điểm tích lũy">
+            <article class="stat-card stat-card--navy">
+                <p class="stat-card__label">GPA TÍCH LŨY · HỆ 4</p>
+                <p class="stat-card__value" id="cumGpaDisplay">0.00</p>
+                <p class="stat-card__note">Thang 4.0 chuẩn Thông tư 08</p>
+            </article>
+            <article class="stat-card">
+                <p class="stat-card__label">ĐIỂM TB TÍCH LŨY · HỆ 10</p>
+                <p class="stat-card__value" id="cumAvg10Display">0.00</p>
+                <p class="stat-card__note">Trung bình có trọng số tín chỉ</p>
+            </article>
+            <article class="stat-card stat-card--mint">
+                <p class="stat-card__label">TÍN CHỈ TÍCH LŨY</p>
+                <p class="stat-card__value" id="cumCreditsDisplay">0 / 0 TC</p>
+                <p class="stat-card__note">Tín chỉ các môn đạt (A..D)</p>
+            </article>
+            <article class="stat-card stat-card--navy">
+                <p class="stat-card__label">XẾP LOẠI HỌC LỰC</p>
+                <p class="stat-card__value" id="cumRankDisplay">--</p>
+                <p class="stat-card__note">Quy chế đào tạo tín chỉ</p>
+            </article>
+        </section>
+
         <!-- MAIN CARD -->
-        <div class="app-card" style="margin-top: 0; box-shadow: var(--shadow-soft); border-radius: var(--radius-lg);">
-            <!-- TÓM TẮT TÍCH LŨY -->
-            <div class="transcript-summary-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 16px; margin-bottom: 20px;">
-                <div style="background: var(--bg-main); padding: 18px; border-radius: 20px; text-align: center;">
-                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-gray);">GPA Tích Lũy (Hệ 4)</div>
-                    <div id="cumGpaDisplay" style="font-size: 30px; font-weight: 800; color: var(--primary); margin-top: 4px;">0.00</div>
-                    <div style="font-size: 11px; color: var(--text-gray);">Thang 4.0 chuẩn Thông tư 08</div>
-                </div>
-
-                <div style="background: var(--bg-main); padding: 18px; border-radius: 20px; text-align: center;">
-                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-gray);">ĐTB Tích Lũy (Hệ 10)</div>
-                    <div id="cumAvg10Display" style="font-size: 30px; font-weight: 800; color: #2563EB; margin-top: 4px;">0.00</div>
-                    <div style="font-size: 11px; color: var(--text-gray);">Trung bình có trọng số tín chỉ</div>
-                </div>
-
-                <div style="background: var(--bg-main); padding: 18px; border-radius: 20px; text-align: center;">
-                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-gray);">Tổng Tín Chỉ Đạt</div>
-                    <div id="cumCreditsDisplay" style="font-size: 30px; font-weight: 800; color: #10B981; margin-top: 4px;">0 / 0 TC</div>
-                    <div style="font-size: 11px; color: var(--text-gray);">Tín chỉ môn đạt (A..D)</div>
-                </div>
-
-                <div style="background: var(--bg-main); padding: 18px; border-radius: 20px; text-align: center;">
-                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-gray);">Xếp Loại Học Lực</div>
-                    <div id="cumRankDisplay" style="font-size: 24px; font-weight: 800; color: var(--text-black); margin-top: 8px;">--</div>
-                    <div style="font-size: 11px; color: var(--text-gray);">Quy chế đào tạo tín chỉ</div>
-                </div>
-            </div>
-
+        <div class="app-card" style="margin-top: 0;">
             <!-- BỘ LỌC HỌC KỲ & TÌM KIẾM MÔN HỌC (Ẩn khi in A4) -->
             <div class="filter-bar no-print" id="transcriptFilterBar" style="margin-bottom: 20px;">
                 <div class="filter-input-wrap">
@@ -195,8 +192,8 @@
                 </select>
 
                 <div style="margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap;">
-                    <button type="button" onclick="CSVHelper.exportTranscriptCSV()" class="btn btn-secondary btn-sm">Xuất .CSV</button>
-                    <button type="button" onclick="CSVHelper.exportTranscriptExcel()" class="btn btn-primary btn-sm">Xuất .XLSX</button>
+                    <button type="button" onclick="CSVHelper.exportTranscriptCSV()" class="btn-figma-outline">↓ Xuất .CSV</button>
+                    <button type="button" onclick="CSVHelper.exportTranscriptExcel()" class="btn-figma-primary">↓ Xuất .XLSX</button>
                 </div>
             </div>
 

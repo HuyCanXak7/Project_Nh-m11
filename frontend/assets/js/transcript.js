@@ -125,12 +125,22 @@ function renderTranscript() {
   const keyword = (document.getElementById('transcriptSearchInput')?.value || '').trim().toLowerCase();
   const selectedSemId = document.getElementById('transcriptSemesterFilter')?.value || 'ALL';
 
+  // Tính GPA tích lũy lũy tiến qua từng học kỳ (PB-52 · T0694E5)
+  const cumulativeBySemId = {};
+  const runningCourses = [];
+  semesters.forEach(s => {
+    const sc = courses.filter(c => c.semester_id === s.id);
+    runningCourses.push(...sc);
+    cumulativeBySemId[s.id] = GradeCalculator.calculateCumulativeGPA(runningCourses);
+  });
+
   const filteredSemesters = semesters.filter(sem => selectedSemId === 'ALL' || sem.id === selectedSemId);
   const countedSet = new Set(cum.countedCourseIds || []);
 
   const cardsHtml = filteredSemesters.map(sem => {
     const allSemCourses = courses.filter(c => c.semester_id === sem.id);
     const semCalc = GradeCalculator.calculateSemesterGPA(allSemCourses);
+    const cumUpToSem = cumulativeBySemId[sem.id] || cum;
 
     const visibleCourses = allSemCourses.filter(c => {
       if (!keyword) return true;
@@ -143,33 +153,35 @@ function renderTranscript() {
     }
 
     return `
-      <div class="transcript-sem-card" style="background: #fff; border: 1.5px solid rgba(107, 114, 128, 0.2); border-radius: 20px; padding: 20px; margin-bottom: 22px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+      <div class="transcript-sem-card" style="background: #FFFFFF; border: 1px solid #CBD5E1; padding: 0; margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; background: #F8FAFC; border-bottom: 1px solid #CBD5E1; flex-wrap: wrap; gap: 10px;">
           <div>
-            <h3 style="font-size: 16px; font-weight: 800; color: var(--text-black);">${escapeHtml(sem.name)} ${sem.academic_year ? `(${escapeHtml(sem.academic_year)})` : ''}</h3>
-            <span style="font-size: 12px; color: var(--text-gray);">Thời gian: ${escapeHtml(sem.start_date || '--')} đến ${escapeHtml(sem.end_date || '--')}</span>
+            <h3 style="font-size: 15px; font-weight: 800; color: #0F1F38;">${escapeHtml(sem.name)} ${sem.academic_year ? `(${escapeHtml(sem.academic_year)})` : ''}</h3>
+            <span style="font-size: 11.5px; color: #64748B;">Thời gian: ${escapeHtml(sem.start_date || '--')} đến ${escapeHtml(sem.end_date || '--')}</span>
           </div>
-          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: var(--bg-main); padding: 8px 14px; border-radius: 14px; font-size: 12.5px;">
-            <span>GPA Học kỳ (Hệ 4): <strong style="color: var(--primary); font-size: 14.5px;">${semCalc.formattedGPA}</strong></span>
-            <span>•</span>
-            <span>ĐTB Kỳ (Hệ 10): <strong style="color: #2563EB;">${semCalc.formattedAvg10 || '0.00'}</strong></span>
-            <span>•</span>
-            <span>Tín chỉ đạt: <strong>${semCalc.passedCredits}/${semCalc.totalCredits} TC</strong></span>
+          <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: #FFFFFF; padding: 7px 14px; border: 1px solid #CBD5E1; font-size: 12px;">
+            <span>GPA Học kỳ (Hệ 4): <strong style="color: #0F1F38; font-size: 13.5px;">${semCalc.formattedGPA}</strong></span>
+            <span style="color: #CBD5E1;">|</span>
+            <span>ĐTB Kỳ (Hệ 10): <strong style="color: #0F1F38;">${semCalc.formattedAvg10 || '0.00'}</strong></span>
+            <span style="color: #CBD5E1;">|</span>
+            <span>GPA Tích lũy: <strong style="color: #059669; font-size: 13.5px;">${cumUpToSem.formattedGPA}</strong></span>
+            <span style="color: #CBD5E1;">|</span>
+            <span>Tín chỉ đạt: <strong>${semCalc.passedCredits}/${semCalc.registeredCredits || semCalc.totalCredits} TC</strong></span>
           </div>
         </div>
 
-        <div class="table-wrap">
-          <table class="app-table">
+        <div class="table-wrap" style="border: none;">
+          <table class="app-table course-figma-table">
             <thead>
               <tr>
-                <th style="width: 95px;">Mã môn</th>
-                <th>Tên môn học</th>
-                <th style="width: 75px; text-align: center;">Tín chỉ</th>
-                <th>Điểm thành phần chi tiết</th>
-                <th style="width: 95px; text-align: center;">Điểm Hệ 10</th>
-                <th style="width: 80px; text-align: center;">Điểm Chữ</th>
-                <th style="width: 75px; text-align: center;">Hệ 4</th>
-                <th style="width: 110px; text-align: center;">Kết quả</th>
+                <th style="width: 95px;">MÃ MÔN</th>
+                <th>TÊN MÔN HỌC</th>
+                <th style="width: 75px; text-align: center;">TÍN CHỈ</th>
+                <th>ĐIỂM THÀNH PHẦN CHI TIẾT</th>
+                <th style="width: 95px; text-align: center;">ĐIỂM HỆ 10</th>
+                <th style="width: 80px; text-align: center;">ĐIỂM CHỮ</th>
+                <th style="width: 75px; text-align: center;">HỆ 4</th>
+                <th style="width: 110px; text-align: center;">KẾT QUẢ</th>
               </tr>
             </thead>
             <tbody>
@@ -183,8 +195,8 @@ function renderTranscript() {
                   ? '<span style="color: var(--error); font-weight: 600;">Chưa cấu hình cột điểm</span>'
                   : comps.map(cp => {
                       const hasScore = cp.score !== null && cp.score !== '' && cp.score !== undefined && !isNaN(Number(cp.score));
-                      return `<span style="display: inline-block; background: #F3F4F6; padding: 2px 8px; border-radius: 6px; margin: 2px 4px 2px 0; font-size: 11.5px; color: var(--text-dark);">
-                        <strong>${escapeHtml(cp.name)}</strong> (${cp.weight_percent}%): <strong style="color: ${hasScore ? 'var(--primary)' : 'var(--warning)'};">${hasScore ? cp.score : 'Chưa nhập'}</strong>
+                      return `<span style="display: inline-block; background: #F1F5F9; border: 1px solid #E2E8F0; padding: 2px 8px; margin: 2px 4px 2px 0; font-size: 11.5px; color: #0F1F38;">
+                        <strong>${escapeHtml(cp.name)}</strong> (${cp.weight_percent}%): <strong style="color: ${hasScore ? '#0F1F38' : '#64748B'};">${hasScore ? Number(cp.score).toFixed(1) : '—'}</strong>
                       </span>`;
                     }).join('');
 
@@ -196,29 +208,29 @@ function renderTranscript() {
 
                 return `
                   <tr>
-                    <td style="font-family: monospace; font-weight: 700; color: var(--primary);">${escapeHtml(c.course_code)}</td>
+                    <td class="course-code-cell">${escapeHtml(c.course_code)}</td>
                     <td style="font-weight: 600;">
-                      <div>${escapeHtml(c.course_name)}</div>
+                      <div class="course-name-text">${escapeHtml(c.course_name)}</div>
                       <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 3px;">
-                        <span class="badge badge-blue" style="font-size: 10.5px; padding: 2px 7px;">${escapeHtml(c.category || 'Đại cương')}</span>
-                        ${c.is_retake ? '<span class="badge badge-orange" style="font-size: 10.5px; padding: 2px 7px;">Học lại / Cải thiện</span>' : ''}
-                        ${isReplacedByRetake ? '<span class="badge badge-gray" style="font-size: 10.5px; padding: 2px 7px;" title="Đã có lần học khác điểm cao hơn được tính vào GPA tích lũy">Đã thay thế bởi lần học cao hơn</span>' : ''}
+                        <span class="badge badge-blue" style="font-size: 10px; padding: 2px 6px;">${escapeHtml(c.category || 'Đại cương')}</span>
+                        ${c.is_retake ? '<span class="badge badge-orange" style="font-size: 10px; padding: 2px 6px;">Học lại / Cải thiện</span>' : ''}
+                        ${isReplacedByRetake ? '<span class="badge badge-gray" style="font-size: 10px; padding: 2px 6px;" title="Đã có lần học khác điểm cao hơn được tính vào GPA tích lũy">Đã thay thế bởi lần học cao hơn</span>' : ''}
                       </div>
                     </td>
-                    <td style="text-align: center; font-weight: 700;">${c.credits} TC</td>
+                    <td style="text-align: center; font-weight: 700; color: #0F1F38;">${c.credits} TC</td>
                     <td style="font-size: 12px;">${compsHtml}${weightErrorHtml}</td>
-                    <td style="text-align: center; font-weight: 800; font-size: 14px; color: ${calc.isComplete ? 'var(--text-black)' : 'var(--text-gray)'};">
-                      ${calc.isComplete ? calc.finalScore10.toFixed(1) : '--'}
+                    <td style="text-align: center; font-weight: 800; font-size: 13.5px; color: ${calc.isComplete ? '#0F1F38' : '#94A3B8'};">
+                      ${calc.isComplete ? calc.finalScore10.toFixed(1) : '—'}
                     </td>
                     <td style="text-align: center; font-weight: 800;">
-                      ${calc.isComplete ? `<span class="badge ${grade.colorClass}">${grade.letter}</span>` : '--'}
+                      ${calc.isComplete ? `<span class="badge ${grade.colorClass}">${grade.letter}</span>` : '—'}
                     </td>
-                    <td style="text-align: center; font-weight: 800;">
-                      ${calc.isComplete ? grade.scale4.toFixed(1) : '--'}
+                    <td style="text-align: center; font-weight: 800; color: #0F1F38;">
+                      ${calc.isComplete ? grade.scale4.toFixed(1) : '—'}
                     </td>
                     <td style="text-align: center;">
                       <span class="badge ${calc.isComplete ? grade.colorClass : (!calc.isValidWeight || calc.hasInvalidScore ? 'badge-red' : 'badge-gray')}">
-                        ${calc.isComplete ? grade.status : (!calc.isValidWeight ? 'Sai trọng số' : 'Chưa đủ điểm')}
+                        ${calc.isComplete ? grade.status : (!calc.isValidWeight ? 'Sai trọng số' : 'Đang học')}
                       </span>
                     </td>
                   </tr>
