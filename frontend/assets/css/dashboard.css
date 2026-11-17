@@ -450,8 +450,11 @@
 }
 
 @media (max-width: 600px) {
-    .hero-gpa-card { padding: 20px 18px; min-height: 0; }
-    .hero-gpa-card__value { font-size: 56px; }
+    .hero-gpa-card { padding: 20px 16px; min-height: 0; }
+    .hero-gpa-card__value { font-size: 54px; }
+    .e-html-chart__bar { width: 28px; }
+    .e-html-chart__bar-val { font-size: 9.5px; }
+    .e-html-chart__xlabel { font-size: 9.5px; }
     .lesson { grid-template-columns: 48px 1fr auto; }
     .lesson__room { display: none; }
     .activity { grid-template-columns: 1fr auto auto; }

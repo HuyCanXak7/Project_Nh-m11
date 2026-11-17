@@ -706,10 +706,16 @@ body.app-page {
 }
 
 @media (max-width: 600px) {
+    .sidebar__logo { padding: 0 12px; font-size: 14px; }
+    .topbar-right { padding: 0 10px; gap: 6px; }
+    .topbar-user-wrap { padding-left: 6px; }
     .dash { padding: 0; }
     .dash-header { flex-wrap: wrap; gap: 10px; padding: 12px 14px; }
     .dash-header__greeting { order: 2; flex-basis: 100%; }
-    .dash-header__actions { margin-left: auto; flex-wrap: wrap; gap: 6px; }
+    .dash-header__title { font-size: 19px; }
+    .dash-header__actions { margin-left: auto; flex-wrap: wrap; gap: 6px; max-width: 100%; }
+    .tabs { max-width: 100%; overflow-x: auto; }
+    .tabs__btn { padding: 0 10px; font-size: 11px; }
     .stats { grid-template-columns: 1fr; }
     .stat-card { border-right: none !important; border-bottom: 1px solid var(--e-border); padding: 14px 16px; min-height: 0; }
     .stat-card:last-child { border-bottom: none; }

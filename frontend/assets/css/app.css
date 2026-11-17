@@ -1334,6 +1334,14 @@ body.app-body {
 }
 
 @media (max-width: 600px) {
+    .course-sem-tabs {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .course-sem-tab {
+        border-bottom: 1px solid #CBD5E1;
+        padding: 0 12px;
+        font-size: 12px;
+    }
     .course-sem-strip {
         grid-template-columns: 1fr;
     }
