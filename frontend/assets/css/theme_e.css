@@ -1,0 +1,284 @@
+/*
+ * StudyTrack — giao diện bản E (Midnight Mint, lưới Swiss).
+ * Chỉ ghi đè giao diện, không đổi class/ID mà JS đang dùng.
+ * Nạp file này SAU CÙNG trên mọi trang sau đăng nhập.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
+
+body.app-page,
+.app-page {
+    /* Bảng màu E */
+    --e-ink: #0F1B3D;
+    --e-paper: #F4F7FB;
+    --e-mint: #3EE6A8;
+    --e-coral: #FF5A5F;
+    --e-muted: #66708A;
+    --e-soft: #DDE3EE;
+    --e-tint: #E9EEF6;
+    --e-display: 'Bricolage Grotesque', 'Be Vietnam Pro', sans-serif;
+    --e-gutter: 40px;
+
+    /* Map sang token cũ trong app_layout.css / dashboard.css / statistics.css / app.css */
+    --e-navy: var(--e-ink);
+    --e-navy-light: #1E2B52;
+    --e-slate-bar: var(--e-ink);
+    --e-border: var(--e-ink);
+    --e-border-soft: var(--e-soft);
+    --e-bg: var(--e-paper);
+    --primary: var(--e-ink);
+    --primary-hover: #1E2B52;
+    --bg-main: var(--e-paper);
+    --border-focus: var(--e-ink);
+    --danger: var(--e-coral);
+    --dash-primary: var(--e-ink);
+    --dash-text: var(--e-ink);
+    --dash-text-muted: var(--e-muted);
+    --dash-border: var(--e-ink);
+    --dash-chip: var(--e-tint);
+    --topbar-h: 64px;
+}
+
+body.app-page {
+    background: var(--e-paper) !important;
+    color: var(--e-ink) !important;
+}
+
+/* ===== Thanh trên cùng ===== */
+.app-page .sidebar {
+    height: 64px;
+    padding: 0 var(--e-gutter);
+    background: var(--e-paper);
+    border-bottom: 1px solid var(--e-ink);
+}
+.app-page .sidebar__logo {
+    height: 63px;
+    padding: 0 32px 0 0;
+    font-family: var(--e-display);
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    border-right: 1px solid var(--e-ink);
+}
+.app-page .sidebar__nav { height: 63px; margin-left: 8px; }
+.app-page .nav-item { height: 63px; padding: 0 18px; font-size: 14px; }
+.app-page .nav-item.is-active { border-bottom-width: 3px; }
+.app-page .topbar-right { height: 63px; gap: 16px; }
+.app-page .topbar-date { font-size: 13px; color: var(--e-muted); }
+.app-page .topbar-icon-btn { width: 36px; height: 36px; border-color: var(--e-soft); }
+.app-page .topbar-user-wrap { height: 63px; padding-left: 20px; border-left: 1px solid var(--e-soft); }
+.app-page .user-chip { height: 36px; font-size: 14px; }
+.app-page .user-chip__avatar { width: 36px; height: 36px; border-radius: 0; background: var(--e-ink); color: var(--e-paper); }
+
+/* ===== Đầu trang ===== */
+.app-page .dash-header {
+    padding: 26px var(--e-gutter) 20px;
+    background: transparent;
+    border-bottom: 1px solid var(--e-ink);
+}
+.app-page .dash-header__title,
+.app-page .dash-header__title > span {
+    font-family: var(--e-display);
+    font-size: 46px;
+    font-weight: 700;
+    letter-spacing: -0.045em;
+    line-height: 1;
+}
+.app-page .dash-header__sub-inline,
+.app-page .dash-header__slash { color: var(--e-muted); font-weight: 500; }
+.app-page .header-meta-item span { font-size: 13px; color: var(--e-muted); }
+.app-page .header-meta-item strong { font-size: 15px; font-weight: 600; }
+.app-page .btn-figma-outline,
+.app-page .btn-figma-primary,
+.app-page .btn-reset {
+    height: 42px;
+    padding: 0 18px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 0;
+}
+.app-page .btn-figma-outline { background: transparent; border: 1px solid var(--e-ink); color: var(--e-ink); }
+.app-page .btn-figma-primary { background: var(--e-ink); border: 1px solid var(--e-ink); color: var(--e-paper); }
+
+/* ===== Lưới nội dung: lề 40px, đường kẻ màu mực ===== */
+.app-page .dash > :not(.dash-header) {
+    margin-left: var(--e-gutter);
+    margin-right: var(--e-gutter);
+    border-left: 1px solid var(--e-ink);
+    border-right: 1px solid var(--e-ink);
+}
+.app-page .dash > :not(.dash-header) > :last-child { border-right: none; }
+.app-page .card,
+.app-page .stat-card,
+.app-page .course-sem-strip__cell { background: transparent; border-radius: 0; box-shadow: none; }
+
+/* Nhãn và tiêu đề ô */
+.app-page .card__title { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
+.app-page .stat-card__label,
+.app-page .hero-gpa-card__kicker,
+.app-page .course-sem-strip__label,
+.app-page .card__meta {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+.app-page .card__link { font-size: 13px; font-weight: 600; text-underline-offset: 4px; }
+
+/* Con số dùng font hiển thị */
+.app-page .hero-gpa-card__value,
+.app-page .stat-card__value,
+.app-page .course-sem-strip__val,
+.app-page .course-sem-tab strong,
+.app-page .course-sem-tab b {
+    font-family: var(--e-display);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    font-feature-settings: "tnum" 1;
+}
+
+/* ===== Ô màu ===== */
+.app-page .hero-gpa-card,
+.app-page .stat-card--navy { background: var(--e-ink); color: var(--e-paper); }
+.app-page .stat-card--mint,
+.app-page .course-sem-strip__cell--gpa { background: var(--e-mint); color: var(--e-ink); }
+
+/* ===== Biểu đồ GPA ===== */
+.app-page .sq--past { background: var(--e-ink) !important; }
+.app-page .sq--latest { background: var(--e-mint) !important; }
+.app-page .sq--cum { background: var(--e-ink) !important; }
+
+/* ===== Tinh chỉnh theo bản E ===== */
+.app-page .dash { background: transparent; }
+.app-page .nav-item { padding: 0 14px; }
+.app-page .dash-header__title .dash-header__sub-inline,
+.app-page .dash-header__title .dash-header__slash { color: var(--e-muted); font-weight: 500; }
+
+/* Ô GPA lớn (Tổng quan) */
+.app-page .hero-gpa-card { padding: 26px 30px; min-height: 404px; }
+.app-page .hero-gpa-card__value { font-size: 200px; line-height: .82; letter-spacing: -0.065em; margin-top: 18px; }
+.app-page .hero-gpa-card__meta-line { font-size: 15px; gap: 28px; color: var(--e-paper); }
+.app-page .hero-gpa-card__meta-line span { color: inherit; }
+.app-page .hero-gpa-card__track { height: 6px; }
+.app-page .hero-gpa-card__marker { color: var(--e-paper); font-weight: 700; }
+.app-page .hero-gpa-card__ticks { font-size: 11px; color: rgba(244, 247, 251, .72); }
+
+/* Ô số (KPI) */
+.app-page .stat-card { padding: 22px 24px; }
+.app-page .stat-card__value { font-size: 58px; line-height: 1; margin-top: 12px; }
+.app-page .stat-card__value-sub { font-family: var(--e-display); font-size: 22px; font-weight: 500; letter-spacing: -0.02em; }
+.app-page .stat-card__note { font-size: 13px; margin-top: 12px; }
+.app-page .stat-thin-bar { height: 6px; margin-top: 16px; background: var(--e-soft); }
+.app-page .stat-thin-bar span { background: var(--e-ink); }
+
+/* Biểu đồ: cột màu mực, số trắng trong cột */
+.app-page .e-html-chart__bar { background: var(--e-ink); }
+.app-page .e-html-chart__bar--latest { background: var(--e-mint); }
+.app-page .e-html-chart__bar--planned { background: transparent; border-color: var(--e-muted); }
+.app-page .e-html-chart__bar-val { font-family: var(--e-display); font-size: 15px; font-weight: 700; color: var(--e-paper); padding-bottom: 5px; }
+.app-page .e-html-chart__bar--latest .e-html-chart__bar-val { color: var(--e-ink); }
+.app-page .e-html-chart__bar--planned .e-html-chart__bar-val { font-family: var(--e-display); font-size: 11px; font-weight: 500; color: var(--e-muted); }
+.app-page .e-html-chart__dot { width: 9px; height: 9px; border-radius: 0; background: var(--e-ink); border: 2px solid var(--e-paper); }
+.app-page .e-html-chart__xlabel { font-size: 12px; color: var(--e-muted); }
+.app-page .e-html-chart__ylabel { font-size: 11px; color: var(--e-muted); }
+.app-page .e-html-chart__target { border-top-color: var(--e-coral) !important; }
+.app-page .e-html-chart__target-label { color: var(--e-coral); font-weight: 700; }
+
+/* Thanh trên: 7 mục menu vẫn vừa một hàng */
+.app-page .nav-item { padding: 0 12px; font-size: 13.5px; }
+.app-page .sidebar__nav { flex: 1 1 auto; min-width: 0; }
+.app-page .topbar-right { flex: none; }
+
+/* ===== Môn học ===== */
+.app-page .course-sem-tab { padding: 14px 20px; font-size: 14px; }
+.app-page .course-sem-tab__gpa { font-family: var(--e-display); font-size: 20px; font-weight: 700; letter-spacing: -0.03em; }
+.app-page .course-sem-tab.is-active .course-sem-tab__gpa { color: var(--e-mint); }
+.app-page .course-sem-strip__cell { padding: 18px 22px; }
+.app-page .course-sem-strip__val { font-size: 44px; line-height: 1; }
+.app-page .course-sem-strip__val--date { font-size: 28px; }
+.app-page .course-sem-strip__sub { font-size: 14px; }
+.app-page .course-toolbar,
+.app-page .course-toolbar input { background: transparent; }
+
+/* Tiêu đề dài thì cắt bằng dấu …, không xuống dòng */
+.app-page .dash-header__greeting { min-width: 0; }
+.app-page .dash-header__title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ===== Các trang còn lại: vuông góc, viền mực, nền giấy ===== */
+.app-page .dash [style*="border-radius"]:not([style*="50%"]):not([style*="999"]) { border-radius: 0 !important; }
+.app-page .app-card {
+    background: transparent !important;
+    border: 1px solid var(--e-ink) !important;
+    box-shadow: none !important;
+}
+.app-page .app-card .app-card { border-color: var(--e-soft) !important; }
+.app-page .semester-card { background: transparent; border-color: var(--e-ink); }
+.app-page .semester-card__stats { background: var(--e-tint); }
+.app-page .semester-card__title,
+.app-page .semester-card h3 { font-family: var(--e-display); letter-spacing: -0.03em; }
+.app-page .app-card h2,
+.app-page .app-card h3 { font-family: var(--e-display); letter-spacing: -0.02em; }
+.app-page input:not([type="checkbox"]):not([type="radio"]),
+.app-page select,
+.app-page textarea { border-radius: 0; }
+.app-page .dash-header__title { flex-wrap: nowrap; }
+.app-page .dash-header__title > span { white-space: nowrap; flex: none; }
+.app-page .dash-header__title > .dash-header__sub-inline { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+/* Hồ sơ: bỏ bóng đổ và bo góc của thẻ ảnh đại diện */
+.app-page .profile-avatar-card { border-radius: 0; box-shadow: none; border: 1px solid var(--e-soft); background: transparent; }
+.app-page .profile-avatar-circle { box-shadow: none; background: var(--e-ink); }
+
+/* ===== Màn nhỏ ===== */
+@media (max-width: 1280px) {
+    body.app-page { --e-gutter: 24px; }
+    .app-page .topbar-date { display: none; }
+    .app-page .hero-gpa-card__value { font-size: 150px; }
+    .app-page .dash-header__title,
+    .app-page .dash-header__title > span { font-size: 38px; }
+}
+@media (max-width: 900px) {
+    body.app-page { --e-gutter: 16px; }
+    .app-page .sidebar { padding: 0 16px; }
+    .app-page .sidebar__logo { border-right: none; }
+    .app-page .sidebar__nav { height: auto; margin-left: 0; background: var(--e-paper); }
+    .app-page .nav-item { height: 44px; padding: 0 20px; }
+    .app-page .dash-header { padding: 16px; }
+    .app-page .dash-header__title,
+    .app-page .dash-header__title > span { font-size: 26px; }
+    .app-page .hero-gpa-card { min-height: 0; padding: 20px; }
+    .app-page .hero-gpa-card__value { font-size: 96px; margin-top: 8px; }
+    .app-page .hero-gpa-card__meta-line { flex-wrap: wrap; gap: 8px 18px; font-size: 13.5px; }
+    .app-page .stat-card__value { font-size: 40px; }
+    .app-page .course-sem-strip__val { font-size: 32px; }
+    .app-page .topbar-icon-btn,
+    .app-page .user-chip__name,
+    .app-page .user-chip__caret { display: none; }
+    .app-page .topbar-user-wrap { padding-left: 0; border-left: none; }
+    .app-page .dash-header__actions { flex-wrap: wrap; }
+    .app-page .card,
+    .app-page .chart,
+    .app-page .gpa-chart { min-width: 0; }
+    .app-page .e-html-chart { max-width: 100%; overflow: hidden; grid-template-columns: 32px minmax(0, 1fr); }
+    .app-page .stats-row,
+    .app-page .dash-row { grid-template-columns: minmax(0, 1fr) !important; }
+    .app-page .stats-row > *,
+    .app-page .dash-row > * { min-width: 0; }
+    .app-page .dash-header { flex-wrap: wrap; gap: 12px; }
+    .app-page .stats-toolbar { width: 100%; }
+    .app-page .stats-toolbar .tabs { flex: 1 1 auto; }
+    .app-page .dash-header__menu { order: 0; }
+    .app-page .dash-header__greeting { order: 1; flex: 1 1 calc(100% - 64px); }
+    .app-page .dash-header__actions { order: 2; }
+    .app-page .e-html-chart__xlabel { font-size: 10px; line-height: 1.2; white-space: normal; text-align: center; }
+    .app-page .e-html-chart__bar-val { font-size: 11px; }
+}
+
+/* Ô nhập được trình duyệt tự điền: giữ nền trắng thay cho màu xanh nhạt mặc định */
+.app-page input:-webkit-autofill,
+.app-page input:-webkit-autofill:hover,
+.app-page input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #FFFFFF inset;
+    box-shadow: 0 0 0 1000px #FFFFFF inset;
+    -webkit-text-fill-color: var(--e-ink);
+    transition: background-color 9999s ease-out 0s;
+}

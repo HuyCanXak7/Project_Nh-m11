@@ -4,7 +4,7 @@
  * Hỗ trợ đầy đủ trạng thái Loading, Empty State và Error State (PB-40 / [T0694ED])
  */
 
-const $ = (id) => document.getElementById(id);
+// $() dùng chung từ app_shell.js (khai báo lại ở đây làm cả file lỗi)
 
 function escapeHtml(str) {
     if (str === null || str === undefined) return '';
@@ -157,7 +157,7 @@ async function loadStatisticsData(/* cohortId */) {
             programCredits: 140,
             targetGpa,
             average10: Number(avg10.toFixed(2)),
-            average10Delta,
+            average10Delta: avg10Delta,
             semesters,
             programYears: uniqueYears.length >= 5 ? uniqueYears : ['2025-2026', '2026-2027', '2027-2028', '2028-2029', '2029-2030'],
             gradeDistribution,
@@ -558,7 +558,7 @@ async function initStatistics() {
             expBtn.addEventListener('click', () => exportReport(data, semesters));
         }
     } catch (err) {
-        console.error('Statistics error:', err);
+        console.error('Statistics error: - statistics.js:561', err);
         if (chartBox) {
             chartBox.innerHTML = `
                 <div class="chart__empty" style="text-align: center; color: var(--danger);">

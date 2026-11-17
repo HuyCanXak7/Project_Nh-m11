@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../assets/css/common.css">
     <link rel="stylesheet" href="../assets/css/model.css">
     <link rel="stylesheet" href="../assets/css/app.css">
+    <link rel="stylesheet" href="../assets/css/theme-e.css">
 </head>
 <body class="app-page page-import">
     <!-- Nền trang trí floating circles -->
@@ -142,16 +143,16 @@
         </header>
 
         <!-- MAIN CARD -->
-        <div class="app-card" style="margin-top: 0;">
-            <!-- HƯỚNG DẪN CẤU TRÚC CỘT MẪU (PB-25 / T0694DD) -->
-            <div style="background: #F8FAFC; border: 1px solid #CBD5E1; padding: 16px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-                <div style="font-size: 13px; color: #0F1F38; line-height: 1.6;">
-                    <strong style="text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; color: #64748B; display: block;">Cấu trúc 8 cột chuẩn (PB-25 · T0694DD)</strong>
-                    <code style="background: #FFFFFF; border: 1px solid #CBD5E1; padding: 4px 10px; font-weight: 700; color: #0F1F38; display: inline-block; margin-top: 4px; word-break: break-all;">semester_name, course_code, course_name, credits, category, component_name, weight_percent, score</code>
+        <div class="app-card" style="margin-top: 0; box-shadow: var(--shadow-soft); border-radius: var(--radius-lg);">
+            <!-- HƯỚNG DẪN CẤU TRÚC CỘT MẪU (PB-25) -->
+            <div style="background: var(--bg-main); border-radius: 16px; padding: 14px 18px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div style="font-size: 13px; color: var(--text-dark); line-height: 1.55;">
+                    <strong style="color: var(--text-black);">Cấu trúc 8 cột chuẩn (PB-25):</strong>
+                    <code style="background: #fff; padding: 3px 8px; border-radius: 6px; font-weight: 700; color: var(--primary); display: inline-block; margin-top: 4px; word-break: break-all;">semester_name, course_code, course_name, credits, category, component_name, weight_percent, score</code>
                 </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <button type="button" onclick="CSVHelper.downloadTemplate()" class="btn-figma-outline">↓ Tải mẫu .CSV</button>
-                    <button type="button" onclick="CSVHelper.downloadTemplateExcel()" class="btn-figma-primary">↓ Tải mẫu .XLSX</button>
+                    <button type="button" onclick="CSVHelper.downloadTemplate()" class="btn btn-secondary btn-sm">Tải mẫu .CSV</button>
+                    <button type="button" onclick="CSVHelper.downloadTemplateExcel()" class="btn btn-secondary btn-sm">Tải mẫu .XLSX</button>
                 </div>
             </div>
 
@@ -159,16 +160,16 @@
             <div id="importStatusBanner" style="display: none; margin-bottom: 20px;" role="alert" aria-live="polite"></div>
 
             <!-- VÙNG KÉO THẢ CSV / EXCEL -->
-            <div id="dropZone" class="empty-state" style="cursor: pointer; margin-bottom: 24px; border: 1.5px dashed #0F1F38; background: #F8FAFC;">
-                <div class="empty-state__icon" style="border-radius: 0; border: 1px solid #CBD5E1; box-shadow: none;">
-                    <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#0F1F38" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto;">
+            <div id="dropZone" class="empty-state" style="cursor: pointer; margin-bottom: 28px;">
+                <div class="empty-state__icon">
+                    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto;">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                         <polyline points="17 8 12 3 7 8"/>
                         <line x1="12" y1="3" x2="12" y2="15"/>
                     </svg>
                 </div>
                 <h3 class="empty-state__title">Kéo & Thả tệp CSV hoặc Excel (.xlsx) vào đây</h3>
-                <p class="empty-state__desc">hoặc bấm vào nút bên dưới để chọn tệp từ máy tính của bạn.<br>Hỗ trợ định dạng <strong>.csv</strong> (PapaParse) và <strong>.xlsx</strong>, dung lượng tối đa <strong>2 MB</strong>, không quá <strong>1.000 dòng</strong>.</p>
+                <p class="empty-state__desc">hoặc bấm vào nút bên dưới để chọn tệp từ máy tính của bạn.<br>Hỗ trợ định dạng <strong>.csv</strong> và <strong>.xlsx</strong>, dung lượng tối đa <strong>2 MB</strong>, không quá <strong>1.000 dòng</strong>.</p>
                 <input type="file" id="csvFileInput" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display: none;">
                 <button type="button" onclick="event.stopPropagation(); document.getElementById('csvFileInput').click()" class="btn btn-primary">
                     Chọn tệp CSV / Excel (.xlsx)...
@@ -177,30 +178,30 @@
 
             <!-- BẢNG XEM TRƯỚC (PREVIEW) & BẮT LỖI DÒNG -->
             <div id="previewContainer" style="display: none;">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; padding: 16px 20px; background: #F8FAFC; border: 1px solid #CBD5E1;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; padding: 16px; background: var(--bg-main); border-radius: 20px;">
                     <div>
-                        <h4 style="font-size: 15px; font-weight: 800; color: #0F1F38;">Kết quả kiểm tra dữ liệu trước khi lưu (PB-26)</h4>
-                        <p id="previewSummaryText" style="font-size: 13px; color: #64748B; margin-top: 2px;"></p>
+                        <h4 style="font-size: 15px; font-weight: 800; color: var(--text-black);">Kết quả kiểm tra dữ liệu trước khi lưu</h4>
+                        <p id="previewSummaryText" style="font-size: 13px; color: var(--text-gray); margin-top: 2px;"></p>
                     </div>
                     <div style="display: flex; gap: 10px;">
-                        <button type="button" onclick="resetImportPreview()" class="btn-figma-outline">Hủy bỏ</button>
-                        <button type="button" id="btnExecuteBatchSave" onclick="executeBatchSave()" class="btn-figma-primary">Xác nhận lưu</button>
+                        <button type="button" onclick="resetImportPreview()" class="btn btn-secondary btn-sm">Hủy bỏ</button>
+                        <button type="button" id="btnExecuteBatchSave" onclick="executeBatchSave()" class="btn btn-primary btn-sm">Xác nhận lưu</button>
                     </div>
                 </div>
 
                 <div class="table-wrap">
-                    <table class="app-table course-figma-table">
+                    <table class="app-table">
                         <thead>
                             <tr>
-                                <th style="width: 60px; text-align: center;">DÒNG</th>
-                                <th style="width: 130px;">HỌC KỲ</th>
-                                <th style="width: 90px;">MÃ MÔN</th>
-                                <th>TÊN MÔN</th>
-                                <th style="width: 80px; text-align: center;">TÍN CHỈ</th>
-                                <th style="width: 120px;">THÀNH PHẦN</th>
-                                <th style="width: 90px; text-align: center;">TRỌNG SỐ</th>
-                                <th style="width: 80px; text-align: center;">ĐIỂM</th>
-                                <th>TRẠNG THÁI & LỖI DÒNG</th>
+                                <th style="width: 60px; text-align: center;">Dòng</th>
+                                <th style="width: 130px;">Học kỳ</th>
+                                <th style="width: 90px;">Mã môn</th>
+                                <th>Tên môn</th>
+                                <th style="width: 80px; text-align: center;">Tín chỉ</th>
+                                <th style="width: 120px;">Thành phần</th>
+                                <th style="width: 90px; text-align: center;">Trọng số</th>
+                                <th style="width: 80px; text-align: center;">Điểm</th>
+                                <th>Trạng thái & Lỗi dòng</th>
                             </tr>
                         </thead>
                         <tbody id="previewTableBody"></tbody>
@@ -211,7 +212,6 @@
     </main>
 
     <!-- SCRIPTS -->
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <script src="../assets/js/storageService.js"></script>
     <script src="../assets/js/gradeCalculator.js"></script>
     <script src="../assets/js/csvHelper.js"></script>
