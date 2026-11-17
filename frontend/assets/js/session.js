@@ -233,6 +233,19 @@ const authApi = {
         }
         return res;
     },
+
+    /** Cập nhật hồ sơ cá nhân của chính người dùng đang đăng nhập (PB-04 / T0694E3) */
+    async updateProfile({ fullName }) {
+        const res = await apiFetch('/auth/profile', {
+            method: 'PATCH',
+            body: { fullName },
+        });
+        const session = getSession();
+        if (session && session.user && res?.fullName) {
+            saveSession({ ...session, user: { ...session.user, fullName: res.fullName } });
+        }
+        return res;
+    },
 };
 
 /** Đăng xuất (PB-03): thu hồi refresh token ở BE rồi xóa phiên phía client */
@@ -395,6 +408,16 @@ const mockServer = (() => {
             });
 
             return issueTokens(db, user);
+        },
+
+        async 'PATCH /auth/profile'(db, { fullName }, token) {
+            const user = userFromAccess(db, token);
+            const cleanName = String(fullName || '').trim();
+            if (cleanName.length < 2) {
+                fail(400, 'VALIDATION_ERROR', 'Họ và tên phải có ít nhất 2 ký tự.');
+            }
+            user.fullName = cleanName;
+            return { id: user.id, email: user.email, fullName: user.fullName };
         },
     };
 

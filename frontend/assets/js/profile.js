@@ -119,36 +119,72 @@ function handleRemoveAvatar() {
   showToast('Đã xóa ảnh đại diện!');
 }
 
-function handleSaveProfile(e) {
+function setProfileStatus(message, isError = false) {
+  const box = document.getElementById('profileSaveStatus');
+  if (!box) return;
+  if (!message) {
+    box.style.display = 'none';
+    box.textContent = '';
+    return;
+  }
+  box.style.display = 'block';
+  box.style.background = isError ? '#FEF2F2' : '#ECFDF5';
+  box.style.border = isError ? '1px solid #FCA5A5' : '1px solid #6EE7B7';
+  box.style.color = isError ? '#991B1B' : '#065F46';
+  box.textContent = message;
+}
+
+async function handleSaveProfile(e) {
   e.preventDefault();
+  setProfileStatus('');
+
+  const session = typeof getSession === 'function' ? getSession() : null;
+  if (!session || !session.user) {
+    const msg = 'Phiên đăng nhập không hợp lệ. Chỉ chủ tài khoản mới có thể sửa hồ sơ cá nhân!';
+    setProfileStatus(msg, true);
+    showToast(msg, true);
+    return;
+  }
+
   const name = document.getElementById('profileNameInput').value.trim();
   const student_id = document.getElementById('profileStudentIdInput').value.trim();
   const major = document.getElementById('profileMajorInput').value.trim();
   const class_name = document.getElementById('profileClassInput').value.trim();
 
-  if (!name || !student_id) {
-    showToast('Họ tên và MSSV không được để trống!', true);
+  if (name.length < 2 || !student_id) {
+    const msg = 'Họ tên (tối thiểu 2 ký tự) và MSSV không được để trống!';
+    setProfileStatus(msg, true);
+    showToast(msg, true);
     return;
   }
 
   const student = StorageService.getStudent();
   student.name = name;
   student.student_id = student_id;
+  student.email = session.user.email || student.email || '';
   student.major = major;
   student.class_name = class_name;
 
   StorageService.saveStudent(student);
 
-  // Cập nhật session user nếu có
-  const session = typeof getSession === 'function' ? getSession() : null;
-  if (session && session.user) {
-    session.user.fullName = name;
-    if (typeof saveSession === 'function') saveSession(session);
+  try {
+    if (typeof authApi !== 'undefined' && typeof authApi.updateProfile === 'function') {
+      await authApi.updateProfile({ fullName: name });
+    } else if (typeof saveSession === 'function') {
+      saveSession({ ...session, user: { ...session.user, fullName: name } });
+    }
+  } catch (err) {
+    const errMsg = err?.message || 'Không thể đồng bộ hồ sơ tài khoản!';
+    setProfileStatus(errMsg, true);
+    showToast(errMsg, true);
+    return;
   }
 
   updateProfileAvatarDisplay(student);
   if (typeof renderUser === 'function') renderUser({ ...student, fullName: name });
-  showToast('Cập nhật thông tin hồ sơ sinh viên thành công!');
+  const okMsg = 'Cập nhật thông tin hồ sơ sinh viên thành công!';
+  setProfileStatus(okMsg, false);
+  showToast(okMsg);
 }
 
 function setPasswordStatus(message, isError = false) {
