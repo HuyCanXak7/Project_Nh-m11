@@ -16,14 +16,19 @@ const GradeCalculator = {
     { min: 0.0, max: 3.9, letter: 'F', scale4: 0.0, status: 'Rớt', label: 'Kém (Học lại)', colorClass: 'badge-red' }
   ],
 
+  // toPrecision(12) khử sai số số thực (8.45*10 = 84.4999…) để khớp Decimal ROUND_HALF_UP của BE
+  roundHalfUp(val, factor) {
+    return Math.round(Number((Number(val) * factor).toPrecision(12))) / factor;
+  },
+
   round1(val) {
     if (val === null || val === undefined || isNaN(val)) return null;
-    return Math.round(Number(val) * 10) / 10;
+    return this.roundHalfUp(val, 10);
   },
 
   round2(val) {
     if (val === null || val === undefined || isNaN(val)) return 0;
-    return Math.round(Number(val) * 100) / 100;
+    return this.roundHalfUp(val, 100);
   },
 
   convertScore10(score10) {

@@ -184,8 +184,6 @@ function renderSimulationTable() {
   }
 
   tbody.innerHTML = simulationCourses.map((c, idx) => {
-    const isValid = c.simulatedScore !== null && !isNaN(c.simulatedScore) && c.simulatedScore >= 0 && c.simulatedScore <= 10;
-    const grade = isValid ? GradeCalculator.convertScore10(c.simulatedScore) : { letter: 'Lỗi', scale4: '--', colorClass: 'badge-red' };
     return `
       <tr>
         <td style="font-family: monospace; font-weight: 800; color: var(--primary);">${escapeHtml(c.course_code)}</td>
@@ -194,27 +192,37 @@ function renderSimulationTable() {
         <td style="text-align: center; color: var(--text-gray);">${c.originalScore !== null ? c.originalScore : 'Chưa có'}</td>
         <td style="width: 140px; text-align: center;">
           <input type="number" step="0.1" min="0" max="10" value="${c.simulatedScore !== null ? c.simulatedScore : ''}"
-                 oninput="updateSimScore(${idx}, this.value)"
+                 oninput="updateSimScore(${idx}, this)" aria-label="Điểm giả định ${escapeHtml(c.course_code)}"
                  class="modal-input" style="height: 38px; text-align: center; font-weight: 800;">
         </td>
         <td style="text-align: center;">
-          <span class="badge ${grade.colorClass}">${isValid ? `${grade.letter} (${grade.scale4})` : 'Điểm 0-10'}</span>
+          <span id="simBadge${idx}" class="badge"></span>
         </td>
       </tr>
     `;
   }).join('');
 
+  simulationCourses.forEach((c, idx) => renderSimBadge(idx, c.simulatedScore !== null));
   recalculateSimulatedGPA();
 }
 
-function updateSimScore(idx, val) {
-  const trimmed = String(val).trim();
+// Cập nhật nhãn điểm chữ của một dòng mà không render lại bảng (giữ focus ô đang gõ)
+function renderSimBadge(idx, isValid) {
+  const badge = document.getElementById(`simBadge${idx}`);
+  if (!badge) return;
+  const grade = isValid ? GradeCalculator.convertScore10(simulationCourses[idx].simulatedScore) : null;
+  badge.className = `badge ${grade ? grade.colorClass : 'badge-red'}`;
+  badge.textContent = grade ? `${grade.letter} (${grade.scale4})` : 'Điểm 0-10';
+}
+
+function updateSimScore(idx, input) {
+  const trimmed = String(input.value).trim();
   const num = Number(trimmed);
-  if (trimmed === '' || isNaN(num) || num < 0 || num > 10) {
-    simulationCourses[idx].simulatedScore = null;
-  } else {
-    simulationCourses[idx].simulatedScore = Math.round(num * 10) / 10;
-  }
+  const isValid = trimmed !== '' && !isNaN(num) && num >= 0 && num <= 10;
+  simulationCourses[idx].simulatedScore = isValid ? GradeCalculator.round1(num) : null;
+  input.style.borderColor = isValid ? '' : 'var(--error)';
+  input.setAttribute('aria-invalid', String(!isValid));
+  renderSimBadge(idx, isValid);
   recalculateSimulatedGPA();
 }
 
