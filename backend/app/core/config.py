@@ -17,6 +17,7 @@ class Setting(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    SEED_DEMO_PASSWORD: str | None = None
 
     # Pydantic v2 dùng model_config thay cho class Config cũ.
     model_config = SettingsConfigDict(

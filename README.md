@@ -475,6 +475,27 @@ Chạy lại script sẽ giữ nguyên tài khoản đã có, kể cả mật kh
 
 Để kiểm tra, mở Swagger UI tại `http://localhost:8000/docs`. Gọi `POST /api/v1/auth/login` với email và mật khẩu mẫu. Dùng `data.accessToken` để **Authorize**, rồi gọi `GET /api/v1/auth/me` và xem `data.role`. Giao diện HTML hiện dùng đăng nhập giả lập, vì vậy hãy kiểm tra các tài khoản này qua Swagger.
 
+## Reset dữ liệu demo (PB-59)
+
+Script tạo lại dữ liệu cho riêng ba tài khoản `demo.student01@example.com`, `demo.student02@example.com` và `demo.student03@example.com`: 8 học kỳ, 40 lượt môn, thành phần điểm hợp lệ, môn F, một lần học lại có cùng mã môn và mục tiêu GPA mẫu 3.60. Mật khẩu dùng chung lấy từ biến môi trường `SEED_DEMO_PASSWORD`; script chỉ nhận các tài khoản demo đã dành riêng (vai trò `STUDENT` và mã `DEMO-001..003`).
+
+Lệnh chỉ xóa học kỳ, môn, thành phần điểm, mục tiêu GPA và phiên đăng nhập thuộc ba tài khoản demo. Tài khoản và dữ liệu người dùng khác, bảng thang điểm và schema được giữ nguyên. Chỉ dùng với database demo/local. Migration tự tạo bảng `goals` khi backend khởi động; mục tiêu có một bản ghi cho mỗi tài khoản.
+
+Đặt `SEED_DEMO_PASSWORD` trong môi trường backend (dài 8–72 byte UTF-8), sau đó chạy từ thư mục `backend`:
+
+```bash
+alembic upgrade head
+python -m scripts.reset_demo_data
+```
+
+Nếu chạy trực tiếp trên máy, dùng `.env` của backend và chạy migration trước lệnh reset. Trong Docker Compose, backend tự chạy migration khi khởi động; sau khi service sẵn sàng, chạy từ thư mục chứa `docker-compose.yaml`:
+
+```bash
+docker compose exec backend python -m scripts.reset_demo_data
+```
+
+Hai tệp mẫu import theo 8 cột chuẩn nằm tại `backend/scripts/demo_import_valid.csv` và `backend/scripts/demo_import_invalid.csv`; tệp lỗi có điểm ngoài khoảng 0–10 để kiểm tra báo lỗi theo dòng. Frontend hiện lưu mục tiêu mẫu trong `localStorage`; backend có bản ghi mục tiêu tương ứng để phục vụ dữ liệu demo API/DB. Mục tiêu ở hai nơi được quản lý độc lập theo kiến trúc hiện tại.
+
 ## Dữ liệu GPA (PB-18, PB-19)
 
 `GET /api/v1/semesters/{semesterId}/gpa` đọc môn từ cơ sở dữ liệu của người dùng đã đăng nhập. Backend tính điểm môn ghi đồng thời `courses.grade10` và `courses.grade4` sau khi đủ điểm, hoặc để cả hai là `NULL` nếu chưa thể tính. GPA được làm tròn đến hai chữ số thập phân trước khi xếp loại.
