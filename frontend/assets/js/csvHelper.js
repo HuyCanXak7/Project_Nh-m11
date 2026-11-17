@@ -126,18 +126,38 @@ const CSVHelper = {
   },
 
   /**
-   * Đọc và kiểm tra nội dung CSV (PB-25, PB-26)
+   * Đọc và kiểm tra nội dung CSV bằng PapaParse (hoặc bộ tách RFC-4180 nội bộ khi offline) (PB-25, PB-26 / T0694DD)
    */
   parseCSV(text) {
     if (!text || typeof text !== 'string') {
       return { success: false, error: 'Tệp CSV rỗng hoặc không thể đọc nội dung!' };
     }
 
-    // Loại bỏ BOM UTF-8 nếu có
-    const cleanText = text.replace(/^\uFEFF/, '');
+    // Loại bỏ BOM UTF-8 và dòng sep= của Excel nếu có
+    const cleanText = text
+      .replace(/^\uFEFF/, '')
+      .replace(/^sep=.*\r?\n/i, '');
+
+    if (cleanText.trim().length === 0) {
+      return { success: false, error: 'Tệp CSV rỗng, không có dữ liệu để đọc!' };
+    }
+
+    // Ưu tiên sử dụng thư viện PapaParse tại FE theo đúng đặc tả PB-25 (T0694DD)
+    if (typeof window !== 'undefined' && window.Papa && typeof window.Papa.parse === 'function') {
+      const parsed = window.Papa.parse(cleanText, {
+        header: false,
+        skipEmptyLines: 'greedy'
+      });
+      const rows = Array.isArray(parsed.data) ? parsed.data : [];
+      if (rows.length === 0) {
+        return { success: false, error: 'Tệp CSV rỗng, không có dữ liệu để đọc!' };
+      }
+      return this.validateTabularData(rows[0], rows.slice(1));
+    }
+
     const rawLines = cleanText
       .split(/\r?\n/)
-      .filter(line => line.trim().length > 0 && !/^sep=/i.test(line.trim()));
+      .filter(line => line.trim().length > 0);
 
     if (rawLines.length === 0) {
       return { success: false, error: 'Tệp CSV rỗng, không có dữ liệu để đọc!' };
