@@ -10,24 +10,59 @@ let currentConfiguringCourse = null;
 let currentStatusFilter = 'ALL'; // ALL | PASSED | IN_PROGRESS | FAILED
 
 document.addEventListener('DOMContentLoaded', () => {
-  initSemesterFilterOptions();
+  initCoursesPage();
+});
 
-  const params = new URLSearchParams(window.location.search);
-  const semIdParam = params.get('semId');
-  const filterEl = document.getElementById('filterSemester');
-
-  if (semIdParam && filterEl) {
-    filterEl.value = semIdParam;
-  } else if (filterEl) {
-    const sems = StorageService.getSemesters();
-    if (sems.length > 0) {
-      filterEl.value = sems[sems.length - 1].id;
-    }
+function initCoursesPage() {
+  const tbody = document.getElementById('courseTableBody');
+  if (tbody) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="11" style="text-align: center; padding: 28px; color: #64748B;">
+          Đang tải danh sách môn học và điểm số...
+        </td>
+      </tr>
+    `;
   }
 
-  renderSemesterTabs();
-  renderCourses();
-});
+  try {
+    initSemesterFilterOptions();
+
+    const params = new URLSearchParams(window.location.search);
+    const semIdParam = params.get('semId');
+    const filterEl = document.getElementById('filterSemester');
+
+    if (semIdParam && filterEl) {
+      filterEl.value = semIdParam;
+    } else if (filterEl && !filterEl.value) {
+      const sems = StorageService.getSemesters();
+      if (sems.length > 0) {
+        filterEl.value = sems[sems.length - 1].id;
+      }
+    }
+
+    renderSemesterTabs();
+    renderCourses();
+  } catch (err) {
+    console.error('Lỗi tải danh sách môn học:', err);
+    if (tbody) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="11">
+            <div class="empty-state" style="padding: 36px 16px; margin: 10px; border-color: #FCA5A5; background: #FEF2F2;">
+              <h4 class="empty-state__title" style="color: #991B1B;">Không tải được danh sách môn học</h4>
+              <p class="empty-state__desc">Đã xảy ra lỗi khi đọc dữ liệu môn học. Bạn có thể thử tải lại hoặc khôi phục dữ liệu mẫu.</p>
+              <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 12px;">
+                <button type="button" onclick="initCoursesPage()" class="btn-figma-primary">Thử tải lại</button>
+                <button type="button" onclick="handleResetData()" class="btn-figma-outline">Khôi phục dữ liệu mẫu</button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+  }
+}
 
 function formatShortSemName(sem) {
   if (!sem) return '';
