@@ -469,7 +469,7 @@ const StorageService = {
     const newSemesters = new Set();
     const newCourses = new Set();
 
-    return (validRows || []).map(row => {
+    const annotatedRows = (validRows || []).map(row => {
       const semLower = (row.semester_name || '').trim().toLowerCase();
       const codeUpper = (row.course_code || '').trim().toUpperCase();
       const cKey = `${semLower}::${codeUpper}`;
@@ -485,6 +485,7 @@ const StorageService = {
         isNewCourse
       };
     });
+    return { annotatedRows, newSemesterCount: newSemesters.size, newCourseCount: newCourses.size };
   },
 
   // Batch import Upsert (PB-26, PB-46)
