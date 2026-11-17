@@ -26,7 +26,7 @@ const MESSAGES = {
 class ApiError extends Error {
     constructor(status, code, message, details = {}) {
         super(message || code);
-        this.status = status;     // 0 = lỗi mạng
+        this.status = status;     
         this.code = code;
         this.details = details;
     }
@@ -105,6 +105,16 @@ function requireAuth() {
     clearSession();
     window.location.replace(loginPath());
     return null;
+}
+
+function requireAdmin() {
+    const user = requireAuth();
+    if (!user) return null;
+    if (user.role !== 'ADMIN') {
+        window.location.replace(dashboardPath());
+        return null;
+    }
+    return user;
 }
 
 /** Gọi ở trang đăng nhập / đăng ký: đã đăng nhập rồi thì vào thẳng Dashboard */
@@ -319,7 +329,7 @@ const mockServer = (() => {
             refreshToken,
             expiresIn: CONFIG.accessTtl,
             refreshExpiresIn: CONFIG.refreshTtl,
-            user: { id: user.id, email: user.email, fullName: user.fullName },
+            user: { id: user.id, email: user.email, fullName: user.fullName, role: user.role ?? 'STUDENT' },
         };
     }
 
@@ -336,7 +346,7 @@ const mockServer = (() => {
         async 'POST /auth/register'(db, { email, fullName, password }) {
             if (db.users.some((u) => u.email === email)) fail(409, 'EMAIL_EXISTS', 'Email này đã được sử dụng');
             if (!password || password.length < 8) fail(400, 'VALIDATION_ERROR', 'Mật khẩu phải có ít nhất 8 kí tự');
-            const user = { id: randomToken(), email, fullName, passwordHash: await hash(email, password), isActive: true };
+            const user = { id: randomToken(), email, fullName, passwordHash: await hash(email, password), isActive: true, role: 'STUDENT', createdAt: new Date().toISOString() };
             db.users.push(user);
             return { id: user.id, email, fullName };
         },
@@ -386,7 +396,7 @@ const mockServer = (() => {
 
         async 'GET /auth/me'(db, body, token) {
             const user = userFromAccess(db, token);
-            return { id: user.id, email: user.email, fullName: user.fullName };
+            return { id: user.id, email: user.email, fullName: user.fullName, role: user.role ?? 'STUDENT' };
         },
 
         async 'POST /auth/change-password'(db, { currentPassword, newPassword }, token) {
@@ -419,18 +429,31 @@ const mockServer = (() => {
             user.fullName = cleanName;
             return { id: user.id, email: user.email, fullName: user.fullName };
         },
+        async 'GET /admin/users'(db, body, token, query) {
+            const me = userFromAccess(db, token);
+            if ((me.role ?? 'STUDENT') !== 'ADMIN') fail(403, 'FORBIDDEN', 'Bạn không có quyền quản trị');
+            const q = (query.get('q') || '').trim().toLowerCase();
+            const items = db.users
+                .filter((u) => !q || u.email.toLowerCase().includes(q) || u.fullName.toLowerCase().includes(q))
+                .map((u) => ({
+                    id: u.id, email: u.email, fullName: u.fullName, studentCode: u.studentCode ?? null, major: u.major ?? null, role: u.role ?? 'STUDENT',
+                    isActive: u.isActive, createdAt: u.createdAt ?? null, 
+                }));
+                return { items, total: items.length };
+        }
     };
 
     async function handle(method, path, body = {}, token) {
         await sleep(CONFIG.latency);
-        const route = routes[`${method} ${path}`];
-        if (!route) throw new ApiError(404, 'NOT_FOUND', `Mock chưa có ${method} ${path}`);
+        const [pathname, search = ''] = path.split('?');
+        const route = routes[`${method} ${pathname}`];
+        if (!route) throw new ApiError(404, 'NOT_FOUND', `Mock chưa có ${method} ${pathname}`);
         const db = load();
         await migrateLegacy(db);
         try {
-            return await route(db, body, token);
+            return await route(db, body, token, new URLSearchParams(search));
         } finally {
-            save(db); // lưu cả khi lỗi (để đếm số lần đăng nhập sai)
+            save(db);
         }
     }
 
@@ -441,11 +464,21 @@ const mockServer = (() => {
         setActive(email, active) {
             const db = load();
             const user = db.users.find((u) => u.email === email);
-            if (!user) return console.warn('Không có tài khoản - session.js:378', email);
+            if (!user) return console.warn('Không có tài khoản - session.js:467', email);
             user.isActive = active;
             save(db);
-            console.info(`${email}: is_active = ${active} - session.js:381`);
+            console.info(`${email}: is_active = ${active} - session.js:470`);
         },
+        
+        setRole(email, role) {
+            const db = load();
+            const user = db.users.find((u) => u.email === email);
+            if (!user) return console.warn('Không có tài khoản - session.js:476', email);
+            user.role = role;
+            save(db);
+            console.info(`${email}: role = ${role} - session.js:479`);
+        },
+        
         /** Cho access token hết hạn ngay → lần gọi API tới sẽ tự refresh */
         expireAccess() {
             const db = load();
@@ -453,7 +486,7 @@ const mockServer = (() => {
             save(db);
             const s = getSession();
             if (s) saveSession({ ...s, accessExpiresAt: 0 });
-            console.info('Đã cho access token hết hạn - session.js:390');
+            console.info('Đã cho access token hết hạn - session.js:489');
         },
         /** Cho cả refresh token hết hạn → bị đưa về trang đăng nhập */
         expireRefresh() {
@@ -463,12 +496,12 @@ const mockServer = (() => {
             save(db);
             const s = getSession();
             if (s) saveSession({ ...s, accessExpiresAt: 0 });
-            console.info('Đã cho refresh token hết hạn - session.js:400');
+            console.info('Đã cho refresh token hết hạn - session.js:499');
         },
         reset() {
             localStorage.removeItem(DB_KEY);
             clearSession();
-            console.info('Đã xóa toàn bộ dữ liệu mock - session.js:405');
+            console.info('Đã xóa toàn bộ dữ liệu mock - session.js:504');
         },
     };
 

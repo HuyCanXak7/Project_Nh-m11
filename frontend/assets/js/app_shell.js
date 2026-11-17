@@ -52,13 +52,15 @@ function upgradeSidebarFigma() {
                 <i class="sidebar__logo-sq sidebar__logo-sq--navy"></i>
                 <i class="sidebar__logo-sq sidebar__logo-sq--mint"></i>
             </span>
-            <span>StudyTrack</span>
+            <span>StudyLIMS</span>
         `;
     }
 
     // 2. Menu ngang đánh số chuẩn Figma
     const nav = sidebar.querySelector('.sidebar__nav');
     if (nav) {
+        // Chỉ ADMIN thấy link quản lý tài khoản (PB-29)
+        const isAdmin = typeof getSession === 'function' && getSession()?.user?.role === 'ADMIN';
         nav.innerHTML = `
             <a href="dashboard.html" class="nav-item"><span class="nav-item__num">01</span><span>Tổng quan</span></a>
             <a href="courses.html" class="nav-item"><span class="nav-item__num">02</span><span>Môn học</span></a>
@@ -67,6 +69,7 @@ function upgradeSidebarFigma() {
             <a href="goals.html" class="nav-item"><span class="nav-item__num">05</span><span>Mục tiêu</span></a>
             <a href="import.html" class="nav-item"><span class="nav-item__num">06</span><span>Nhập điểm</span></a>
             <a href="transcript.html" class="nav-item"><span class="nav-item__num">07</span><span>Bảng điểm</span></a>
+            ${isAdmin ? '<a href="admin-user.html" class="nav-item"><span class="nav-item__num">08</span><span>Tài khoản</span></a>' : ''}
         `;
     }
 
