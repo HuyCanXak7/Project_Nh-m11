@@ -304,6 +304,12 @@ HK1 2025-2026,INT1001,Nhập môn lập trình,3,đại cương,Giữa kỳ,30,7
 HK1 2025-2026,INT1001,Nhập môn lập trình,3,đại cương,Cuối kỳ,60,8
 ```
 
+### 7.1. API lưu batch import (v1.1 / PB-26)
+
+`POST /api/v1/import/grades` yêu cầu access token và nhận `{ "rows": [...] }`. Mỗi dòng dùng tám cột nghiệp vụ của mẫu CSV, kèm `row` để báo lỗi theo dòng. Để tạo học kỳ mới, gửi thêm `semester_academic_year`, `semester_start_date` và `semester_end_date` dạng ISO (`YYYY-MM-DD`); nếu học kỳ đã tồn tại, các metadata này có thể bỏ qua hoặc gửi đúng với dữ liệu hiện có.
+
+Backend giới hạn 1.000 dòng, kiểm tra lại dữ liệu và owner từ token, tổng trọng số theo môn phải bằng 100%, và chỉ commit toàn bộ batch khi hợp lệ. Thành phần trùng với dữ liệu hiện có hoặc lặp trong batch bị từ chối; không ghi đè điểm. Lỗi trả `IMPORT_INVALID_ROWS` cùng `error.details` có `row`, `field`, `reason`; không có bản ghi nào được lưu. Export tiếp tục được tạo ở FE theo BR-24.
+
 | Cột | Ý nghĩa |
 |---|---|
 | `semester_name` | Tên học kỳ |
