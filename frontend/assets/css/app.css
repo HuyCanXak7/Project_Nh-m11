@@ -1353,28 +1353,139 @@ body.app-body {
     }
 }
 
-/* ===== BẢN IN A4 CHUẨN (PB-28) ===== */
+/* ===== BẢN IN A4 CHUẨN (PB-28 · T0694E7) ===== */
+.print-only {
+    display: none !important;
+}
+
+@page {
+    size: A4 portrait;
+    margin: 12mm 10mm;
+}
+
 @media print {
+    body.app-page,
     body.app-body {
-        background: #fff !important;
-        padding: 0 !important;
-        color: #000 !important;
-    }
-    .bg-decoration, .app-navbar, .mobile-nav, .app-actions, .filter-bar, .no-print {
-        display: none !important;
-    }
-    .app-wrapper {
-        max-width: 100% !important;
+        display: block !important;
+        min-height: auto !important;
+        height: auto !important;
+        overflow: visible !important;
+        background: #FFFFFF !important;
         padding: 0 !important;
         margin: 0 !important;
+        color: #000000 !important;
+        font-size: 10.5pt !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
+
+    .bg-decoration,
+    .dash-bg,
+    .sidebar,
+    .sidebar-overlay,
+    .dash-header,
+    .app-navbar,
+    .mobile-nav,
+    .app-actions,
+    .filter-bar,
+    .no-print,
+    button,
+    .btn {
+        display: none !important;
+    }
+
+    .dash,
+    .app-wrapper,
     .app-card {
+        display: block !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        min-height: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
         box-shadow: none !important;
         border: none !important;
-        padding: 0 !important;
     }
+
     .print-only {
         display: block !important;
     }
+
+    .print-only.print-signature {
+        display: flex !important;
+        justify-content: space-between !important;
+        text-align: center !important;
+        margin-top: 28px !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .print-signature__col {
+        width: 240px;
+    }
+
+    .stats {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        border: 1px solid #000000 !important;
+        margin-bottom: 16px !important;
+        page-break-inside: avoid !important;
+    }
+
+    .stat-card,
+    .stat-card--navy,
+    .stat-card--mint {
+        background: #FFFFFF !important;
+        color: #000000 !important;
+        border-right: 1px solid #000000 !important;
+        min-height: auto !important;
+        padding: 10px 12px !important;
+    }
+
+    .stat-card:last-child {
+        border-right: none !important;
+    }
+
+    .stat-card__label,
+    .stat-card__value,
+    .stat-card__note {
+        color: #000000 !important;
+    }
+
+    .stat-card__value {
+        font-size: 18pt !important;
+    }
+
+    .transcript-sem-card {
+        border: 1px solid #000000 !important;
+        margin-bottom: 16px !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .table-wrap {
+        overflow: visible !important;
+        border: none !important;
+    }
+
+    .app-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        table-layout: auto !important;
+    }
+
+    .app-table th,
+    .app-table td {
+        white-space: normal !important;
+        word-break: break-word !important;
+        padding: 6px 8px !important;
+        font-size: 9.5pt !important;
+        border: 1px solid #64748B !important;
+        color: #000000 !important;
+    }
+
+    .app-table tr {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
 }
-.print-only { display: none; }
