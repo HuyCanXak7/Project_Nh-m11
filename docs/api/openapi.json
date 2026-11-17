@@ -3,7 +3,7 @@
   "info": {
     "title": "Nhóm 11 – Academic Tracker API",
     "version": "1.0.0",
-    "description": "Hợp đồng OpenAPI **dự thảo v1** cho PB-41, đối chiếu với SRS Nhóm 11 ngày 06/11/2026 và README.md. Phạm vi: Auth, Semester, Course, Grade, Goal. Các endpoint thống kê, tính điểm cần đạt, import hàng loạt, Admin và GET /grade-scale thuộc **v1.1 (PB-51)**, không xuất hiện ở v1. What-if và Export xử lý tại FE, không có endpoint. Mọi API phải kiểm tra quyền sở hữu dữ liệu người dùng. Phản hồi thống nhất gồm success, statusCode, message, data, error, timestamp, path. Lưu ý: các đường dẫn, tên trường và cấu trúc payload cụ thể chưa được tài liệu nguồn chốt hoàn toàn; đây là thiết kế đề xuất để FE/BE thống nhất, chưa phải Swagger sinh từ backend đang chạy.",
+    "description": "Hợp đồng OpenAPI dự thảo v1 đối chiếu SRS, README và Product Backlog. Bao gồm endpoint import hàng loạt PB-26 đã triển khai. Admin nghiệp vụ, thống kê, điểm cần đạt và GET /grade-scale chưa triển khai. What-if và Export xử lý tại frontend. Mọi API phải kiểm tra quyền sở hữu dữ liệu. Response gồm success, statusCode, message, data, error, timestamp, path. Payload cụ thể cần được đối chiếu FE/BE.",
     "contact": {
       "name": "Nhóm 11"
     }
@@ -34,6 +34,10 @@
     {
       "name": "Goal",
       "description": "Mục tiêu GPA duy nhất (PB-22)."
+    },
+    {
+      "name": "Import",
+      "description": "Lưu hàng loạt dữ liệu điểm sau bước xem trước (PB-26)."
     }
   ],
   "paths": {
@@ -1414,6 +1418,131 @@
           },
           "500": {
             "$ref": "#/components/responses/HTTP500"
+          }
+        }
+      }
+    },
+    "/import/grades": {
+      "post": {
+        "tags": [
+          "Import"
+        ],
+        "summary": "Lưu hàng loạt dữ liệu điểm",
+        "operationId": "importGrades",
+        "description": "Backend kiểm tra lại và lưu batch nguyên tử. Batch có lỗi bị từ chối toàn bộ. Học kỳ mới cần năm học, ngày bắt đầu và ngày kết thúc. Thành phần điểm hiện có không bị ghi đè.",
+        "x-backlog-id": "PB-26",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "rows": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "row": {
+                          "type": "integer",
+                          "minimum": 2
+                        },
+                        "semester_name": {
+                          "type": "string"
+                        },
+                        "semester_academic_year": {
+                          "type": "string",
+                          "description": "Bắt buộc khi tạo học kỳ mới."
+                        },
+                        "semester_start_date": {
+                          "type": "string",
+                          "description": "Bắt buộc khi tạo học kỳ mới.",
+                          "format": "date"
+                        },
+                        "semester_end_date": {
+                          "type": "string",
+                          "description": "Bắt buộc khi tạo học kỳ mới.",
+                          "format": "date"
+                        },
+                        "course_code": {
+                          "type": "string"
+                        },
+                        "course_name": {
+                          "type": "string"
+                        },
+                        "credits": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "category": {
+                          "type": "string",
+                          "enum": [
+                            "GENERAL",
+                            "FOUNDATION",
+                            "SPECIALIZED"
+                          ]
+                        },
+                        "component_name": {
+                          "type": "string"
+                        },
+                        "weight_percent": {
+                          "exclusiveMinimum": 0,
+                          "type": "number",
+                          "maximum": 100
+                        },
+                        "score": {
+                          "minimum": 0,
+                          "type": "number",
+                          "maximum": 10
+                        }
+                      },
+                      "required": [
+                        "row",
+                        "semester_name",
+                        "course_code",
+                        "course_name",
+                        "credits",
+                        "category",
+                        "component_name",
+                        "weight_percent",
+                        "score"
+                      ]
+                    },
+                    "maxItems": 1000,
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "rows"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Import thành công"
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ hoặc batch vượt 1.000 dòng; lỗi chi tiết gắn với số dòng."
+          },
+          "401": {
+            "description": "Chưa xác thực"
+          },
+          "500": {
+            "description": "Lỗi máy chủ"
           }
         }
       }
@@ -3322,7 +3451,6 @@
       "/grade-scale",
       "/stats/*",
       "/goals/required-score",
-      "/import/grades",
       "/admin/*"
     ],
     "frontendOnly": [

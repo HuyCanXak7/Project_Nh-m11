@@ -14,6 +14,7 @@ from app.models import AuthSession, Course, GradeComponent, GradeScale, Semester
 from app.routers.auth import router as auth_router
 from app.routers.courses import router as course_router
 from app.routers.gpa import router as gpa_router
+from app.routers.grade_import import router as grade_import_router
 from app.routers.grades import router as grade_router
 from app.routers.grade_scale import router as grade_scale_router
 from app.routers.semesters import router as semester_router
@@ -39,11 +40,12 @@ async def handle_http_error(request: Request, error: HTTPException):
     detail = error.detail if isinstance(error.detail, dict) else {}
     message = detail.get("message", str(error.detail))
     code = detail.get("code", "HTTP_ERROR")
+    details = detail.get("details", [])
     return api_response(
         request,
         error.status_code,
         message,
-        error={"code": code, "details": []},
+        error={"code": code, "details": details},
         headers=error.headers,
     )
 
@@ -80,3 +82,4 @@ app.include_router(course_router)
 app.include_router(grade_router)
 app.include_router(grade_scale_router)
 app.include_router(gpa_router)
+app.include_router(grade_import_router)
