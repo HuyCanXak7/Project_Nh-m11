@@ -282,3 +282,67 @@ body.app-page {
     -webkit-text-fill-color: var(--e-ink);
     transition: background-color 9999s ease-out 0s;
 }
+
+/* =========================================================
+ * Tách khối rõ hơn: mỗi khối là một thẻ trắng viền mực 1.5px,
+ * cách nhau 20px trên nền giấy (Tổng quan, Môn học, Thống kê)
+ * ========================================================= */
+body.app-page { --e-rule: 1.5px; }
+
+.app-page .dash > :not(.dash-header) {
+    margin-top: 20px;
+    background: #FFFFFF;
+    border: var(--e-rule) solid var(--e-ink) !important;
+}
+.app-page .dash > .dash-header + * { margin-top: 24px; }
+.app-page .dash > :last-child { margin-bottom: 32px; }
+
+/* Môn học: tab học kỳ dính liền dải số liệu; thanh tìm kiếm dính liền bảng */
+.app-page .dash > .course-sem-strip,
+.app-page .dash > .course-table-card { margin-top: 0; border-top: none !important; }
+
+/* Đường chia bên trong khối: màu mực, đậm hơn */
+.app-page .stat-card,
+.app-page .dash-row > .card,
+.app-page .stats-row > .card,
+.app-page .course-sem-tab,
+.app-page .course-sem-strip__cell { border-right: 1px solid var(--e-ink) !important; }
+.app-page .stat-card:last-child,
+.app-page .dash-row > .card:last-child,
+.app-page .stats-row > .card:last-child,
+.app-page .course-sem-strip__cell:last-child { border-right: none !important; }
+.app-page .course-sem-tabs { border-bottom: 1px solid var(--e-ink) !important; }
+.app-page .course-toolbar { border-bottom: 1px solid var(--e-ink) !important; }
+.app-page .course-toolbar__search { border-right: 1px solid var(--e-ink) !important; }
+.app-page .dash-row,
+.app-page .stats-row,
+.app-page .stats,
+.app-page .course-sem-strip { border-bottom-color: var(--e-ink) !important; }
+
+/* Nhãn nhỏ đậm hơn một chút để dễ đọc trên nền trắng */
+.app-page .stat-card__label,
+.app-page .course-sem-strip__label,
+.app-page .card__meta { color: #4F5878; }
+
+/* Nút "+ Học kỳ mới" ở trang Môn học: nút đặc màu bạc hà, dễ thấy */
+.app-page .course-sem-tab--add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--e-mint) !important;
+    color: var(--e-ink) !important;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    border-right: none !important;
+    transition: background .15s ease, color .15s ease;
+}
+.app-page .course-sem-tab--add:hover {
+    background: var(--e-ink) !important;
+    color: var(--e-mint) !important;
+}
+.app-page .stat-card--navy .stat-card__label,
+.app-page .hero-gpa-card__kicker { color: rgba(244, 247, 251, .72); }
+.app-page .stat-card--mint .stat-card__label,
+.app-page .course-sem-strip__cell--gpa .course-sem-strip__label { color: rgba(15, 27, 61, .72); }

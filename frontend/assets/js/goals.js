@@ -6,9 +6,38 @@
 let simulationCourses = [];
 
 document.addEventListener('DOMContentLoaded', () => {
-  renderGoalSection();
-  initSimulation();
+  initGoalsPage();
 });
+
+function initGoalsPage() {
+  const tbody = document.getElementById('whatIfTableBody');
+  if (tbody) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align: center; padding: 24px; color: #64748B;">
+          Đang tải dữ liệu mục tiêu GPA và bảng mô phỏng...
+        </td>
+      </tr>
+    `;
+  }
+
+  try {
+    renderGoalSection();
+    initSimulation();
+  } catch (err) {
+    console.error('Lỗi tải trang Mục tiêu GPA:', err);
+    if (tbody) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" style="text-align: center; padding: 28px; background: #FEF2F2; color: #991B1B;">
+            <div style="font-weight: 700; margin-bottom: 8px;">Không thể tải dữ liệu mục tiêu GPA. Vui lòng thử lại.</div>
+            <button type="button" onclick="initGoalsPage()" class="btn btn-primary btn-sm">Thử tải lại</button>
+          </td>
+        </tr>
+      `;
+    }
+  }
+}
 
 function renderGoalSection() {
   const goal = StorageService.getGoal();

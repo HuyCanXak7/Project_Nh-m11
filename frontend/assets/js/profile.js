@@ -151,24 +151,80 @@ function handleSaveProfile(e) {
   showToast('Cập nhật thông tin hồ sơ sinh viên thành công!');
 }
 
-function handleChangePassword(e) {
+function setPasswordStatus(message, isError = false) {
+  const box = document.getElementById('changePasswordStatus');
+  if (!box) return;
+  if (!message) {
+    box.style.display = 'none';
+    box.textContent = '';
+    return;
+  }
+  box.style.display = 'block';
+  box.style.background = isError ? '#FEF2F2' : '#ECFDF5';
+  box.style.border = isError ? '1px solid #FCA5A5' : '1px solid #6EE7B7';
+  box.style.color = isError ? '#991B1B' : '#065F46';
+  box.textContent = message;
+}
+
+async function handleChangePassword(e) {
   e.preventDefault();
   const currentPass = document.getElementById('currentPasswordInput').value;
   const newPass = document.getElementById('newPasswordInput').value;
   const confirmPass = document.getElementById('confirmPasswordInput').value;
+  const btn = document.getElementById('btnChangePassword');
 
+  setPasswordStatus('');
+
+  if (!currentPass) {
+    const msg = 'Vui lòng nhập mật khẩu hiện tại!';
+    setPasswordStatus(msg, true);
+    showToast(msg, true);
+    return;
+  }
   if (newPass.length < 8) {
-    showToast('Mật khẩu mới phải có ít nhất 8 ký tự!', true);
+    const msg = 'Mật khẩu mới phải có ít nhất 8 ký tự!';
+    setPasswordStatus(msg, true);
+    showToast(msg, true);
+    return;
+  }
+  if (newPass === currentPass) {
+    const msg = 'Mật khẩu mới không được trùng với mật khẩu hiện tại!';
+    setPasswordStatus(msg, true);
+    showToast(msg, true);
     return;
   }
   if (newPass !== confirmPass) {
-    showToast('Xác nhận mật khẩu mới không khớp!', true);
+    const msg = 'Xác nhận mật khẩu mới không khớp!';
+    setPasswordStatus(msg, true);
+    showToast(msg, true);
     return;
   }
 
-  document.getElementById('currentPasswordInput').value = '';
-  document.getElementById('newPasswordInput').value = '';
-  document.getElementById('confirmPasswordInput').value = '';
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Đang xử lý...';
+  }
 
-  showToast('Đổi mật khẩu thành công! Các phiên đăng nhập cũ đã được thu hồi an toàn.');
+  try {
+    if (typeof authApi !== 'undefined' && typeof authApi.changePassword === 'function') {
+      await authApi.changePassword({ currentPassword: currentPass, newPassword: newPass });
+    }
+
+    document.getElementById('currentPasswordInput').value = '';
+    document.getElementById('newPasswordInput').value = '';
+    document.getElementById('confirmPasswordInput').value = '';
+
+    const okMsg = 'Đổi mật khẩu thành công! Các refresh token cũ đã được thu hồi.';
+    setPasswordStatus(okMsg, false);
+    showToast(okMsg);
+  } catch (err) {
+    const errMsg = err?.message || 'Không thể đổi mật khẩu. Vui lòng thử lại!';
+    setPasswordStatus(errMsg, true);
+    showToast(errMsg, true);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Đổi mật khẩu';
+    }
+  }
 }
