@@ -610,20 +610,26 @@ const CSVHelper = {
     const courses = StorageService.getCourses();
     const semesters = StorageService.getSemesters();
     const student = StorageService.getStudent();
+    const sessionUser = (typeof getSession === 'function' ? getSession()?.user : null);
+    const studentName = student.name || sessionUser?.fullName || 'Sinh viên';
     const cum = GradeCalculator.calculateCumulativeGPA(courses);
 
-    // Tính GPA cho từng học kỳ
+    // Tính GPA cho từng học kỳ và GPA tích lũy lũy tiến
     const semGpaMap = {};
+    const cumUpToSemMap = {};
+    const runningCourses = [];
     semesters.forEach(sem => {
       const semCourses = courses.filter(c => c.semester_id === sem.id);
+      runningCourses.push(...semCourses);
       semGpaMap[sem.id] = GradeCalculator.calculateSemesterGPA(semCourses);
+      cumUpToSemMap[sem.id] = GradeCalculator.calculateCumulativeGPA(runningCourses);
     });
 
     const rows = [];
     rows.push(['BẢNG ĐIỂM TỔNG HỢP CÁ NHÂN - HỆ THỐNG QUẢN LÝ CHỈ SỐ HỌC TẬP N11']);
     rows.push([
       'Họ và tên:',
-      this.sanitizeFormula(student.name || 'Sinh viên'),
+      this.sanitizeFormula(studentName),
       'MSSV:',
       this.sanitizeFormula(student.student_id || 'Chưa cập nhật'),
       'Lớp:',
@@ -645,7 +651,7 @@ const CSVHelper = {
     ]);
     rows.push([]);
 
-    // Tiêu đề cột chi tiết
+    // Tiêu đề cột chi tiết (PB-27 / T0694E6)
     rows.push([
       'Học kỳ',
       'Năm học',
@@ -658,6 +664,7 @@ const CSVHelper = {
       'Điểm chữ',
       'Điểm hệ 4',
       'GPA Học kỳ (Hệ 4)',
+      'GPA Tích lũy (Hệ 4)',
       'Kết quả'
     ]);
 
@@ -665,6 +672,7 @@ const CSVHelper = {
     semesters.forEach(sem => {
       const semCourses = courses.filter(c => c.semester_id === sem.id);
       const semCalc = semGpaMap[sem.id] || { formattedGPA: '0.00', formattedAvg10: '0.00', passedCredits: 0, totalCredits: 0 };
+      const cumAtSem = cumUpToSemMap[sem.id] || cum;
 
       semCourses.forEach(c => {
         const calc = GradeCalculator.calculateCourseFinalScore(c.components);
@@ -685,6 +693,7 @@ const CSVHelper = {
           calc.isComplete ? grade.letter : '--',
           calc.isComplete ? Number(grade.scale4) : '--',
           semCalc.formattedGPA,
+          cumAtSem.formattedGPA,
           calc.isComplete ? grade.status : 'Chưa hoàn thành'
         ]);
       });
@@ -702,6 +711,7 @@ const CSVHelper = {
           '',
           '',
           semCalc.formattedGPA,
+          cumAtSem.formattedGPA,
           ''
         ]);
       }
@@ -728,6 +738,7 @@ const CSVHelper = {
         calc.isComplete ? grade.letter : '--',
         calc.isComplete ? Number(grade.scale4) : '--',
         '--',
+        cum.formattedGPA,
         calc.isComplete ? grade.status : 'Chưa hoàn thành'
       ]);
     });
@@ -745,14 +756,15 @@ const CSVHelper = {
       'Xếp loại học lực:',
       cum.rank,
       '',
+      '',
       ''
     ]);
 
-    return { rows, student, coursesCount: courses.length };
+    return { rows, student: { ...student, name: studentName }, coursesCount: courses.length };
   },
 
   /**
-   * Xuất bảng điểm ra tệp CSV (PB-27 / [T0694E6])
+   * Xuất bảng điểm ra tệp CSV tại FE (PB-27 / [T0694E6])
    */
   exportTranscriptCSV() {
     const { rows, student, coursesCount } = this.buildTranscriptExportData();
@@ -763,7 +775,7 @@ const CSVHelper = {
       return false;
     }
 
-    const csvLines = ['sep=,'];
+    const csvLines = [];
     rows.forEach(row => {
       if (!row || row.length === 0) {
         csvLines.push('');
@@ -773,7 +785,7 @@ const CSVHelper = {
     });
 
     const safeFileId = (student.student_id || student.name || 'SinhVien').replace(/[^a-zA-Z0-9_-]/g, '_');
-    const blob = new Blob(['\uFEFF' + csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob(['\uFEFF' + csvLines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
     this._triggerDownload(blob, `Bang_diem_${safeFileId}.csv`);
 
     if (typeof showToast === 'function') {
