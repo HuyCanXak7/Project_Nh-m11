@@ -67,7 +67,7 @@ function renderSemesters() {
             </div>
           </div>
 
-          <div style="display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 10px 14px; border: 1.5px solid rgba(59, 130, 246, 0.2); border-radius: 16px; margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; background: var(--e-card); padding: 10px 14px; border: 1.5px solid rgba(59, 130, 246, 0.2); border-radius: 16px; margin-bottom: 16px;">
             <span style="font-size: 13px; font-weight: 600; color: var(--text-gray);">GPA Học Kỳ (Hệ 4):</span>
             <strong style="font-size: 16px; color: var(--primary); font-weight: 800;">${semGpaData.formattedGPA}</strong>
           </div>

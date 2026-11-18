@@ -10,6 +10,8 @@ body.app-page,
     /* Bảng màu E */
     --e-ink: #0F1B3D;
     --e-paper: #F4F7FB;
+    --e-card: #FFFFFF;
+    --e-card-alt: #F8FAFC;
     --e-mint: #3EE6A8;
     --e-coral: #FF5A5F;
     --e-muted: #66708A;
@@ -291,7 +293,7 @@ body.app-page { --e-rule: 1.5px; }
 
 .app-page .dash > :not(.dash-header) {
     margin-top: 20px;
-    background: #FFFFFF;
+    background: var(--e-card);
     border: var(--e-rule) solid var(--e-ink) !important;
 }
 .app-page .dash > .dash-header + * { margin-top: 24px; }
@@ -346,3 +348,88 @@ body.app-page { --e-rule: 1.5px; }
 .app-page .hero-gpa-card__kicker { color: rgba(244, 247, 251, .72); }
 .app-page .stat-card--mint .stat-card__label,
 .app-page .course-sem-strip__cell--gpa .course-sem-strip__label { color: rgba(15, 27, 61, .72); }
+/* =========================================================
+ * Chế độ tối: đảo bảng màu E (mực sáng trên nền tối).
+ * Chỉ áp dụng trên màn hình — bản in luôn dùng bảng màu sáng.
+ * ========================================================= */
+@media screen {
+    html.theme-dark body.app-page {
+        --e-ink: #E2E8F0;
+        --e-paper: #0B1120;
+        --e-card: #111827;
+        --e-card-alt: #162033;
+        --e-muted: #94A3B8;
+        --e-soft: #334155;
+        --e-tint: #1E293B;
+        --e-line: #334155;
+        --e-navy-light: #CBD5E1;
+        --primary-hover: #CBD5E1;
+    }
+
+    /* Đường kẻ màu mực -> xám tối, đỡ chói */
+    html.theme-dark .app-page .sidebar,
+    html.theme-dark .app-page .sidebar__logo,
+    html.theme-dark .app-page .dash-header,
+    html.theme-dark .app-page .dash > :not(.dash-header),
+    html.theme-dark .app-page .app-card,
+    html.theme-dark .app-page .semester-card,
+    html.theme-dark .app-page .stat-card,
+    html.theme-dark .app-page .dash-row > .card,
+    html.theme-dark .app-page .stats-row > .card,
+    html.theme-dark .app-page .course-sem-tab,
+    html.theme-dark .app-page .course-sem-strip__cell,
+    html.theme-dark .app-page .course-sem-tabs,
+    html.theme-dark .app-page .course-toolbar,
+    html.theme-dark .app-page .course-toolbar__search,
+    html.theme-dark .app-page .dash-row,
+    html.theme-dark .app-page .stats-row,
+    html.theme-dark .app-page .stats,
+    html.theme-dark .app-page .course-sem-strip,
+    html.theme-dark .app-page .topbar-user-wrap,
+    html.theme-dark .app-page .topbar-icon-btn {
+        border-color: var(--e-line) !important;
+    }
+
+    /* Menu trên: hover nền tối, chữ sáng (trước đây nền trắng + chữ trắng) */
+    html.theme-dark .app-page .nav-item:hover { background: #1E293B; color: #F8FAFC; }
+    html.theme-dark .app-page .nav-item:hover .nav-item__num { color: #F8FAFC; }
+
+    /* Nút biểu tượng trên topbar */
+    html.theme-dark .app-page .topbar-icon-btn { background: #111827; color: #CBD5E1 !important; }
+    html.theme-dark .app-page .topbar-icon-btn:hover { background: #1E293B; color: #F8FAFC !important; }
+
+    /* Nút "+ Học kỳ mới": giữ nút bạc hà chữ tối */
+    html.theme-dark .app-page .course-sem-tab--add { background: var(--e-mint) !important; color: #0F1B3D !important; }
+    html.theme-dark .app-page .course-sem-tab--add:hover { background: #1E293B !important; color: var(--e-mint) !important; }
+
+    /* Nhãn nhỏ */
+    html.theme-dark .app-page .stat-card__label,
+    html.theme-dark .app-page .course-sem-strip__label,
+    html.theme-dark .app-page .card__meta { color: #94A3B8; }
+
+    /* Ô GPA lớn: nền navy cố định nên chữ luôn sáng */
+    html.theme-dark .app-page .hero-gpa-card__meta-line,
+    html.theme-dark .app-page .hero-gpa-card__marker { color: #F8FAFC; }
+
+    /* Chữ tối trên nền bạc hà */
+    html.theme-dark .app-page .lesson__tag--live { color: #0F1B3D; }
+
+    /* Màu cứng còn sót trong app.css / statistics.css */
+    html.theme-dark .app-page .course-sem-tab { color: #CBD5E1; }
+    html.theme-dark .app-page .course-status-tab.is-active,
+    html.theme-dark .app-page .course-state--pass { color: #F8FAFC; }
+    html.theme-dark .app-page .credit-stacked-bar { background: #1E293B; }
+
+    /* Nút đặc màu mực (In A4) và ảnh đại diện: nền tối, chữ sáng */
+    html.theme-dark .app-page .btn-figma-pink { background: var(--e-mint); border-color: var(--e-mint); color: #0F1B3D; }
+    html.theme-dark .app-page .btn-figma-pink:hover { background: #2BC58D; }
+    html.theme-dark .app-page .profile-avatar-circle { background: #1E293B; }
+
+    /* Ô nhập được trình duyệt tự điền */
+    html.theme-dark .app-page input:-webkit-autofill,
+    html.theme-dark .app-page input:-webkit-autofill:hover,
+    html.theme-dark .app-page input:-webkit-autofill:focus {
+        -webkit-box-shadow: 0 0 0 1000px #0F172A inset;
+        box-shadow: 0 0 0 1000px #0F172A inset;
+    }
+}

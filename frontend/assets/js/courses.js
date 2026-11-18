@@ -364,7 +364,7 @@ function renderCourses() {
     let letterHtml = '<span class="score-dash">—</span>';
     if (scoreCalc.isComplete) {
       let sqColor = '#10B981'; // A, A+
-      if (grade.letter === 'B+' || grade.letter === 'B') sqColor = '#0F1F38';
+      if (grade.letter === 'B+' || grade.letter === 'B') sqColor = 'var(--e-ink)';
       else if (grade.letter !== 'A+' && grade.letter !== 'A') sqColor = '#EF4444';
       letterHtml = `
         <span class="e-grade-cell" title="Hệ 4: ${grade.scale4.toFixed(1)}">
@@ -391,7 +391,7 @@ function renderCourses() {
     const rowHighlight = !scoreCalc.isComplete ? 'course-row--inprogress' : '';
     const totalScoreColor = scoreCalc.isComplete && scoreCalc.finalScore10 < 7.0
       ? 'color: #EF4444;'
-      : 'color: #0F1F38;';
+      : 'color: var(--e-ink);';
 
     return `
       <tr class="${rowHighlight}">
@@ -403,7 +403,7 @@ function renderCourses() {
           </div>
         </td>
         <td style="color: #64748B; font-size: 12px;">${escapeHtml(c.category || 'Đại cương')}</td>
-        <td style="text-align: center; font-weight: 700; color: #0F1F38;">${c.credits}</td>
+        <td style="text-align: center; font-weight: 700; color: var(--e-ink);">${c.credits}</td>
         <td style="text-align: center; cursor: pointer;" onclick="openScoreModal('${c.id}')">${fmtCompScore(0)}</td>
         <td style="text-align: center; cursor: pointer;" onclick="openScoreModal('${c.id}')">${fmtCompScore(1)}</td>
         <td style="text-align: center; cursor: pointer;" onclick="openScoreModal('${c.id}')">${fmtCompScore(2)}</td>
