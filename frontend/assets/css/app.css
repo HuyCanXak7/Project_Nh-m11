@@ -1257,6 +1257,28 @@ body.app-body {
     color: #64748B;
 }
 
+.course-cat-cell {
+    color: #64748B;
+    font-size: 12px;
+}
+
+.course-credits-cell {
+    text-align: center;
+    font-weight: 700;
+    color: #0F1F38;
+}
+
+.course-total-cell {
+    text-align: center;
+    font-weight: 800;
+    font-size: 13.5px;
+    color: #0F1F38;
+}
+
+.course-total-cell--low {
+    color: #EF4444;
+}
+
 .course-name-wrap {
     display: flex;
     align-items: center;

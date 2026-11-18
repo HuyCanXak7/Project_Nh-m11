@@ -794,12 +794,20 @@ html.theme-dark .e-html-chart__bar-val {
 }
 
 html.theme-dark .nav-item {
-    color: #94A3B8;
+    color: #E2E8F0 !important;
+}
+
+html.theme-dark .nav-item__num {
+    color: #94A3B8 !important;
 }
 
 html.theme-dark .nav-item:hover,
 html.theme-dark .nav-item.is-active {
-    color: #F8FAFC;
+    color: #FFFFFF !important;
+}
+
+html.theme-dark .nav-item.is-active .nav-item__num {
+    color: #3EE09B !important;
 }
 
 html.theme-dark .nav-item.is-active {
@@ -816,14 +824,21 @@ html.theme-dark .stat-card__note,
 html.theme-dark .course-sem-strip__label,
 html.theme-dark .course-sem-strip__sub,
 html.theme-dark .course-code-cell,
+html.theme-dark .course-cat-cell,
 html.theme-dark .e-html-chart__xlabel,
 html.theme-dark .e-html-chart__ylabel {
-    color: #94A3B8 !important;
+    color: #CBD5E1 !important;
+}
+
+html.theme-dark .topbar-icon-btn {
+    background: transparent !important;
+    border-color: #334155 !important;
+    color: #E2E8F0 !important;
 }
 
 html.theme-dark .topbar-icon-btn:hover {
-    background: #1E293B;
-    color: #F8FAFC !important;
+    background: #1E293B !important;
+    color: #FFFFFF !important;
 }
 
 html.theme-dark .dash,
@@ -901,7 +916,52 @@ html.theme-dark .empty-state {
 
 html.theme-dark .app-table td {
     border-bottom-color: #1E293B !important;
-    color: #E2E8F0;
+    color: #F1F5F9;
+}
+
+html.theme-dark .course-credits-cell,
+html.theme-dark .course-total-cell,
+html.theme-dark .course-sem-tab,
+html.theme-dark .course-status-tab.is-active,
+html.theme-dark .modal-label,
+html.theme-dark .empty-state__title,
+html.theme-dark .semester-card__name,
+html.theme-dark .semester-card__stat-val,
+html.theme-dark .app-header__title,
+html.theme-dark .transcript-sem-card h3 {
+    color: #F8FAFC !important;
+}
+
+html.theme-dark .course-total-cell--low {
+    color: #F87171 !important;
+}
+
+html.theme-dark .course-sem-tab--add,
+html.theme-dark .course-state--pass {
+    color: #3EE09B !important;
+}
+
+html.theme-dark .course-state--prog {
+    color: #CBD5E1 !important;
+}
+
+html.theme-dark .course-status-tab {
+    color: #94A3B8 !important;
+}
+
+html.theme-dark .course-status-tab.is-active {
+    border-bottom-color: #3EE09B !important;
+}
+
+html.theme-dark .empty-state__desc,
+html.theme-dark .semester-card__dates,
+html.theme-dark .semester-card__stat-label,
+html.theme-dark .lesson__room,
+html.theme-dark .lesson__tag,
+html.theme-dark .activity__time,
+html.theme-dark .highlight__sub,
+html.theme-dark .credit-row__ratio {
+    color: #CBD5E1 !important;
 }
 
 html.theme-dark .app-table tbody tr:hover {

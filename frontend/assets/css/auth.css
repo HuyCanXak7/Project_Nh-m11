@@ -434,3 +434,103 @@ body.page-auth {
 @media (prefers-reduced-motion: reduce) {
     .auth-wrap, .auth-side > *, .auth-leaving .auth-wrap, .auth-leaving .auth-side > * { animation: none; }
 }
+
+/* ===== Dark Mode cho Đăng nhập, Đăng ký, Quên mật khẩu (PB-35 / T0694F3) ===== */
+html.theme-dark body.page-auth {
+    background: #0B1120;
+    color: #F8FAFC;
+}
+
+html.theme-dark .auth-main {
+    background: #0F172A;
+    color: #F8FAFC;
+}
+
+html.theme-dark .auth-top,
+html.theme-dark .auth-sub,
+html.theme-dark .auth-foot,
+html.theme-dark .auth-note,
+html.theme-dark .auth-form__label span {
+    color: #CBD5E1;
+}
+
+html.theme-dark .auth-kicker {
+    color: #3EE09B;
+}
+
+html.theme-dark .auth-title,
+html.theme-dark .auth-form__label,
+html.theme-dark .auth-check,
+html.theme-dark .auth-check a,
+html.theme-dark .auth-note b {
+    color: #F8FAFC;
+}
+
+html.theme-dark .auth-btn-outline {
+    color: #F8FAFC;
+    border-color: #475569;
+    background: #1E293B;
+}
+
+html.theme-dark .auth-btn-outline:hover {
+    border-color: #3EE09B;
+    background: #273549;
+}
+
+html.theme-dark .input-group {
+    background: #1E293B;
+    border-color: #475569;
+}
+
+html.theme-dark .input-group:focus-within {
+    border-color: #3EE09B;
+}
+
+html.theme-dark .input-group__input {
+    color: #F8FAFC;
+}
+
+html.theme-dark .input-group__input::placeholder {
+    color: #94A3B8;
+}
+
+html.theme-dark .input-group__icon,
+html.theme-dark .input-group__toggle {
+    color: #94A3B8;
+}
+
+html.theme-dark .input-group__toggle:hover {
+    color: #F8FAFC;
+}
+
+html.theme-dark .auth-check input[type="checkbox"] {
+    background: #1E293B;
+    border-color: #64748B;
+}
+
+html.theme-dark .auth-check input[type="checkbox"]:checked {
+    background: #3EE09B;
+    border-color: #3EE09B;
+}
+
+html.theme-dark .auth-check input[type="checkbox"]::after {
+    border-color: #0F1F38;
+}
+
+html.theme-dark .auth-form__submit {
+    background: #3EE09B;
+    color: #0F1F38;
+}
+
+html.theme-dark .auth-form__submit:hover {
+    background: #2FD497;
+}
+
+html.theme-dark .auth-note {
+    border-top-color: #334155;
+}
+
+html.theme-dark .auth-alert {
+    background: rgba(62, 224, 155, 0.16);
+    color: #F8FAFC;
+}

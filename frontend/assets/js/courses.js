@@ -389,9 +389,9 @@ function renderCourses() {
     }
 
     const rowHighlight = !scoreCalc.isComplete ? 'course-row--inprogress' : '';
-    const totalScoreColor = scoreCalc.isComplete && scoreCalc.finalScore10 < 7.0
-      ? 'color: #EF4444;'
-      : 'color: var(--e-ink);';
+    const totalScoreClass = scoreCalc.isComplete && scoreCalc.finalScore10 < 7.0
+      ? 'course-total-cell course-total-cell--low'
+      : 'course-total-cell';
 
     return `
       <tr class="${rowHighlight}">
@@ -402,12 +402,12 @@ function renderCourses() {
             ${c.is_retake ? '<span class="badge badge-orange" style="font-size: 10px; padding: 2px 6px;">Học lại</span>' : ''}
           </div>
         </td>
-        <td style="color: #64748B; font-size: 12px;">${escapeHtml(c.category || 'Đại cương')}</td>
-        <td style="text-align: center; font-weight: 700; color: var(--e-ink);">${c.credits}</td>
+        <td class="course-cat-cell">${escapeHtml(c.category || 'Đại cương')}</td>
+        <td class="course-credits-cell">${c.credits}</td>
         <td style="text-align: center; cursor: pointer;" onclick="openScoreModal('${c.id}')">${fmtCompScore(0)}</td>
         <td style="text-align: center; cursor: pointer;" onclick="openScoreModal('${c.id}')">${fmtCompScore(1)}</td>
         <td style="text-align: center; cursor: pointer;" onclick="openScoreModal('${c.id}')">${fmtCompScore(2)}</td>
-        <td style="text-align: center; font-weight: 800; font-size: 13.5px; ${totalScoreColor}">
+        <td class="${totalScoreClass}">
           ${scoreCalc.isComplete ? scoreCalc.finalScore10.toFixed(1) : '<span class="score-dash">—</span>'}
         </td>
         <td>${letterHtml}</td>

@@ -39,15 +39,78 @@ function applyTheme(theme) {
     }
 }
 
+function playThemeTransitionAnimation(nextTheme, onSwitchMidpoint) {
+    if (typeof document === 'undefined' || !document.body) {
+        onSwitchMidpoint();
+        return;
+    }
+
+    document.getElementById('themeTransitionOverlay')?.remove();
+    document.documentElement.classList.add('theme-transitioning');
+
+    const overlay = document.createElement('div');
+    overlay.id = 'themeTransitionOverlay';
+    overlay.setAttribute('aria-hidden', 'true');
+
+    if (nextTheme === 'light') {
+        // Chuyển Tối -> Sáng: Mặt trời từ góc dưới-trái bay xéo lên góc trên-phải kéo màn đen qua
+        overlay.innerHTML = `
+            <div class="theme-curtain-dark"></div>
+            <div class="theme-sun-orb">
+                <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="4.5"/>
+                    <path d="M12 1.5v2.5M12 20v2.5M4.57 4.57l1.77 1.77M17.66 17.66l1.77 1.77M1.5 12H4M20 12h2.5M4.57 19.43l1.77-1.77M17.66 6.34l1.77-1.77"/>
+                </svg>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        setTimeout(onSwitchMidpoint, 220);
+        setTimeout(() => {
+            overlay.remove();
+            document.documentElement.classList.remove('theme-transitioning');
+        }, 980);
+    } else {
+        // Chuyển Sáng -> Tối: Màn sao từ trên rơi xuống dưới kèm hiệu ứng mờ chuyển mượt
+        const veil = document.createElement('div');
+        veil.className = 'theme-night-veil';
+        overlay.appendChild(veil);
+
+        const starCount = 34;
+        for (let i = 0; i < starCount; i++) {
+            const star = document.createElement('span');
+            const isStreak = i % 4 === 0;
+            star.className = isStreak ? 'theme-star theme-star--streak' : 'theme-star';
+            if (!isStreak) {
+                star.textContent = i % 3 === 0 ? '✦' : '★';
+                star.style.fontSize = `${10 + (i % 4) * 3}px`;
+            }
+            star.style.left = `${(i * 3.1 + (i % 5) * 2.7) % 98}%`;
+            star.style.setProperty('--delay', `${(i % 7) * 0.045}s`);
+            star.style.setProperty('--dur', `${0.68 + (i % 4) * 0.09}s`);
+            overlay.appendChild(star);
+        }
+
+        document.body.appendChild(overlay);
+        setTimeout(onSwitchMidpoint, 390);
+        setTimeout(() => {
+            overlay.remove();
+            document.documentElement.classList.remove('theme-transitioning');
+        }, 1020);
+    }
+}
+
 function toggleTheme() {
     const next = getSavedTheme() === 'dark' ? 'light' : 'dark';
     try {
         localStorage.setItem(THEME_STORAGE_KEY, next);
     } catch { /* ignore */ }
-    applyTheme(next);
-    if (typeof showToast === 'function') {
-        showToast(next === 'dark' ? 'Đã bật giao diện tối (Dark Mode)' : 'Đã chuyển sang giao diện sáng');
-    }
+
+    playThemeTransitionAnimation(next, () => {
+        applyTheme(next);
+        if (typeof showToast === 'function') {
+            showToast(next === 'dark' ? 'Đã bật giao diện tối (Dark Mode)' : 'Đã chuyển sang giao diện sáng');
+        }
+    });
 }
 
 applyTheme(getSavedTheme());
@@ -135,7 +198,6 @@ function upgradeSidebarFigma() {
 
     rightBox.innerHTML = `
         <span class="topbar-date">${formatTopbarDate()}</span>
-        <button type="button" class="topbar-icon-btn" id="themeToggleBtn" title="Bật giao diện tối (Dark Mode)" aria-label="Bật hoặc tắt giao diện tối" aria-pressed="false" onclick="toggleTheme()"></button>
         <button type="button" class="topbar-icon-btn" title="Tìm kiếm môn học" onclick="window.location.href='courses.html'">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7.5"/><line x1="20" y1="20" x2="16.2" y2="16.2"/></svg>
         </button>
@@ -144,6 +206,7 @@ function upgradeSidebarFigma() {
             <span class="topbar-icon-btn__dot"></span>
         </button>
         <div class="topbar-user-wrap" id="topbarUserWrap"></div>
+        <button type="button" class="theme-toggle-icon-btn" id="themeToggleBtn" title="Bật giao diện tối (Dark Mode)" aria-label="Bật hoặc tắt giao diện tối" aria-pressed="false" onclick="toggleTheme()"></button>
     `;
 
     const wrap = rightBox.querySelector('#topbarUserWrap');
