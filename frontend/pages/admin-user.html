@@ -98,7 +98,7 @@
                 <h1 class="dash-header__title">
                     <span>Tài khoản</span>
                     <span class="dash-header__slash">/</span>
-                    <span class="dash-header__sub-inline">Danh sách & tìm kiếm (chỉ ADMIN)</span>
+                    <span class="dash-header__sub-inline">Danh sách, tìm kiếm & khóa/mở (chỉ ADMIN)</span>
                 </h1>
             </div>
 
@@ -152,6 +152,7 @@
                             <th>Vai trò</th>
                             <th>Trạng thái</th>
                             <th>Ngày tạo</th>
+                            <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody id="userTableBody"></tbody>
@@ -159,6 +160,22 @@
             </div>
         </div>
     </main>
+
+    <!-- MODAL KHÓA / MỞ TÀI KHOẢN (PB-30) -->
+    <div id="lockModal" class="modal-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="lockModalTitle">
+        <div class="modal" id="lockModalBox" style="max-width: 440px; padding: 32px;">
+            <div class="modal__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            </div>
+            <h3 class="modal__title" id="lockModalTitle" style="font-size: 20px;"></h3>
+            <p class="modal__message" id="lockModalMessage" style="font-size: 14px; margin-bottom: 20px;"></p>
+            <p id="lockModalError" role="alert" style="display: none; color: var(--error); font-size: 13px; margin-bottom: 16px;"></p>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="closeAppModal('lockModal')">Hủy</button>
+                <button type="button" class="btn" id="lockModalConfirm" style="flex: 1;"></button>
+            </div>
+        </div>
+    </div>
 
     <!-- SCRIPTS -->
     <script src="../assets/js/session.js"></script>

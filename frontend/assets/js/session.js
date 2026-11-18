@@ -440,18 +440,37 @@ const mockServer = (() => {
                     isActive: u.isActive, createdAt: u.createdAt ?? null, 
                 }));
                 return { items, total: items.length };
+        },
+
+        // PB-30: khóa/mở tài khoản, thu hồi mọi token khi khóa, ghi audit log
+        async 'PATCH /admin/users/:id/status'(db, { isActive }, token, query, id) {
+            const me = userFromAccess(db, token);
+            if ((me.role ?? 'STUDENT') !== 'ADMIN') fail(403, 'FORBIDDEN', 'Bạn không có quyền quản trị');
+            if (typeof isActive !== 'boolean') fail(400, 'VALIDATION_ERROR', 'isActive phải là true/false');
+            const user = db.users.find((u) => u.id === id);
+            if (!user) fail(404, 'USER_NOT_FOUND', 'Không tìm thấy tài khoản');
+            if (user.id === me.id) fail(400, 'CANNOT_LOCK_SELF', 'Không thể tự khóa tài khoản của chính mình');
+            user.isActive = isActive;
+            if (!isActive) {
+                Object.values(db.refreshTokens).forEach((e) => { if (e.userId === id) e.revoked = true; });
+                Object.keys(db.accessTokens).forEach((t) => { if (db.accessTokens[t].userId === id) delete db.accessTokens[t]; });
+            }
+            (db.auditLogs ??= []).push({ actorId: me.id, action: isActive ? 'USER_UNLOCK' : 'USER_LOCK', targetId: id, at: new Date().toISOString() });
+            return { id, isActive };
         }
     };
 
     async function handle(method, path, body = {}, token) {
         await sleep(CONFIG.latency);
         const [pathname, search = ''] = path.split('?');
-        const route = routes[`${method} ${pathname}`];
+        // Đường dẫn có id (vd /admin/users/<id>/status) → khớp route ':id'
+        const id = pathname.match(/^\/admin\/users\/([^/]+)\/status$/)?.[1];
+        const route = routes[`${method} ${id ? '/admin/users/:id/status' : pathname}`];
         if (!route) throw new ApiError(404, 'NOT_FOUND', `Mock chưa có ${method} ${pathname}`);
         const db = load();
         await migrateLegacy(db);
         try {
-            return await route(db, body, token, new URLSearchParams(search));
+            return await route(db, body, token, new URLSearchParams(search), id);
         } finally {
             save(db);
         }

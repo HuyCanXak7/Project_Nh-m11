@@ -1,5 +1,5 @@
 /**
- * QUẢN LÝ TÀI KHOẢN (PB-29): chỉ ADMIN xem danh sách và tìm theo email / họ tên.
+ * QUẢN LÝ TÀI KHOẢN (PB-29, PB-30): chỉ ADMIN xem, tìm theo email / họ tên, khóa / mở tài khoản.
  * Chặn ở FE chỉ để trải nghiệm; quyền thật do BE kiểm tra (403 FORBIDDEN).
  */
 const adminUser = requireAdmin();
@@ -12,11 +12,50 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(searchTimer);
         searchTimer = setTimeout(loadUsers, 300);
     });
+    $('userTableBody').addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-id]');
+        if (btn) toggleActive(btn);
+    });
+    $('lockModalConfirm').addEventListener('click', confirmToggle);
     loadUsers();
 });
 
+let pendingTarget = null;
+
+function toggleActive(btn) {
+    const lock = btn.dataset.active === 'true';
+    pendingTarget = { id: btn.dataset.id, lock };
+    $('lockModalBox').classList.toggle('modal--error', lock);
+    $('lockModalTitle').textContent = lock ? 'Khóa tài khoản' : 'Mở khóa tài khoản';
+    $('lockModalMessage').innerHTML = `Bạn có chắc muốn ${lock ? 'khóa' : 'mở khóa'} tài khoản <strong>${escapeHtml(btn.dataset.email)}</strong>?`
+        + (lock ? '<br>Người dùng sẽ bị đăng xuất khỏi mọi thiết bị và không thể đăng nhập.' : '');
+    $('lockModalError').style.display = 'none';
+    const confirmBtn = $('lockModalConfirm');
+    confirmBtn.className = `btn ${lock ? 'btn-danger' : 'btn-primary'}`;
+    confirmBtn.textContent = lock ? 'Khóa' : 'Mở khóa';
+    confirmBtn.disabled = false;
+    openAppModal('lockModal');
+}
+
+async function confirmToggle() {
+    if (!pendingTarget) return;
+    const { id, lock } = pendingTarget;
+    const confirmBtn = $('lockModalConfirm');
+    confirmBtn.disabled = true;
+    try {
+        await apiFetch(`/admin/users/${encodeURIComponent(id)}/status`, { method: 'PATCH', body: { isActive: !lock } });
+        closeAppModal('lockModal');
+        loadUsers();
+    } catch (err) {
+        if (err.status === 403) return window.location.replace('dashboard.html');
+        confirmBtn.disabled = false;
+        $('lockModalError').textContent = err.message || `${lock ? 'Khóa' : 'Mở khóa'} tài khoản thất bại.`;
+        $('lockModalError').style.display = 'block';
+    }
+}
+
 function setStateRow(html) {
-    $('userTableBody').innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 24px;">${html}</td></tr>`;
+    $('userTableBody').innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 24px;">${html}</td></tr>`;
 }
 
 async function loadUsers() {
@@ -40,6 +79,8 @@ async function loadUsers() {
                 <td>${u.role === 'ADMIN' ? 'Quản trị' : 'Sinh viên'}</td>
                 <td>${u.isActive ? 'Hoạt động' : 'Đã khóa'}</td>
                 <td>${u.createdAt ? new Date(u.createdAt).toLocaleDateString('vi-VN') : '—'}</td>
+                <td>${u.id === adminUser.id ? '—' : `<button type="button" class="btn btn-sm ${u.isActive ? 'btn-danger' : 'btn-primary'}"
+                    data-id="${escapeHtml(u.id)}" data-active="${u.isActive}" data-email="${escapeHtml(u.email)}">${u.isActive ? 'Khóa' : 'Mở khóa'}</button>`}</td>
             </tr>`).join('');
     } catch (err) {
         if (requestId !== lastRequest) return;
