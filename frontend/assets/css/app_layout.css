@@ -733,3 +733,254 @@ body.app-page {
         max-width: 100% !important;
     }
 }
+
+/* ===== CHẾ ĐỘ TỐI - DARK MODE (PB-35 / T0694F3) ===== */
+html.theme-dark body.app-page,
+body.theme-dark.app-page {
+    --e-border: #334155;
+    --e-border-soft: #1E293B;
+    --e-bg: #0B1120;
+    --bg-main: #0F172A;
+    --border: #334155;
+    --border-focus: #3EE09B;
+    --dash-primary: #F1F5F9;
+    --dash-primary-soft: #1E293B;
+    --dash-text: #F1F5F9;
+    --dash-text-body: #E2E8F0;
+    --dash-text-muted: #94A3B8;
+    --dash-text-faint: #64748B;
+    --dash-border: #334155;
+    --dash-chip: #1E293B;
+    --text-black: #F8FAFC;
+    --text-dark: #E2E8F0;
+    --text-gray: #94A3B8;
+    --white: #111827;
+    background: #0B1120 !important;
+    color: #F1F5F9 !important;
+}
+
+html.theme-dark .sidebar {
+    background: #0F172A;
+    border-bottom-color: #334155;
+}
+
+html.theme-dark .sidebar__logo,
+html.theme-dark .user-chip,
+html.theme-dark .user-chip__name,
+html.theme-dark .dash-header__title,
+html.theme-dark .header-meta-item strong,
+html.theme-dark .card__title,
+html.theme-dark .card__link,
+html.theme-dark .stat-card__value,
+html.theme-dark .course-name-text,
+html.theme-dark .course-sem-tab__gpa,
+html.theme-dark .course-sem-strip__val,
+html.theme-dark .score-cell,
+html.theme-dark .e-grade-cell,
+html.theme-dark .lesson__time,
+html.theme-dark .lesson__name,
+html.theme-dark .activity__name,
+html.theme-dark .activity__score,
+html.theme-dark .activity__grade,
+html.theme-dark .highlight__name,
+html.theme-dark .highlight__score,
+html.theme-dark .highlight__grade,
+html.theme-dark .credit-row__name,
+html.theme-dark .credit-row__pct,
+html.theme-dark .grade-row__label,
+html.theme-dark .grade-row__count,
+html.theme-dark .e-html-chart__bar-val {
+    color: #F1F5F9 !important;
+}
+
+html.theme-dark .nav-item {
+    color: #94A3B8;
+}
+
+html.theme-dark .nav-item:hover,
+html.theme-dark .nav-item.is-active {
+    color: #F8FAFC;
+}
+
+html.theme-dark .nav-item.is-active {
+    border-bottom-color: #3EE09B;
+}
+
+html.theme-dark .topbar-date,
+html.theme-dark .topbar-icon-btn,
+html.theme-dark .dash-header__slash,
+html.theme-dark .dash-header__sub-inline,
+html.theme-dark .header-meta-item span,
+html.theme-dark .stat-card__label,
+html.theme-dark .stat-card__note,
+html.theme-dark .course-sem-strip__label,
+html.theme-dark .course-sem-strip__sub,
+html.theme-dark .course-code-cell,
+html.theme-dark .e-html-chart__xlabel,
+html.theme-dark .e-html-chart__ylabel {
+    color: #94A3B8 !important;
+}
+
+html.theme-dark .topbar-icon-btn:hover {
+    background: #1E293B;
+    color: #F8FAFC !important;
+}
+
+html.theme-dark .dash,
+html.theme-dark .card,
+html.theme-dark .stat-card,
+html.theme-dark .app-card,
+html.theme-dark .course-sem-tabs,
+html.theme-dark .course-sem-tab,
+html.theme-dark .course-sem-strip,
+html.theme-dark .course-toolbar,
+html.theme-dark .course-status-tabs,
+html.theme-dark .course-toolbar__select,
+html.theme-dark .course-table-card,
+html.theme-dark .semester-card,
+html.theme-dark .transcript-sem-card,
+html.theme-dark .tabs__btn {
+    background: #111827 !important;
+    border-color: #334155 !important;
+}
+
+html.theme-dark .stat-card--navy,
+html.theme-dark .hero-gpa-card {
+    background: #0F1F38 !important;
+    color: #FFFFFF !important;
+}
+
+html.theme-dark .stat-card--mint,
+html.theme-dark .course-sem-strip__cell--gpa {
+    background: #3EE09B !important;
+    color: #0F1F38 !important;
+}
+
+html.theme-dark .stat-card--mint *,
+html.theme-dark .course-sem-strip__cell--gpa * {
+    color: #0F1F38 !important;
+}
+
+html.theme-dark .course-sem-tab.is-active,
+html.theme-dark .tabs__btn.is-active,
+html.theme-dark .btn-figma-primary,
+html.theme-dark .btn-primary {
+    background: #3EE09B !important;
+    color: #0F1F38 !important;
+    border-color: #3EE09B !important;
+}
+
+html.theme-dark .course-sem-tab.is-active .course-sem-tab__gpa {
+    color: #0F1F38 !important;
+}
+
+html.theme-dark .btn-figma-outline,
+html.theme-dark .btn-secondary,
+html.theme-dark .btn-reset,
+html.theme-dark .dash-header__menu {
+    background: #1E293B !important;
+    color: #F1F5F9 !important;
+    border-color: #475569 !important;
+}
+
+html.theme-dark .btn-figma-outline:hover,
+html.theme-dark .btn-secondary:hover,
+html.theme-dark .course-sem-tab:hover {
+    background: #273549 !important;
+}
+
+html.theme-dark .course-figma-table th,
+html.theme-dark .app-table th,
+html.theme-dark .course-table-footer,
+html.theme-dark .filter-bar,
+html.theme-dark .empty-state {
+    background: #162033 !important;
+    color: #CBD5E1 !important;
+    border-color: #334155 !important;
+}
+
+html.theme-dark .app-table td {
+    border-bottom-color: #1E293B !important;
+    color: #E2E8F0;
+}
+
+html.theme-dark .app-table tbody tr:hover {
+    background: #1E293B !important;
+}
+
+html.theme-dark .course-row--inprogress {
+    background: #17253D !important;
+    box-shadow: inset 3px 0 0 #3EE09B !important;
+}
+
+html.theme-dark .course-toolbar__search input,
+html.theme-dark .filter-input,
+html.theme-dark .filter-select,
+html.theme-dark .modal-input,
+html.theme-dark .modal-select {
+    background: #0F172A !important;
+    color: #F1F5F9 !important;
+    border-color: #475569 !important;
+}
+
+html.theme-dark .modal,
+html.theme-dark .user-menu__list {
+    background: #111827 !important;
+    color: #F1F5F9 !important;
+    border-color: #334155 !important;
+}
+
+html.theme-dark .user-menu__item {
+    color: #E2E8F0 !important;
+}
+
+html.theme-dark .user-menu__item:hover {
+    background: #1E293B !important;
+}
+
+html.theme-dark .btn-action--edit {
+    background: #1E293B !important;
+    color: #E2E8F0 !important;
+    border-color: #475569 !important;
+}
+
+html.theme-dark .btn-action--score {
+    background: #3EE09B !important;
+    color: #0F1F38 !important;
+    border-color: #3EE09B !important;
+}
+
+html.theme-dark .e-html-chart__gridline {
+    border-top-color: #1E293B;
+}
+
+html.theme-dark .e-html-chart__plot {
+    border-bottom-color: #475569;
+}
+
+html.theme-dark .e-html-chart__bar--latest .e-html-chart__bar-val {
+    color: #0F1F38 !important;
+}
+
+html.theme-dark .e-html-chart__bar:not(.e-html-chart__bar--latest):not(.e-html-chart__bar--planned) {
+    background: #334155;
+}
+
+html.theme-dark .e-html-chart__dot {
+    background: #3EE09B;
+}
+
+html.theme-dark .e-html-chart__svg-line polyline {
+    stroke: #3EE09B;
+}
+
+@media (max-width: 900px) {
+    html.theme-dark .sidebar__nav {
+        background: #0F172A;
+        border-bottom-color: #3EE09B;
+    }
+    html.theme-dark .nav-item.is-active {
+        background: #1E293B;
+        border-left-color: #3EE09B;
+    }
+}

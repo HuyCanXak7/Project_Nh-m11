@@ -6,6 +6,52 @@
 
 const $ = (id) => document.getElementById(id);
 
+const THEME_STORAGE_KEY = 'studytrack_theme';
+
+function getSavedTheme() {
+    try {
+        return localStorage.getItem(THEME_STORAGE_KEY) === 'dark' ? 'dark' : 'light';
+    } catch {
+        return 'light';
+    }
+}
+
+function applyTheme(theme) {
+    const isDark = theme === 'dark';
+    document.documentElement.classList.toggle('theme-dark', isDark);
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    if (document.body) {
+        document.body.classList.toggle('theme-dark', isDark);
+    }
+
+    const btn = $('themeToggleBtn');
+    if (btn) {
+        btn.setAttribute('aria-pressed', String(isDark));
+        btn.title = isDark ? 'Chuyển sang giao diện sáng' : 'Bật giao diện tối (Dark Mode)';
+        btn.innerHTML = isDark
+            ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>'
+            : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    }
+
+    const menuLabel = $('themeMenuLabel');
+    if (menuLabel) {
+        menuLabel.textContent = isDark ? 'Giao diện sáng' : 'Giao diện tối';
+    }
+}
+
+function toggleTheme() {
+    const next = getSavedTheme() === 'dark' ? 'light' : 'dark';
+    try {
+        localStorage.setItem(THEME_STORAGE_KEY, next);
+    } catch { /* ignore */ }
+    applyTheme(next);
+    if (typeof showToast === 'function') {
+        showToast(next === 'dark' ? 'Đã bật giao diện tối (Dark Mode)' : 'Đã chuyển sang giao diện sáng');
+    }
+}
+
+applyTheme(getSavedTheme());
+
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 function svgEl(tag, attrs = {}) {
@@ -89,6 +135,7 @@ function upgradeSidebarFigma() {
 
     rightBox.innerHTML = `
         <span class="topbar-date">${formatTopbarDate()}</span>
+        <button type="button" class="topbar-icon-btn" id="themeToggleBtn" title="Bật giao diện tối (Dark Mode)" aria-label="Bật hoặc tắt giao diện tối" aria-pressed="false" onclick="toggleTheme()"></button>
         <button type="button" class="topbar-icon-btn" title="Tìm kiếm môn học" onclick="window.location.href='courses.html'">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7.5"/><line x1="20" y1="20" x2="16.2" y2="16.2"/></svg>
         </button>
@@ -126,6 +173,12 @@ function upgradeSidebarFigma() {
                     </a>
                 </li>
                 <li role="none">
+                    <button type="button" class="user-menu__item" onclick="toggleTheme()" role="menuitem">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                        <span id="themeMenuLabel">Giao diện tối</span>
+                    </button>
+                </li>
+                <li role="none">
                     <button type="button" class="user-menu__item" onclick="handleResetData()" role="menuitem">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
                         Khôi phục dữ liệu mẫu
@@ -140,6 +193,8 @@ function upgradeSidebarFigma() {
             `;
         }
     }
+
+    applyTheme(getSavedTheme());
 }
 
 function refreshSidebarGoalWidget() {}
