@@ -528,7 +528,12 @@ function showToast(msg, isError = false) {
         document.body.appendChild(toast);
     }
 
-    toast.style.background = isError ? '#DC2626' : '#0F1F38';
+    const isDark = document.documentElement.classList.contains('theme-dark');
+    toast.style.background = isError ? '#DC2626' : (isDark ? '#1E293B' : '#0F1F38');
+    toast.style.color = '#FFFFFF';
+    toast.style.border = isError
+        ? '1px solid #FCA5A5'
+        : (isDark ? '1px solid #3EE09B' : '1px solid rgba(255,255,255,0.18)');
     toast.textContent = msg;
     toast.style.opacity = '1';
     toast.style.transform = 'translateY(0)';

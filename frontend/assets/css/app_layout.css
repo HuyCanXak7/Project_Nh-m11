@@ -1010,6 +1010,60 @@ html.theme-dark .btn-action--score {
     border-color: #3EE09B !important;
 }
 
+html.theme-dark .btn-action--delete,
+html.theme-dark .btn-danger {
+    background: rgba(239, 68, 68, 0.2) !important;
+    color: #FCA5A5 !important;
+    border-color: #EF4444 !important;
+}
+
+html.theme-dark .btn-action--delete:hover,
+html.theme-dark .btn-danger:hover {
+    background: #EF4444 !important;
+    color: #FFFFFF !important;
+}
+
+html.theme-dark .badge-blue {
+    background: rgba(59, 130, 246, 0.22);
+    color: #93C5FD;
+}
+
+html.theme-dark .badge-green {
+    background: rgba(62, 224, 155, 0.2);
+    color: #3EE09B;
+}
+
+html.theme-dark .badge-orange {
+    background: rgba(245, 158, 11, 0.22);
+    color: #FCD34D;
+}
+
+html.theme-dark .badge-red {
+    background: rgba(239, 68, 68, 0.22);
+    color: #FCA5A5;
+}
+
+html.theme-dark .badge-gray {
+    background: rgba(148, 163, 184, 0.2);
+    color: #E2E8F0;
+}
+
+html.theme-dark .alert-danger {
+    background: rgba(220, 38, 38, 0.22) !important;
+    color: #FECACA !important;
+    border-color: #EF4444 !important;
+}
+
+html.theme-dark .alert-warning {
+    background: rgba(217, 119, 6, 0.22) !important;
+    color: #FDE68A !important;
+    border-color: #F59E0B !important;
+}
+
+html.theme-dark .modal button[onclick*="closeAppModal"] {
+    color: #E2E8F0 !important;
+}
+
 html.theme-dark .e-html-chart__gridline {
     border-top-color: #1E293B;
 }
