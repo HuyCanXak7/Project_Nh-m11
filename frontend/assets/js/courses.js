@@ -30,7 +30,9 @@ function initCoursesPage() {
 
     const params = new URLSearchParams(window.location.search);
     const semIdParam = params.get('semId');
+    const queryParam = params.get('q');
     const filterEl = document.getElementById('filterSemester');
+    const searchEl = document.getElementById('searchCourseInput');
 
     if (semIdParam && filterEl) {
       filterEl.value = semIdParam;
@@ -39,6 +41,10 @@ function initCoursesPage() {
       if (sems.length > 0) {
         filterEl.value = sems[sems.length - 1].id;
       }
+    }
+
+    if (queryParam && searchEl) {
+      searchEl.value = queryParam;
     }
 
     renderSemesterTabs();

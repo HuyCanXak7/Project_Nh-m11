@@ -198,7 +198,7 @@ function upgradeSidebarFigma() {
 
     rightBox.innerHTML = `
         <span class="topbar-date">${formatTopbarDate()}</span>
-        <button type="button" class="topbar-icon-btn" title="Tìm kiếm môn học" onclick="window.location.href='courses.html'">
+        <button type="button" class="topbar-icon-btn" id="topbarSearchBtn" title="Tìm kiếm nhanh (Ctrl+K)" aria-label="Tìm kiếm nhanh" onclick="openGlobalSearchModal()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7.5"/><line x1="20" y1="20" x2="16.2" y2="16.2"/></svg>
         </button>
         <button type="button" class="topbar-icon-btn" title="Thông báo" onclick="showToast('Không có thông báo mới')">
@@ -579,6 +579,148 @@ function initAppShell() {
     }
     return true;
 }
+
+/* ===== Tìm kiếm nhanh toàn hệ thống (Kính lúp Topbar & Ctrl+K) ===== */
+function normalizeSearchText(str) {
+    return String(str || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/Đ/g, 'D')
+        .toLowerCase();
+}
+
+function openGlobalSearchModal() {
+    document.getElementById('globalSearchOverlay')?.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'globalSearchOverlay';
+    overlay.className = 'modal-overlay is-open';
+    overlay.innerHTML = `
+        <div class="modal global-search-modal" role="dialog" aria-modal="true" aria-label="Tìm kiếm nhanh">
+            <div class="global-search__head">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7.5"/><line x1="20" y1="20" x2="16.2" y2="16.2"/></svg>
+                <input type="text" id="globalSearchInput" class="global-search__input" placeholder="Tìm mã môn, tên môn học, học kỳ hoặc trang..." autocomplete="off">
+                <button type="button" id="globalSearchClose" class="global-search__close" aria-label="Đóng tìm kiếm">✕</button>
+            </div>
+            <div class="global-search__results" id="globalSearchResults"></div>
+        </div>
+    `;
+
+    const close = () => {
+        document.removeEventListener('keydown', onKey);
+        overlay.remove();
+    };
+    const onKey = (e) => {
+        if (e.key === 'Escape') close();
+    };
+
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    overlay.querySelector('#globalSearchClose').addEventListener('click', close);
+    document.addEventListener('keydown', onKey);
+    document.body.appendChild(overlay);
+
+    const input = overlay.querySelector('#globalSearchInput');
+    const resultsEl = overlay.querySelector('#globalSearchResults');
+
+    const pages = [
+        { title: '01 Tổng quan', sub: 'Dashboard GPA & Tiến độ học tập', href: 'dashboard.html' },
+        { title: '02 Môn học', sub: 'Quản lý môn học, trọng số & điểm thành phần', href: 'courses.html' },
+        { title: '03 Học kỳ', sub: 'Danh sách & thời gian các học kỳ', href: 'semesters.html' },
+        { title: '04 Thống kê', sub: 'Biểu đồ GPA & phân bố điểm chữ', href: 'statistics.html' },
+        { title: '05 Mục tiêu', sub: 'Đặt mục tiêu GPA & mô phỏng What-If', href: 'goals.html' },
+        { title: '06 Nhập điểm', sub: 'Nhập điểm từ tệp CSV / Excel (.xlsx)', href: 'import.html' },
+        { title: '07 Bảng điểm', sub: 'Xem bảng điểm tổng hợp, xuất CSV/Excel & In A4', href: 'transcript.html' },
+        { title: 'Hồ sơ cá nhân', sub: 'Thông tin sinh viên, ảnh đại diện & đổi mật khẩu', href: 'profile.html' }
+    ];
+
+    const renderResults = (query) => {
+        const q = normalizeSearchText(query).trim();
+        const courses = (typeof StorageService !== 'undefined' && StorageService.getCourses) ? StorageService.getCourses() : [];
+        const semesters = (typeof StorageService !== 'undefined' && StorageService.getSemesters) ? StorageService.getSemesters() : [];
+        const semMap = Object.fromEntries(semesters.map(s => [s.id, s]));
+
+        const matchedCourses = courses.filter(c => {
+            if (!q) return true;
+            return normalizeSearchText(c.course_code).includes(q) ||
+                   normalizeSearchText(c.course_name).includes(q) ||
+                   normalizeSearchText(c.category).includes(q);
+        }).slice(0, q ? 10 : 5);
+
+        const matchedPages = pages.filter(p => !q || normalizeSearchText(p.title + ' ' + p.sub).includes(q)).slice(0, 5);
+
+        let html = '';
+        if (matchedCourses.length > 0) {
+            html += `<div class="global-search__section">Môn học (${matchedCourses.length})</div>`;
+            html += matchedCourses.map(c => {
+                const sem = semMap[c.semester_id];
+                const semLabel = sem ? `${sem.name} ${sem.academic_year || ''}` : 'Chưa phân kỳ';
+                const targetUrl = `courses.html?semId=${encodeURIComponent(c.semester_id || '')}&q=${encodeURIComponent(c.course_code || c.course_name || '')}`;
+                return `
+                    <button type="button" class="global-search__item" data-course-code="${escapeHtml(c.course_code)}" data-sem-id="${escapeHtml(c.semester_id || '')}" data-href="${targetUrl}">
+                        <span class="global-search__code">${escapeHtml(c.course_code)}</span>
+                        <span class="global-search__meta">
+                            <strong>${escapeHtml(c.course_name)}</strong>
+                            <small>${escapeHtml(semLabel)} · ${c.credits} TC</small>
+                        </span>
+                        <span class="global-search__go">Mở →</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        if (matchedPages.length > 0) {
+            html += `<div class="global-search__section">Trang chức năng</div>`;
+            html += matchedPages.map(p => `
+                <a href="${p.href}" class="global-search__item">
+                    <span class="global-search__code">TRANG</span>
+                    <span class="global-search__meta">
+                        <strong>${escapeHtml(p.title)}</strong>
+                        <small>${escapeHtml(p.sub)}</small>
+                    </span>
+                    <span class="global-search__go">Đi tới →</span>
+                </a>
+            `).join('');
+        }
+
+        if (!html) {
+            html = `<div class="global-search__empty">Không tìm thấy môn học hoặc trang nào khớp với "${escapeHtml(query)}".</div>`;
+        }
+
+        resultsEl.innerHTML = html;
+
+        resultsEl.querySelectorAll('button.global-search__item').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const code = btn.dataset.courseCode || '';
+                const semId = btn.dataset.semId || '';
+                const href = btn.dataset.href;
+                const searchInputOnPage = document.getElementById('searchCourseInput');
+                const semFilterOnPage = document.getElementById('filterSemester');
+                if (searchInputOnPage && typeof renderCourses === 'function') {
+                    if (semFilterOnPage && semId) semFilterOnPage.value = semId;
+                    searchInputOnPage.value = code;
+                    if (typeof renderSemesterTabs === 'function') renderSemesterTabs();
+                    if (typeof handleFilterChange === 'function') handleFilterChange();
+                    close();
+                    searchInputOnPage.focus();
+                } else {
+                    window.location.href = href;
+                }
+            });
+        });
+    };
+
+    input.addEventListener('input', () => renderResults(input.value));
+    renderResults('');
+    setTimeout(() => input.focus(), 30);
+}
+
+document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        openGlobalSearchModal();
+    }
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     initAppShell();
