@@ -109,3 +109,17 @@ function setSubmitting(button, busy, busyText) {
         if (button.dataset.label) button.innerHTML = button.dataset.label;
     }
 }
+// Chuyển trang mượt: chạy animation trượt ra rồi mới điều hướng
+document.querySelectorAll('.auth-top a').forEach((link) => {
+    link.addEventListener('click', (e) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; // mở tab mới thì để mặc định
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        e.preventDefault();
+        document.body.classList.add('auth-leaving');
+        setTimeout(() => { location.href = link.href; }, 250);
+    });
+});
+// Bấm Back (trang lấy từ bfcache) thì bỏ trạng thái đang rời trang
+window.addEventListener('pageshow', (e) => {
+    if (e.persisted) document.body.classList.remove('auth-leaving');
+});

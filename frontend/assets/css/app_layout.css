@@ -984,3 +984,11 @@ html.theme-dark .e-html-chart__svg-line polyline {
         border-left-color: #3EE09B;
     }
 }
+/* Chuyển trang mượt giữa các trang bên trong: sidebar + header đứng yên, nội dung trượt (xem app_shell.js) */
+.dash > :not(.dash-header) { animation: page-enter .4s cubic-bezier(.2, .8, .2, 1) backwards; }
+.page-leaving .dash > :not(.dash-header) { animation: page-leave .2s ease-in forwards; }
+@keyframes page-enter { from { opacity: 0; transform: translateY(16px); } }
+@keyframes page-leave { to { opacity: 0; transform: translateY(-8px); } }
+@media (prefers-reduced-motion: reduce) {
+    .dash > :not(.dash-header), .page-leaving .dash > :not(.dash-header) { animation: none; }
+}

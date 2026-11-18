@@ -515,3 +515,18 @@ function initAppShell() {
 document.addEventListener('DOMContentLoaded', () => {
     initAppShell();
 });
+
+// Chuyển trang mượt: bấm link trong sidebar / menu tài khoản thì nội dung trượt ra rồi mới điều hướng
+document.addEventListener('click', (e) => {
+    const link = e.target.closest('.sidebar a[href], .user-menu a[href]');
+    if (!link || link.getAttribute('href').startsWith('#') || link.target === '_blank') return;
+    if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; // mở tab mới thì để mặc định
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    e.preventDefault();
+    document.body.classList.add('page-leaving');
+    setTimeout(() => { location.href = link.href; }, 200);
+});
+// Bấm Back (trang lấy từ bfcache) thì bỏ trạng thái đang rời trang
+window.addEventListener('pageshow', (e) => {
+    if (e.persisted) document.body.classList.remove('page-leaving');
+});

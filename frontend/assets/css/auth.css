@@ -423,3 +423,14 @@ body.page-auth {
     .auth-title { font-size: 38px; }
     .auth-form__row { grid-template-columns: 1fr; gap: 0; }
 }
+/* Chuyển trang Đăng nhập <-> Đăng ký: vào trang thì trượt vào, bấm link thì trượt ra (xem auth_common.js) */
+.auth-wrap { animation: auth-enter .45s cubic-bezier(.2, .8, .2, 1) both; }
+.auth-side > * { animation: auth-fade .5s ease both; }
+.auth-leaving .auth-wrap { animation: auth-leave .25s ease-in forwards; }
+.auth-leaving .auth-side > * { animation: auth-fade .25s ease-in reverse forwards; }
+@keyframes auth-enter { from { opacity: 0; transform: translateX(32px); } }
+@keyframes auth-leave { to { opacity: 0; transform: translateX(-32px); } }
+@keyframes auth-fade { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+    .auth-wrap, .auth-side > *, .auth-leaving .auth-wrap, .auth-leaving .auth-side > * { animation: none; }
+}
