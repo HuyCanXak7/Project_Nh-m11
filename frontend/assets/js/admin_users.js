@@ -8,19 +8,35 @@ let lastRequest = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
     if (!adminUser) return;
+    sessionStorage.removeItem('adminViewAs'); // quay về trang này = thoát chế độ xem tài khoản khác
     $('userSearch').addEventListener('input', () => {
         clearTimeout(searchTimer);
         searchTimer = setTimeout(loadUsers, 300);
     });
     $('userTableBody').addEventListener('click', (e) => {
         const btn = e.target.closest('button[data-id]');
-        if (btn) toggleActive(btn);
+        if (btn) return toggleActive(btn);
+        const row = e.target.closest('tr[data-view-id]');
+        if (row) viewUserData(row.dataset.viewId, row.dataset.viewEmail);
+    });
+    $('userTableBody').addEventListener('keydown', (e) => {
+        const row = e.target.closest('tr[data-view-id]');
+        if (row && e.target === row && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            viewUserData(row.dataset.viewId, row.dataset.viewEmail);
+        }
     });
     $('lockModalConfirm').addEventListener('click', confirmToggle);
     loadUsers();
 });
 
 let pendingTarget = null;
+
+// Mở trang Môn học dưới dữ liệu của tài khoản được chọn (StorageService đọc khóa adminViewAs)
+function viewUserData(id, email) {
+    sessionStorage.setItem('adminViewAs', JSON.stringify({ id, email }));
+    window.location.href = 'courses.html';
+}
 
 function toggleActive(btn) {
     const lock = btn.dataset.active === 'true';
@@ -71,7 +87,7 @@ async function loadUsers() {
             return;
         }
         $('userTableBody').innerHTML = items.map((u) => `
-            <tr>
+            <tr ${u.role === 'ADMIN' ? '' : `data-view-id="${escapeHtml(u.id)}" data-view-email="${escapeHtml(u.email)}" tabindex="0" style="cursor: pointer;" title="Xem điểm, môn học, học kỳ, mục tiêu"`}>
                 <td>${escapeHtml(u.email)}</td>
                 <td>${escapeHtml(u.fullName)}</td>
                 <td>${escapeHtml(u.studentCode) || '—'}</td>

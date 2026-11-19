@@ -544,6 +544,20 @@ function showToast(msg, isError = false) {
     }, 2800);
 }
 
+/* ===== ADMIN đang xem dữ liệu của tài khoản khác: banner + nút thoát ===== */
+function renderAdminViewBanner() {
+    const target = typeof StorageService !== 'undefined' && StorageService.adminViewAs?.();
+    const main = document.querySelector('main.dash');
+    if (!target || !main) return;
+    const bar = document.createElement('div');
+    bar.className = 'app-card no-print';
+    bar.setAttribute('role', 'status');
+    bar.style.cssText = 'margin: 0 0 16px; padding: 12px 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border: 2px solid var(--warning, #F5A623);';
+    bar.innerHTML = `<span style="flex: 1;">Quản trị: đang xem và chỉnh sửa dữ liệu của <strong>${escapeHtml(target.email)}</strong></span>
+        <a href="admin-user.html" class="btn btn-secondary btn-sm">Thoát, về danh sách tài khoản</a>`;
+    main.querySelector('.dash-header')?.after(bar) ?? main.prepend(bar);
+}
+
 function initAppShell() {
     if (typeof StorageService !== 'undefined' && typeof StorageService.init === 'function') {
         StorageService.init();
@@ -570,6 +584,7 @@ function initAppShell() {
     }
 
     renderUser(user);
+    renderAdminViewBanner();
     setupSidebar();
     setupUserMenu();
     highlightActiveSidebar();
