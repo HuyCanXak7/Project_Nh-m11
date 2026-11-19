@@ -39,12 +39,12 @@ Công cụ quản lý công việc: Trello (board theo ngày, nhãn Sprint / Fro
 ## 2. Công nghệ và kiến trúc
 
 ```
-Frontend (web)  ──REST/JSON──▶  Backend (API)  ──▶  PostgreSQL
+Frontend (web)  ──REST/JSON──▶  Backend (API)  ──▶  MySQL
         │                            │
         └── What-if, đọc CSV, xuất tệp xử lý tại FE (không có endpoint)
 ```
 
-- **CSDL:** PostgreSQL, thay đổi schema qua migration.
+- **CSDL:** MySQL 8 trong Docker Compose; thay đổi schema qua Alembic migration.
 - **Xác thực:** JWT (access token + refresh token), mật khẩu băm bằng bcrypt.
 - **Tài liệu API:** Swagger.
 - **Môi trường:** Docker Compose (`docker compose up`).
@@ -414,50 +414,87 @@ Một card trên Trello chỉ được chuyển sang **Done** khi:
 | 3 | 13 – 18 | Hồ sơ, import, bảng điểm, Admin, bảo mật, phân quyền, responsive, deploy production, UAT, slide |
 | 4 | 19 – 20 | Tổng duyệt lần 2, chốt gói demo, ngày bảo vệ |
 
-## 12. Chạy dự án
+## 12. Chạy toàn bộ dự án bằng Docker Compose (PB-47)
 
-Ghi đè (Upsert) để sinh viên cập nhập được điểm khi có kết quả thi
-
-```bash
-git clone <repo-url>
-cd <repo>
-cp .env.example .env      # điền giá trị thật, KHÔNG commit .env
-docker compose up         # khởi chạy FE + BE + PostgreSQL
-```
-
-Tài khoản demo: xem [hướng dẫn seed tài khoản PB-48](#seed-tài-khoản-demo-pb-48).
-
----
-
-*Nhóm 11 · Phiên bản 1.0 · 09/11/2026*
-
-# Hướng dẫn dựng môi trường Dev Backend & Database MySQL (Docker)
-
-Môi trường phát triển đã được đóng gói bằng Docker Compose. Hệ thống sẽ tự động khởi chạy MySQL, Backend và tự động chạy Database Migration (Alembic) chỉ bằng một lệnh duy nhất.
+Compose khởi chạy frontend tĩnh, FastAPI backend và MySQL 8. Backend đợi MySQL healthcheck đạt, chạy Alembic migration rồi mở API. Frontend được phục vụ bằng Nginx. Cơ sở dữ liệu được giữ trong named volume khi container dừng hoặc được tạo lại.
 
 ## Yêu cầu
-* Đã cài đặt [Docker](https://www.docker.com/) và Docker Compose trên máy.
 
-## Các bước chạy dự án
+- Cài Docker Desktop (Windows/macOS) hoặc Docker Engine và Docker Compose v2 (Linux).
+- Trên máy kiểm tra thứ hai, chỉ cần có Docker; không cần cài riêng Python, Node.js hay MySQL.
+- Giải nén/clone source dự án về máy và chạy lệnh tại thư mục chứa `docker-compose.yaml`.
 
-**Bước 1: Thiết lập file biến môi trường**
-Copy file `.env.example` và đổi tên thành `.env`:
+## Chạy lần đầu
+
+Tạo file cấu hình local từ mẫu. PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+macOS/Linux:
+
 ```bash
 cp .env.example .env
 ```
-Giá trị MySQL mẫu dùng được ở local. Đặt `JWT_SECRET` thành chuỗi ngẫu nhiên ít nhất 32 byte. Có thể tạo chuỗi bằng `python -c "import secrets; print(secrets.token_urlsafe(32))"`.
 
-**Bước 2: Khởi chạy toàn bộ hệ thống**
-Tại thư mục gốc của dự án (nơi chứa file `docker-compose.yaml`), mở terminal và chạy lệnh sau:
+`.env.example` chỉ có thông tin mẫu phục vụ local. Không thay bằng secret production và không commit `.env`. Các mật khẩu mẫu dùng được cho môi trường local. Tránh ký tự URL đặc biệt trong mật khẩu MySQL local, hoặc URL-encode thông tin user/password khi sửa `DATABASE_URL`.
+
+Khởi chạy cả ba service:
+
 ```bash
 docker compose up --build
 ```
 
-## Kết quả
-Sau khi Terminal báo quá trình khởi động hoàn tất, hệ thống sẽ có sẵn:
-* **API Backend:** Chạy tại `http://localhost:8000` (Frontend dùng URL này để gọi API).
-* **Tài liệu API (Swagger UI):** Truy cập tại `http://localhost:8000/docs`
-* **Cơ sở dữ liệu MySQL:** Chạy ở port `3306` (Dùng tài khoản user đã cấu hình trong file `.env` để kết nối và kiểm tra dữ liệu qua DBeaver, DataGrip hoặc MySQL Workbench).
+Để chạy nền:
+
+```bash
+docker compose up --build -d
+```
+
+## Địa chỉ và kiểm tra khởi động
+
+- Frontend: <http://localhost:8080>
+- Backend health qua OpenAPI: <http://localhost:8000/openapi.json>
+- Swagger UI: <http://localhost:8000/docs>
+- MySQL từ máy host: `localhost:3306`, dùng user và mật khẩu trong `.env`.
+- Từ backend container, host DB là `db`, cổng `3306`. Không dùng `localhost` vì khi đó backend sẽ tìm MySQL bên trong chính container backend.
+
+Kiểm tra các service đã chạy khỏe:
+
+```bash
+docker compose ps
+```
+
+`db` và `backend` cần có trạng thái `healthy`; frontend cần `running`. Có thể mở trang FE và Swagger trong trình duyệt để kiểm tra. Giao diện hiện vẫn dùng mock/localStorage ở một số luồng, vì vậy trang FE tải được không đồng nghĩa mọi chức năng đã nối backend.
+
+## Log, dừng và chạy lại
+
+```bash
+docker compose logs -f                 # xem log tất cả service
+docker compose logs -f backend         # chỉ xem log backend/migration
+docker compose down                    # dừng container, giữ dữ liệu MySQL
+docker compose up --build -d           # chạy lại sau khi cập nhật source
+```
+
+Muốn xóa cả dữ liệu MySQL local và tạo DB trống, dùng `docker compose down -v`. Lệnh này xóa volume database; chỉ dùng khi thực sự muốn reset dữ liệu local.
+
+## Kiểm tra task trên máy thứ hai
+
+1. Cài Docker Desktop/Engine và bật Docker daemon.
+2. Lấy source từ nhánh/commit cần nghiệm thu, mở terminal tại thư mục gốc repo.
+3. Tạo `.env` từ `.env.example` bằng lệnh ở trên.
+4. Chạy `docker compose up --build` và đợi `db`/`backend` healthy.
+5. Mở `http://localhost:8080` và `http://localhost:8000/docs`.
+6. Ghi nhận kết quả `docker compose ps`, log khởi động không có lỗi và ảnh/link minh chứng theo quy trình nộp task.
+
+Lệnh `docker compose config` kiểm tra khả năng phân tích và nội suy cấu hình trước khi tạo container:
+
+```bash
+docker compose config
+```
+
+Không ghi task PB-47 là đã pass máy thứ hai cho tới khi bước 4–6 được thực hiện trên một máy khác thực tế.
 
 ## Seed tài khoản demo (PB-48)
 
@@ -467,7 +504,7 @@ Chạy các lệnh từ thư mục gốc của repo. Compose chờ MySQL sẵn s
 
 ```bash
 docker compose up -d --build
-docker compose exec backend python seed_accounts.py
+docker compose exec backend python -m scripts.seed_accounts
 ```
 
 Nếu vừa sửa `.env` khi container đã chạy, chạy lại `docker compose up -d` để nạp cấu hình mới trước khi seed.
