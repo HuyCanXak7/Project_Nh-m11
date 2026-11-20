@@ -11,7 +11,7 @@ depends_on = None
 
 def upgrade():
     """Nâng database cũ lên đúng cấu trúc của các ORM model mới."""
-    # batch_alter_table tương thích cả MySQL lẫn SQLite dùng trong unit test.
+    # Alembic batch mode keeps these column changes portable across MySQL and SQLite tests.
     with op.batch_alter_table("users") as batch_op:
         batch_op.add_column(Column("student_code", String(30)))
         batch_op.add_column(Column("major", String(150)))

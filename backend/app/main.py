@@ -6,9 +6,11 @@ from secrets import token_urlsafe
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.security import hash_password
+from app.core.config import setting
 from app.db.database import Base, engine
 from app.models import AuthSession, Course, GradeComponent, GradeScale, Semester, User
 from app.routers.auth import router as auth_router
@@ -33,6 +35,15 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Hệ thống quản lý chỉ số học tập", lifespan=lifespan)
+
+# Allow the local web origin to call the API while keeping other origins blocked.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[setting.FRONTEND_ORIGIN],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
+)
 
 
 @app.exception_handler(HTTPException)
