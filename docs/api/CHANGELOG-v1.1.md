@@ -74,3 +74,7 @@ v1 cũ là dự thảo, không phản ánh đầy đủ các PR của nhóm sau 
 - Request import mới dùng category enum và cấu trúc semester hiện hành. Goals/import/Admin vẫn được đánh dấu contract-only cho người phụ trách triển khai; không coi chúng đã có BE chỉ vì xuất hiện trong Swagger.
 
 Các khác biệt so với dự thảo v1 ở trên đã được liệt kê để nhóm thống nhất; không tuyên bố tương thích payload v1 chưa từng chốt/triển khai đầy đủ.
+
+## Bổ sung triển khai FR-11 / PB-22
+
+POST/GET/PUT/DELETE `/goals` đã chuyển thành `x-implementation=implemented`; request vẫn giữ `targetGpa`, `targetDate`, `remainingCredits`. Swagger đồng bộ request với model đang chạy, bổ sung giới hạn số nguyên tín chỉ và mô tả ngày theo UTC+7. POST tạo trùng trả 409 `GOAL_EXISTS` và hướng dẫn dùng PUT; DB unique theo user bảo vệ request đồng thời. Chưa có mục tiêu trả 404; DELETE thành công trả 200 với data=null. Hướng dẫn tích hợp: `docs/guides/FR11-PB22-BE.md`. `/goals/required-score` giữ trạng thái contract-only cho chức năng riêng.

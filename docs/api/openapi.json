@@ -59,7 +59,7 @@
         ],
         "summary": "Xem mục tiêu GPA duy nhất của tôi",
         "operationId": "getMyGoal",
-        "description": "404 NOT_FOUND nếu chưa tạo mục tiêu.",
+        "description": "Chỉ đọc mục tiêu của tài khoản trong Bearer token. Chưa tạo: 404 NOT_FOUND. Mục tiêu đã qua ngày vẫn được đọc để người dùng sửa hoặc xóa.",
         "x-backlog-id": "PB-22",
         "responses": {
           "200": {
@@ -68,6 +68,20 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GoalResponse"
+                },
+                "example": {
+                  "success": true,
+                  "statusCode": 200,
+                  "message": "Thành công",
+                  "error": null,
+                  "data": {
+                    "id": 7,
+                    "targetGpa": 3.5,
+                    "targetDate": "2027-06-30",
+                    "remainingCredits": 30
+                  },
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/goals"
                 }
               }
             }
@@ -85,7 +99,7 @@
             "$ref": "#/components/responses/HTTP500"
           }
         },
-        "x-implementation": "contract-only"
+        "x-implementation": "implemented"
       },
       "post": {
         "tags": [
@@ -93,7 +107,7 @@
         ],
         "summary": "Tạo mục tiêu GPA",
         "operationId": "createGoal",
-        "description": "Mỗi tài khoản tối đa 1 mục tiêu. Nếu đã có, trả 409 GOAL_EXISTS; FE hướng dẫn sửa. targetGpa 0–4, targetDate không trong quá khứ, remainingCredits > 0.",
+        "description": "Tạo một mục tiêu cho tài khoản trong token. Unique constraint ở DB ngăn tạo trùng, kể cả request đồng thời. Đã có: 409 GOAL_EXISTS, hướng dẫn dùng PUT /api/v1/goals. Ngày mục tiêu tính theo giờ Việt Nam UTC+7.",
         "x-backlog-id": "PB-22",
         "requestBody": {
           "required": true,
@@ -102,6 +116,11 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/GoalWrite"
+              },
+              "example": {
+                "targetGpa": 3.5,
+                "targetDate": "2027-06-30",
+                "remainingCredits": 30
               }
             }
           }
@@ -113,6 +132,20 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GoalResponse"
+                },
+                "example": {
+                  "success": true,
+                  "statusCode": 201,
+                  "message": "Thành công",
+                  "error": null,
+                  "data": {
+                    "id": 7,
+                    "targetGpa": 3.5,
+                    "targetDate": "2027-06-30",
+                    "remainingCredits": 30
+                  },
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/goals"
                 }
               }
             }
@@ -133,7 +166,7 @@
             "$ref": "#/components/responses/HTTP500"
           }
         },
-        "x-implementation": "contract-only"
+        "x-implementation": "implemented"
       },
       "put": {
         "tags": [
@@ -141,7 +174,7 @@
         ],
         "summary": "Cập nhật mục tiêu GPA",
         "operationId": "updateGoal",
-        "description": "Tham chiếu PB-22 trong Product Backlog của Nhóm 11.",
+        "description": "Thay toàn bộ ba trường của mục tiêu hiện tại; giữ nguyên id. Không tạo mới khi chưa có: 404 NOT_FOUND. Cùng validation với POST, kể cả ngày theo UTC+7.",
         "x-backlog-id": "PB-22",
         "requestBody": {
           "required": true,
@@ -150,6 +183,11 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/GoalWrite"
+              },
+              "example": {
+                "targetGpa": 3.5,
+                "targetDate": "2027-06-30",
+                "remainingCredits": 30
               }
             }
           }
@@ -161,6 +199,20 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GoalResponse"
+                },
+                "example": {
+                  "success": true,
+                  "statusCode": 200,
+                  "message": "Thành công",
+                  "error": null,
+                  "data": {
+                    "id": 7,
+                    "targetGpa": 3.5,
+                    "targetDate": "2027-06-30",
+                    "remainingCredits": 30
+                  },
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/goals"
                 }
               }
             }
@@ -181,7 +233,7 @@
             "$ref": "#/components/responses/HTTP500"
           }
         },
-        "x-implementation": "contract-only"
+        "x-implementation": "implemented"
       },
       "delete": {
         "tags": [
@@ -189,7 +241,7 @@
         ],
         "summary": "Xóa mục tiêu GPA",
         "operationId": "deleteGoal",
-        "description": "Tham chiếu PB-22 trong Product Backlog của Nhóm 11.",
+        "description": "Xóa duy nhất mục tiêu của tài khoản trong token; trả 200 với data=null. Chưa có hoặc đã xóa: 404 NOT_FOUND. Có thể POST lại sau khi xóa.",
         "x-backlog-id": "PB-22",
         "responses": {
           "200": {
@@ -198,6 +250,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/EmptyResponse"
+                },
+                "example": {
+                  "success": true,
+                  "statusCode": 200,
+                  "message": "Thành công",
+                  "error": null,
+                  "data": null,
+                  "timestamp": "2026-11-17T09:00:00+07:00",
+                  "path": "/api/v1/goals"
                 }
               }
             }
@@ -215,7 +276,7 @@
             "$ref": "#/components/responses/HTTP500"
           }
         },
-        "x-implementation": "contract-only"
+        "x-implementation": "implemented"
       }
     },
     "/goals/required-score": {
@@ -4278,32 +4339,35 @@
         "additionalProperties": false
       },
       "GoalWrite": {
-        "type": "object",
         "properties": {
           "targetGpa": {
             "type": "number",
-            "minimum": 0,
-            "maximum": 4,
-            "example": 3.5
+            "maximum": 4.0,
+            "minimum": 0.0,
+            "title": "Targetgpa"
           },
           "targetDate": {
             "type": "string",
             "format": "date",
-            "example": "2027-06-30"
+            "title": "Targetdate"
           },
           "remainingCredits": {
             "type": "integer",
-            "minimum": 1,
-            "example": 30
+            "maximum": 2147483647.0,
+            "exclusiveMinimum": true,
+            "title": "Remainingcredits",
+            "minimum": 0.0
           }
         },
+        "additionalProperties": false,
+        "type": "object",
         "required": [
           "targetGpa",
           "targetDate",
           "remainingCredits"
         ],
-        "description": "Ngày mục tiêu không được trước ngày hiện tại; mỗi tài khoản tối đa 1 mục tiêu.",
-        "additionalProperties": false
+        "title": "GoalWrite",
+        "description": "GPA 0–4 hữu hạn; ngày YYYY-MM-DD không ở quá khứ theo UTC+7; remainingCredits là số nguyên 1–2147483647. Từ chối trường thừa và kiểu chuỗi/bool cho trường số."
       },
       "Goal": {
         "type": "object",
@@ -6343,6 +6407,36 @@
         ],
         "title": "CourseUpdate",
         "description": "Dữ liệu hợp lệ được phép cập nhật cho môn học."
+      },
+      "LiveGoalWrite": {
+        "properties": {
+          "targetGpa": {
+            "type": "number",
+            "maximum": 4.0,
+            "minimum": 0.0,
+            "title": "Targetgpa"
+          },
+          "targetDate": {
+            "type": "string",
+            "format": "date",
+            "title": "Targetdate"
+          },
+          "remainingCredits": {
+            "type": "integer",
+            "maximum": 2147483647.0,
+            "exclusiveMinimum": true,
+            "title": "Remainingcredits",
+            "minimum": 0.0
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "targetGpa",
+          "targetDate",
+          "remainingCredits"
+        ],
+        "title": "GoalWrite"
       },
       "LiveGradeComponentCreate": {
         "properties": {
