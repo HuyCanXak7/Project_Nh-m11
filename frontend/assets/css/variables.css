@@ -30,3 +30,181 @@
      */
     --u: min(1px, calc(100vw / 1512), calc(100vh / 982));
 }
+
+/* ===== Nút chuyển Sáng/Tối không viền vuông (chỉ hiện biểu tượng) ===== */
+.theme-toggle-icon-btn,
+#themeToggleBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: none !important;
+    outline: none;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 50%;
+    color: #0F1F38;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.25s ease, color 0.25s ease, opacity 0.2s ease;
+}
+
+.theme-toggle-icon-btn:hover,
+#themeToggleBtn:hover {
+    transform: scale(1.12);
+    background: transparent !important;
+}
+
+.theme-toggle-icon-btn svg,
+#themeToggleBtn svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+}
+
+html.theme-dark .theme-toggle-icon-btn,
+html.theme-dark #themeToggleBtn {
+    color: #FDE047 !important;
+}
+
+/* Chuyển màu mượt mà khi đổi chế độ Sáng <-> Tối */
+html.theme-transitioning body,
+html.theme-transitioning .sidebar,
+html.theme-transitioning .dash,
+html.theme-transitioning .card,
+html.theme-transitioning .stat-card,
+html.theme-transitioning .app-card,
+html.theme-transitioning .auth-main,
+html.theme-transitioning .auth-side,
+html.theme-transitioning .course-sem-tabs,
+html.theme-transitioning .course-sem-tab,
+html.theme-transitioning .course-sem-strip,
+html.theme-transitioning .course-toolbar,
+html.theme-transitioning .course-table-card {
+    transition: background-color 0.45s ease, color 0.35s ease, border-color 0.35s ease !important;
+}
+
+/* ===== Hiệu ứng chuyển cảnh Sáng <-> Tối toàn màn hình ===== */
+#themeTransitionOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* 1. Tối -> Sáng: Mặt trời bay từ góc dưới-trái xéo lên góc trên-phải và kéo màn đen qua */
+.theme-curtain-dark {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #070B14 0%, #0F172A 60%, #1E293B 100%);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    animation: themeDarkPullAway 0.92s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes themeDarkPullAway {
+    0% {
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        opacity: 0.95;
+    }
+    55% {
+        clip-path: polygon(65% 0, 100% 0, 100% 35%, 100% 35%);
+        opacity: 0.88;
+    }
+    100% {
+        clip-path: polygon(100% 0, 100% 0, 100% 0, 100% 0);
+        opacity: 0;
+    }
+}
+
+.theme-sun-orb {
+    position: absolute;
+    left: -64px;
+    bottom: -64px;
+    width: 112px;
+    height: 112px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #F59E0B;
+    background: radial-gradient(circle, rgba(254, 240, 138, 0.96) 0%, rgba(251, 191, 36, 0.78) 42%, rgba(245, 158, 11, 0) 74%);
+    box-shadow: 0 0 70px 28px rgba(251, 191, 36, 0.55);
+    animation: themeSunDiagonal 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.theme-sun-orb svg {
+    width: 54px;
+    height: 54px;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.85));
+}
+
+@keyframes themeSunDiagonal {
+    0% {
+        transform: translate(0, 0) scale(0.75) rotate(0deg);
+        opacity: 0.9;
+    }
+    45% {
+        transform: translate(50vw, -50vh) scale(1.22) rotate(120deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(calc(100vw + 130px), calc(-100vh - 130px)) scale(0.9) rotate(240deg);
+        opacity: 0;
+    }
+}
+
+/* 2. Sáng -> Tối: Màn sao rơi từ trên xuống dưới kèm hiệu ứng mờ chuyển mượt */
+.theme-night-veil {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 25%, rgba(15, 23, 42, 0.82) 0%, rgba(7, 11, 20, 0.94) 100%);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    animation: themeNightVeilFade 0.95s ease-in-out forwards;
+}
+
+@keyframes themeNightVeilFade {
+    0%   { opacity: 0; }
+    35%  { opacity: 0.92; }
+    60%  { opacity: 0.88; }
+    100% { opacity: 0; }
+}
+
+.theme-star {
+    position: absolute;
+    top: -36px;
+    color: #FEF08A;
+    font-size: 14px;
+    line-height: 1;
+    text-shadow: 0 0 8px rgba(254, 240, 138, 0.9), 0 0 18px rgba(62, 224, 155, 0.45);
+    opacity: 0;
+    animation: themeStarFall var(--dur, 0.82s) cubic-bezier(0.25, 0.46, 0.45, 0.94) var(--delay, 0s) forwards;
+}
+
+.theme-star--streak {
+    width: 2px;
+    height: 28px;
+    border-radius: 999px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(254, 240, 138, 0.95));
+    box-shadow: 0 0 10px rgba(254, 240, 138, 0.7);
+}
+
+@keyframes themeStarFall {
+    0% {
+        transform: translateY(0) scale(0.7);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 0.9;
+    }
+    100% {
+        transform: translateY(108vh) scale(1.05);
+        opacity: 0;
+    }
+}

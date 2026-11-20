@@ -246,7 +246,17 @@ const StorageService = {
     }
   ],
 
+  // ADMIN đang xem tài khoản khác (chọn ở trang Tài khoản) → đọc/ghi dữ liệu của tài khoản đó
+  adminViewAs() {
+    try {
+      const target = JSON.parse(sessionStorage.getItem('adminViewAs'));
+      return target?.id && getSession()?.user?.role === 'ADMIN' ? target : null;
+    } catch { return null; }
+  },
+
   currentUserId() {
+    const viewAs = this.adminViewAs();
+    if (viewAs) return String(viewAs.id);
     if (typeof getSession === 'function') {
       const u = getSession()?.user;
       if (u?.id) return String(u.id);

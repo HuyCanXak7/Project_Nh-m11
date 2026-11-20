@@ -153,19 +153,19 @@ function renderTranscript() {
     }
 
     return `
-      <div class="transcript-sem-card" style="background: #FFFFFF; border: 1px solid #CBD5E1; padding: 0; margin-bottom: 24px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; background: #F8FAFC; border-bottom: 1px solid #CBD5E1; flex-wrap: wrap; gap: 10px;">
+      <div class="transcript-sem-card" style="background: var(--e-card); border: 1px solid var(--e-soft); padding: 0; margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; background: var(--e-card-alt); border-bottom: 1px solid var(--e-soft); flex-wrap: wrap; gap: 10px;">
           <div>
-            <h3 style="font-size: 15px; font-weight: 800; color: #0F1F38;">${escapeHtml(sem.name)} ${sem.academic_year ? `(${escapeHtml(sem.academic_year)})` : ''}</h3>
+            <h3 style="font-size: 15px; font-weight: 800; color: var(--e-ink);">${escapeHtml(sem.name)} ${sem.academic_year ? `(${escapeHtml(sem.academic_year)})` : ''}</h3>
             <span style="font-size: 11.5px; color: #64748B;">Thời gian: ${escapeHtml(sem.start_date || '--')} đến ${escapeHtml(sem.end_date || '--')}</span>
           </div>
-          <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: #FFFFFF; padding: 7px 14px; border: 1px solid #CBD5E1; font-size: 12px;">
-            <span>GPA Học kỳ (Hệ 4): <strong style="color: #0F1F38; font-size: 13.5px;">${semCalc.formattedGPA}</strong></span>
-            <span style="color: #CBD5E1;">|</span>
-            <span>ĐTB Kỳ (Hệ 10): <strong style="color: #0F1F38;">${semCalc.formattedAvg10 || '0.00'}</strong></span>
-            <span style="color: #CBD5E1;">|</span>
+          <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: var(--e-card); padding: 7px 14px; border: 1px solid var(--e-soft); font-size: 12px;">
+            <span>GPA Học kỳ (Hệ 4): <strong style="color: var(--e-ink); font-size: 13.5px;">${semCalc.formattedGPA}</strong></span>
+            <span style="color: var(--e-soft);">|</span>
+            <span>ĐTB Kỳ (Hệ 10): <strong style="color: var(--e-ink);">${semCalc.formattedAvg10 || '0.00'}</strong></span>
+            <span style="color: var(--e-soft);">|</span>
             <span>GPA Tích lũy: <strong style="color: #059669; font-size: 13.5px;">${cumUpToSem.formattedGPA}</strong></span>
-            <span style="color: #CBD5E1;">|</span>
+            <span style="color: var(--e-soft);">|</span>
             <span>Tín chỉ đạt: <strong>${semCalc.passedCredits}/${semCalc.registeredCredits || semCalc.totalCredits} TC</strong></span>
           </div>
         </div>
@@ -195,8 +195,8 @@ function renderTranscript() {
                   ? '<span style="color: var(--error); font-weight: 600;">Chưa cấu hình cột điểm</span>'
                   : comps.map(cp => {
                       const hasScore = cp.score !== null && cp.score !== '' && cp.score !== undefined && !isNaN(Number(cp.score));
-                      return `<span style="display: inline-block; background: #F1F5F9; border: 1px solid #E2E8F0; padding: 2px 8px; margin: 2px 4px 2px 0; font-size: 11.5px; color: #0F1F38;">
-                        <strong>${escapeHtml(cp.name)}</strong> (${cp.weight_percent}%): <strong style="color: ${hasScore ? '#0F1F38' : '#64748B'};">${hasScore ? Number(cp.score).toFixed(1) : '—'}</strong>
+                      return `<span style="display: inline-block; background: var(--e-tint); border: 1px solid var(--e-soft); padding: 2px 8px; margin: 2px 4px 2px 0; font-size: 11.5px; color: var(--e-ink);">
+                        <strong>${escapeHtml(cp.name)}</strong> (${cp.weight_percent}%): <strong style="color: ${hasScore ? 'var(--e-ink)' : '#64748B'};">${hasScore ? Number(cp.score).toFixed(1) : '—'}</strong>
                       </span>`;
                     }).join('');
 
@@ -217,15 +217,15 @@ function renderTranscript() {
                         ${isReplacedByRetake ? '<span class="badge badge-gray" style="font-size: 10px; padding: 2px 6px;" title="Đã có lần học khác điểm cao hơn được tính vào GPA tích lũy">Đã thay thế bởi lần học cao hơn</span>' : ''}
                       </div>
                     </td>
-                    <td style="text-align: center; font-weight: 700; color: #0F1F38;">${c.credits} TC</td>
+                    <td style="text-align: center; font-weight: 700; color: var(--e-ink);">${c.credits} TC</td>
                     <td style="font-size: 12px;">${compsHtml}${weightErrorHtml}</td>
-                    <td style="text-align: center; font-weight: 800; font-size: 13.5px; color: ${calc.isComplete ? '#0F1F38' : '#94A3B8'};">
+                    <td style="text-align: center; font-weight: 800; font-size: 13.5px; color: ${calc.isComplete ? 'var(--e-ink)' : '#94A3B8'};">
                       ${calc.isComplete ? calc.finalScore10.toFixed(1) : '—'}
                     </td>
                     <td style="text-align: center; font-weight: 800;">
                       ${calc.isComplete ? `<span class="badge ${grade.colorClass}">${grade.letter}</span>` : '—'}
                     </td>
-                    <td style="text-align: center; font-weight: 800; color: #0F1F38;">
+                    <td style="text-align: center; font-weight: 800; color: var(--e-ink);">
                       ${calc.isComplete ? grade.scale4.toFixed(1) : '—'}
                     </td>
                     <td style="text-align: center;">

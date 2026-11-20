@@ -382,7 +382,7 @@ function renderSemBarLineChart(items) {
         }).join(' ');
 
         svg.setAttribute('viewBox', `0 0 ${plotRect.width} ${plotRect.height}`);
-        svg.innerHTML = `<polyline points="${pts}" fill="none" stroke="#0F1F38" stroke-width="1.6"/>`;
+        svg.innerHTML = `<polyline points="${pts}" fill="none" style="stroke: var(--e-ink)" stroke-width="1.6"/>`;
     });
 }
 
@@ -397,7 +397,7 @@ function renderActivities(list) {
         const isLow = a.score < 7.0;
         const sqColor = (a.letter === 'A+' || a.letter === 'A')
             ? '#10B981'
-            : ((a.letter === 'B+' || a.letter === 'B') ? '#0F1F38' : '#EF4444');
+            : ((a.letter === 'B+' || a.letter === 'B') ? 'var(--e-ink)' : '#EF4444');
         return `
         <li class="activity">
             <span class="activity__name">${escapeHtml(a.name)}</span>

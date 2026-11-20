@@ -165,3 +165,50 @@
 .modal__btn--danger:hover { background: #E8484D; }
 .modal__btn--ghost { background: transparent; color: #0F1B3D; border: 1px solid #0F1B3D; }
 .modal__btn--ghost:hover { background: #E9EEF6; }
+
+/* ===== Dark Mode cho Modal & Bảng thông báo xác nhận (PB-35 / T0694F3) ===== */
+html.theme-dark .modal {
+    background: #111827 !important;
+    border: 1px solid #475569 !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55) !important;
+}
+
+html.theme-dark .modal__title {
+    color: #F8FAFC !important;
+}
+
+html.theme-dark .modal__message {
+    color: #CBD5E1 !important;
+}
+
+html.theme-dark .modal__btn {
+    background: #3EE09B !important;
+    color: #0F1F38 !important;
+    font-weight: 700;
+}
+
+html.theme-dark .modal__btn:hover {
+    background: #2FD497 !important;
+}
+
+html.theme-dark .modal--error .modal__btn,
+html.theme-dark .modal__btn--danger {
+    background: #EF4444 !important;
+    color: #FFFFFF !important;
+}
+
+html.theme-dark .modal--error .modal__btn:hover,
+html.theme-dark .modal__btn--danger:hover {
+    background: #DC2626 !important;
+}
+
+html.theme-dark .modal__btn--ghost {
+    background: #1E293B !important;
+    color: #F8FAFC !important;
+    border: 1px solid #64748B !important;
+}
+
+html.theme-dark .modal__btn--ghost:hover {
+    background: #334155 !important;
+    border-color: #94A3B8 !important;
+}

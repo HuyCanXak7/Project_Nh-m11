@@ -6,6 +6,115 @@
 
 const $ = (id) => document.getElementById(id);
 
+const THEME_STORAGE_KEY = 'studytrack_theme';
+
+function getSavedTheme() {
+    try {
+        return localStorage.getItem(THEME_STORAGE_KEY) === 'dark' ? 'dark' : 'light';
+    } catch {
+        return 'light';
+    }
+}
+
+function applyTheme(theme) {
+    const isDark = theme === 'dark';
+    document.documentElement.classList.toggle('theme-dark', isDark);
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    if (document.body) {
+        document.body.classList.toggle('theme-dark', isDark);
+    }
+
+    const btn = $('themeToggleBtn');
+    if (btn) {
+        btn.setAttribute('aria-pressed', String(isDark));
+        btn.title = isDark ? 'Chuyển sang giao diện sáng' : 'Bật giao diện tối (Dark Mode)';
+        btn.innerHTML = isDark
+            ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>'
+            : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    }
+
+    const menuLabel = $('themeMenuLabel');
+    if (menuLabel) {
+        menuLabel.textContent = isDark ? 'Giao diện sáng' : 'Giao diện tối';
+    }
+}
+
+function playThemeTransitionAnimation(nextTheme, onSwitchMidpoint) {
+    if (typeof document === 'undefined' || !document.body) {
+        onSwitchMidpoint();
+        return;
+    }
+
+    document.getElementById('themeTransitionOverlay')?.remove();
+    document.documentElement.classList.add('theme-transitioning');
+
+    const overlay = document.createElement('div');
+    overlay.id = 'themeTransitionOverlay';
+    overlay.setAttribute('aria-hidden', 'true');
+
+    if (nextTheme === 'light') {
+        // Chuyển Tối -> Sáng: Mặt trời từ góc dưới-trái bay xéo lên góc trên-phải kéo màn đen qua
+        overlay.innerHTML = `
+            <div class="theme-curtain-dark"></div>
+            <div class="theme-sun-orb">
+                <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="4.5"/>
+                    <path d="M12 1.5v2.5M12 20v2.5M4.57 4.57l1.77 1.77M17.66 17.66l1.77 1.77M1.5 12H4M20 12h2.5M4.57 19.43l1.77-1.77M17.66 6.34l1.77-1.77"/>
+                </svg>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        setTimeout(onSwitchMidpoint, 220);
+        setTimeout(() => {
+            overlay.remove();
+            document.documentElement.classList.remove('theme-transitioning');
+        }, 980);
+    } else {
+        // Chuyển Sáng -> Tối: Màn sao từ trên rơi xuống dưới kèm hiệu ứng mờ chuyển mượt
+        const veil = document.createElement('div');
+        veil.className = 'theme-night-veil';
+        overlay.appendChild(veil);
+
+        const starCount = 34;
+        for (let i = 0; i < starCount; i++) {
+            const star = document.createElement('span');
+            const isStreak = i % 4 === 0;
+            star.className = isStreak ? 'theme-star theme-star--streak' : 'theme-star';
+            if (!isStreak) {
+                star.textContent = i % 3 === 0 ? '✦' : '★';
+                star.style.fontSize = `${10 + (i % 4) * 3}px`;
+            }
+            star.style.left = `${(i * 3.1 + (i % 5) * 2.7) % 98}%`;
+            star.style.setProperty('--delay', `${(i % 7) * 0.045}s`);
+            star.style.setProperty('--dur', `${0.68 + (i % 4) * 0.09}s`);
+            overlay.appendChild(star);
+        }
+
+        document.body.appendChild(overlay);
+        setTimeout(onSwitchMidpoint, 390);
+        setTimeout(() => {
+            overlay.remove();
+            document.documentElement.classList.remove('theme-transitioning');
+        }, 1020);
+    }
+}
+
+function toggleTheme() {
+    const next = getSavedTheme() === 'dark' ? 'light' : 'dark';
+    try {
+        localStorage.setItem(THEME_STORAGE_KEY, next);
+    } catch { /* ignore */ }
+
+    playThemeTransitionAnimation(next, () => {
+        applyTheme(next);
+        if (typeof showToast === 'function') {
+            showToast(next === 'dark' ? 'Đã bật giao diện tối (Dark Mode)' : 'Đã chuyển sang giao diện sáng');
+        }
+    });
+}
+
+applyTheme(getSavedTheme());
+
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 function svgEl(tag, attrs = {}) {
@@ -89,7 +198,7 @@ function upgradeSidebarFigma() {
 
     rightBox.innerHTML = `
         <span class="topbar-date">${formatTopbarDate()}</span>
-        <button type="button" class="topbar-icon-btn" title="Tìm kiếm môn học" onclick="window.location.href='courses.html'">
+        <button type="button" class="topbar-icon-btn" id="topbarSearchBtn" title="Tìm kiếm nhanh (Ctrl+K)" aria-label="Tìm kiếm nhanh" onclick="openGlobalSearchModal()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7.5"/><line x1="20" y1="20" x2="16.2" y2="16.2"/></svg>
         </button>
         <button type="button" class="topbar-icon-btn" title="Thông báo" onclick="showToast('Không có thông báo mới')">
@@ -97,6 +206,7 @@ function upgradeSidebarFigma() {
             <span class="topbar-icon-btn__dot"></span>
         </button>
         <div class="topbar-user-wrap" id="topbarUserWrap"></div>
+        <button type="button" class="theme-toggle-icon-btn" id="themeToggleBtn" title="Bật giao diện tối (Dark Mode)" aria-label="Bật hoặc tắt giao diện tối" aria-pressed="false" onclick="toggleTheme()"></button>
     `;
 
     const wrap = rightBox.querySelector('#topbarUserWrap');
@@ -126,6 +236,12 @@ function upgradeSidebarFigma() {
                     </a>
                 </li>
                 <li role="none">
+                    <button type="button" class="user-menu__item" onclick="toggleTheme()" role="menuitem">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                        <span id="themeMenuLabel">Giao diện tối</span>
+                    </button>
+                </li>
+                <li role="none">
                     <button type="button" class="user-menu__item" onclick="handleResetData()" role="menuitem">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
                         Khôi phục dữ liệu mẫu
@@ -140,6 +256,8 @@ function upgradeSidebarFigma() {
             `;
         }
     }
+
+    applyTheme(getSavedTheme());
 }
 
 function refreshSidebarGoalWidget() {}
@@ -410,7 +528,12 @@ function showToast(msg, isError = false) {
         document.body.appendChild(toast);
     }
 
-    toast.style.background = isError ? '#DC2626' : '#0F1F38';
+    const isDark = document.documentElement.classList.contains('theme-dark');
+    toast.style.background = isError ? '#DC2626' : (isDark ? '#1E293B' : '#0F1F38');
+    toast.style.color = '#FFFFFF';
+    toast.style.border = isError
+        ? '1px solid #FCA5A5'
+        : (isDark ? '1px solid #3EE09B' : '1px solid rgba(255,255,255,0.18)');
     toast.textContent = msg;
     toast.style.opacity = '1';
     toast.style.transform = 'translateY(0)';
@@ -419,6 +542,20 @@ function showToast(msg, isError = false) {
         toast.style.opacity = '0';
         toast.style.transform = 'translateY(-10px)';
     }, 2800);
+}
+
+/* ===== ADMIN đang xem dữ liệu của tài khoản khác: banner + nút thoát ===== */
+function renderAdminViewBanner() {
+    const target = typeof StorageService !== 'undefined' && StorageService.adminViewAs?.();
+    const main = document.querySelector('main.dash');
+    if (!target || !main) return;
+    const bar = document.createElement('div');
+    bar.className = 'app-card no-print';
+    bar.setAttribute('role', 'status');
+    bar.style.cssText = 'margin: 0 0 16px; padding: 12px 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border: 2px solid var(--warning, #F5A623);';
+    bar.innerHTML = `<span style="flex: 1;">Quản trị: đang xem và chỉnh sửa dữ liệu của <strong>${escapeHtml(target.email)}</strong></span>
+        <a href="admin-user.html" class="btn btn-secondary btn-sm">Thoát, về danh sách tài khoản</a>`;
+    main.querySelector('.dash-header')?.after(bar) ?? main.prepend(bar);
 }
 
 function initAppShell() {
@@ -447,6 +584,7 @@ function initAppShell() {
     }
 
     renderUser(user);
+    renderAdminViewBanner();
     setupSidebar();
     setupUserMenu();
     highlightActiveSidebar();
@@ -457,6 +595,163 @@ function initAppShell() {
     return true;
 }
 
+/* ===== Tìm kiếm nhanh toàn hệ thống (Kính lúp Topbar & Ctrl+K) ===== */
+function normalizeSearchText(str) {
+    return String(str || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/Đ/g, 'D')
+        .toLowerCase();
+}
+
+function openGlobalSearchModal() {
+    document.getElementById('globalSearchOverlay')?.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'globalSearchOverlay';
+    overlay.className = 'modal-overlay is-open';
+    overlay.innerHTML = `
+        <div class="modal global-search-modal" role="dialog" aria-modal="true" aria-label="Tìm kiếm nhanh">
+            <div class="global-search__head">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7.5"/><line x1="20" y1="20" x2="16.2" y2="16.2"/></svg>
+                <input type="text" id="globalSearchInput" class="global-search__input" placeholder="Tìm mã môn, tên môn học, học kỳ hoặc trang..." autocomplete="off">
+                <button type="button" id="globalSearchClose" class="global-search__close" aria-label="Đóng tìm kiếm">✕</button>
+            </div>
+            <div class="global-search__results" id="globalSearchResults"></div>
+        </div>
+    `;
+
+    const close = () => {
+        document.removeEventListener('keydown', onKey);
+        overlay.remove();
+    };
+    const onKey = (e) => {
+        if (e.key === 'Escape') close();
+    };
+
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    overlay.querySelector('#globalSearchClose').addEventListener('click', close);
+    document.addEventListener('keydown', onKey);
+    document.body.appendChild(overlay);
+
+    const input = overlay.querySelector('#globalSearchInput');
+    const resultsEl = overlay.querySelector('#globalSearchResults');
+
+    const pages = [
+        { title: '01 Tổng quan', sub: 'Dashboard GPA & Tiến độ học tập', href: 'dashboard.html' },
+        { title: '02 Môn học', sub: 'Quản lý môn học, trọng số & điểm thành phần', href: 'courses.html' },
+        { title: '03 Học kỳ', sub: 'Danh sách & thời gian các học kỳ', href: 'semesters.html' },
+        { title: '04 Thống kê', sub: 'Biểu đồ GPA & phân bố điểm chữ', href: 'statistics.html' },
+        { title: '05 Mục tiêu', sub: 'Đặt mục tiêu GPA & mô phỏng What-If', href: 'goals.html' },
+        { title: '06 Nhập điểm', sub: 'Nhập điểm từ tệp CSV / Excel (.xlsx)', href: 'import.html' },
+        { title: '07 Bảng điểm', sub: 'Xem bảng điểm tổng hợp, xuất CSV/Excel & In A4', href: 'transcript.html' },
+        { title: 'Hồ sơ cá nhân', sub: 'Thông tin sinh viên, ảnh đại diện & đổi mật khẩu', href: 'profile.html' }
+    ];
+
+    const renderResults = (query) => {
+        const q = normalizeSearchText(query).trim();
+        const courses = (typeof StorageService !== 'undefined' && StorageService.getCourses) ? StorageService.getCourses() : [];
+        const semesters = (typeof StorageService !== 'undefined' && StorageService.getSemesters) ? StorageService.getSemesters() : [];
+        const semMap = Object.fromEntries(semesters.map(s => [s.id, s]));
+
+        const matchedCourses = courses.filter(c => {
+            if (!q) return true;
+            return normalizeSearchText(c.course_code).includes(q) ||
+                   normalizeSearchText(c.course_name).includes(q) ||
+                   normalizeSearchText(c.category).includes(q);
+        }).slice(0, q ? 10 : 5);
+
+        const matchedPages = pages.filter(p => !q || normalizeSearchText(p.title + ' ' + p.sub).includes(q)).slice(0, 5);
+
+        let html = '';
+        if (matchedCourses.length > 0) {
+            html += `<div class="global-search__section">Môn học (${matchedCourses.length})</div>`;
+            html += matchedCourses.map(c => {
+                const sem = semMap[c.semester_id];
+                const semLabel = sem ? `${sem.name} ${sem.academic_year || ''}` : 'Chưa phân kỳ';
+                const targetUrl = `courses.html?semId=${encodeURIComponent(c.semester_id || '')}&q=${encodeURIComponent(c.course_code || c.course_name || '')}`;
+                return `
+                    <button type="button" class="global-search__item" data-course-code="${escapeHtml(c.course_code)}" data-sem-id="${escapeHtml(c.semester_id || '')}" data-href="${targetUrl}">
+                        <span class="global-search__code">${escapeHtml(c.course_code)}</span>
+                        <span class="global-search__meta">
+                            <strong>${escapeHtml(c.course_name)}</strong>
+                            <small>${escapeHtml(semLabel)} · ${c.credits} TC</small>
+                        </span>
+                        <span class="global-search__go">Mở →</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        if (matchedPages.length > 0) {
+            html += `<div class="global-search__section">Trang chức năng</div>`;
+            html += matchedPages.map(p => `
+                <a href="${p.href}" class="global-search__item">
+                    <span class="global-search__code">TRANG</span>
+                    <span class="global-search__meta">
+                        <strong>${escapeHtml(p.title)}</strong>
+                        <small>${escapeHtml(p.sub)}</small>
+                    </span>
+                    <span class="global-search__go">Đi tới →</span>
+                </a>
+            `).join('');
+        }
+
+        if (!html) {
+            html = `<div class="global-search__empty">Không tìm thấy môn học hoặc trang nào khớp với "${escapeHtml(query)}".</div>`;
+        }
+
+        resultsEl.innerHTML = html;
+
+        resultsEl.querySelectorAll('button.global-search__item').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const code = btn.dataset.courseCode || '';
+                const semId = btn.dataset.semId || '';
+                const href = btn.dataset.href;
+                const searchInputOnPage = document.getElementById('searchCourseInput');
+                const semFilterOnPage = document.getElementById('filterSemester');
+                if (searchInputOnPage && typeof renderCourses === 'function') {
+                    if (semFilterOnPage && semId) semFilterOnPage.value = semId;
+                    searchInputOnPage.value = code;
+                    if (typeof renderSemesterTabs === 'function') renderSemesterTabs();
+                    if (typeof handleFilterChange === 'function') handleFilterChange();
+                    close();
+                    searchInputOnPage.focus();
+                } else {
+                    window.location.href = href;
+                }
+            });
+        });
+    };
+
+    input.addEventListener('input', () => renderResults(input.value));
+    renderResults('');
+    setTimeout(() => input.focus(), 30);
+}
+
+document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        openGlobalSearchModal();
+    }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     initAppShell();
+});
+
+// Chuyển trang mượt: bấm link trong sidebar / menu tài khoản thì nội dung trượt ra rồi mới điều hướng
+document.addEventListener('click', (e) => {
+    const link = e.target.closest('.sidebar a[href], .user-menu a[href]');
+    if (!link || link.getAttribute('href').startsWith('#') || link.target === '_blank') return;
+    if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; // mở tab mới thì để mặc định
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    e.preventDefault();
+    document.body.classList.add('page-leaving');
+    setTimeout(() => { location.href = link.href; }, 200);
+});
+// Bấm Back (trang lấy từ bfcache) thì bỏ trạng thái đang rời trang
+window.addEventListener('pageshow', (e) => {
+    if (e.persisted) document.body.classList.remove('page-leaving');
 });

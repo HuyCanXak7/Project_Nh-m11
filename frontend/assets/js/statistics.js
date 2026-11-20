@@ -38,7 +38,7 @@ function formatShortSemLabel(sem) {
 
 async function loadStatisticsData(/* cohortId */) {
     const blockRequirements = {
-        'Đại cương': { label: 'Giáo dục đại cương', req: 35, sqColor: '#0F1F38' },
+        'Đại cương': { label: 'Giáo dục đại cương', req: 35, sqColor: 'var(--e-ink)' },
         'Cơ sở ngành': { label: 'Cơ sở ngành', req: 45, sqColor: '#CBD5E8' },
         'Chuyên ngành': { label: 'Chuyên ngành', req: 45, sqColor: '#3EE09B' },
         'Tự chọn & Thực tập': { label: 'Tự chọn và thực tập', req: 15, sqColor: '#7DD3FC' }
@@ -375,7 +375,7 @@ function renderGpaChart(items, targetGpa = 3.60) {
         }).join(' ');
 
         svg.setAttribute('viewBox', `0 0 ${plotRect.width} ${plotRect.height}`);
-        svg.innerHTML = `<polyline points="${pts}" fill="none" stroke="#0F1F38" stroke-width="1.6"/>`;
+        svg.innerHTML = `<polyline points="${pts}" fill="none" style="stroke: var(--e-ink)" stroke-width="1.6"/>`;
     });
 }
 
@@ -483,7 +483,7 @@ function renderHighlights(list) {
             : (isWarn ? 'Điểm thấp nhất kỳ' : escapeHtml(c.semester));
         const sqColor = (c.grade === 'A+' || c.grade === 'A')
             ? '#10B981'
-            : ((c.grade === 'B+' || c.grade === 'B') ? '#0F1F38' : '#EF4444');
+            : ((c.grade === 'B+' || c.grade === 'B') ? 'var(--e-ink)' : '#EF4444');
 
         return `
         <li class="highlight ${isWarn ? 'highlight--warn' : ''}">
