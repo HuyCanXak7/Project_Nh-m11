@@ -250,7 +250,8 @@ const StorageService = {
   adminViewAs() {
     try {
       const target = JSON.parse(sessionStorage.getItem('adminViewAs'));
-      return target?.id && getSession()?.user?.role === 'ADMIN' ? target : null;
+      const isAdmin = typeof getSession === 'function' && getSession()?.user?.role === 'ADMIN';
+      return target?.id && isAdmin ? target : null;
     } catch { return null; }
   },
 
@@ -279,6 +280,74 @@ const StorageService = {
   coursesKey()   { return STORAGE_KEYS.COURSES + '_' + this.currentUserId(); },
   goalKey()      { return STORAGE_KEYS.GOAL + '_' + this.currentUserId(); },
   studentKey()   { return STORAGE_KEYS.STUDENT + '_' + this.currentUserId(); },
+
+  // Đọc dữ liệu học tập của một tài khoản bất kỳ (dùng cho Admin theo dõi & kiểm tra sinh viên)
+  getStudentDataByUser(userObj) {
+    const candidates = [];
+    if (userObj?.id) candidates.push(String(userObj.id));
+    if (userObj?.email) candidates.push(String(userObj.email).toLowerCase());
+
+    const readJson = (key) => {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : null;
+      } catch {
+        return null;
+      }
+    };
+
+    let semesters = null;
+    let courses = null;
+    let student = null;
+    let goal = null;
+
+    for (const uid of candidates) {
+      if (!semesters) {
+        const s = readJson(STORAGE_KEYS.SEMESTERS + '_' + uid);
+        if (Array.isArray(s) && s.length > 0) semesters = s;
+      }
+      if (!courses) {
+        const c = readJson(STORAGE_KEYS.COURSES + '_' + uid);
+        if (Array.isArray(c) && c.length > 0) courses = c;
+      }
+      if (!student) {
+        const st = readJson(STORAGE_KEYS.STUDENT + '_' + uid);
+        if (st && (st.student_id || st.name || st.major || st.class_name)) student = st;
+      }
+      if (!goal) {
+        const g = readJson(STORAGE_KEYS.GOAL + '_' + uid);
+        if (g && g.target_gpa) goal = g;
+      }
+    }
+
+    // Nếu tài khoản chưa từng mở trang hoặc chưa lưu key riêng, trả về mảng đã lưu (kể cả mảng rỗng) hoặc mặc định
+    if (!semesters && candidates.length > 0) {
+      for (const uid of candidates) {
+        const s = readJson(STORAGE_KEYS.SEMESTERS + '_' + uid);
+        if (Array.isArray(s)) { semesters = s; break; }
+      }
+    }
+    if (!courses && candidates.length > 0) {
+      for (const uid of candidates) {
+        const c = readJson(STORAGE_KEYS.COURSES + '_' + uid);
+        if (Array.isArray(c)) { courses = c; break; }
+      }
+    }
+
+    return {
+      semesters: Array.isArray(semesters) ? semesters : this.DEFAULT_SEMESTERS,
+      courses: Array.isArray(courses) ? courses : this.DEFAULT_COURSES,
+      student: student || {
+        student_id: userObj?.studentCode || '',
+        name: userObj?.fullName || '',
+        email: userObj?.email || '',
+        major: userObj?.major || '',
+        class_name: userObj?.className || ''
+      },
+      goal: goal || { target_gpa: 3.60, target_date: '2027-06-30', remaining_credits: 30 },
+      isDefaultSample: !Array.isArray(courses)
+    };
+  },
 
   init() {
     try {

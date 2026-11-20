@@ -549,11 +549,13 @@ function renderAdminViewBanner() {
     const target = typeof StorageService !== 'undefined' && StorageService.adminViewAs?.();
     const main = document.querySelector('main.dash');
     if (!target || !main) return;
+    document.getElementById('adminViewAsBanner')?.remove();
     const bar = document.createElement('div');
+    bar.id = 'adminViewAsBanner';
     bar.className = 'app-card no-print';
     bar.setAttribute('role', 'status');
     bar.style.cssText = 'margin: 0 0 16px; padding: 12px 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border: 2px solid var(--warning, #F5A623);';
-    bar.innerHTML = `<span style="flex: 1;">Quản trị: đang xem và chỉnh sửa dữ liệu của <strong>${escapeHtml(target.email)}</strong></span>
+    bar.innerHTML = `<span style="flex: 1;">Quản trị: đang theo dõi & kiểm tra dữ liệu của <strong>${escapeHtml(target.email)}</strong></span>
         <a href="admin-user.html" class="btn btn-secondary btn-sm">Thoát, về danh sách tài khoản</a>`;
     main.querySelector('.dash-header')?.after(bar) ?? main.prepend(bar);
 }
@@ -590,7 +592,11 @@ function initAppShell() {
     highlightActiveSidebar();
 
     if (session && typeof authApi !== 'undefined' && authApi.me) {
-        authApi.me().then(renderUser).catch(() => {});
+        authApi.me().then((freshUser) => {
+            renderUser(freshUser);
+            upgradeSidebarFigma();
+            highlightActiveSidebar();
+        }).catch(() => {});
     }
     return true;
 }
@@ -638,6 +644,7 @@ function openGlobalSearchModal() {
     const input = overlay.querySelector('#globalSearchInput');
     const resultsEl = overlay.querySelector('#globalSearchResults');
 
+    const isAdminUser = typeof getSession === 'function' && getSession()?.user?.role === 'ADMIN';
     const pages = [
         { title: '01 Tổng quan', sub: 'Dashboard GPA & Tiến độ học tập', href: 'dashboard.html' },
         { title: '02 Môn học', sub: 'Quản lý môn học, trọng số & điểm thành phần', href: 'courses.html' },
@@ -646,6 +653,7 @@ function openGlobalSearchModal() {
         { title: '05 Mục tiêu', sub: 'Đặt mục tiêu GPA & mô phỏng What-If', href: 'goals.html' },
         { title: '06 Nhập điểm', sub: 'Nhập điểm từ tệp CSV / Excel (.xlsx)', href: 'import.html' },
         { title: '07 Bảng điểm', sub: 'Xem bảng điểm tổng hợp, xuất CSV/Excel & In A4', href: 'transcript.html' },
+        ...(isAdminUser ? [{ title: '08 Tài khoản', sub: 'Trang theo dõi, kiểm tra học vụ sinh viên & khóa/mở TK (ADMIN)', href: 'admin-user.html' }] : []),
         { title: 'Hồ sơ cá nhân', sub: 'Thông tin sinh viên, ảnh đại diện & đổi mật khẩu', href: 'profile.html' }
     ];
 

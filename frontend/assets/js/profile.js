@@ -169,9 +169,14 @@ async function handleSaveProfile(e) {
 
   try {
     if (typeof authApi !== 'undefined' && typeof authApi.updateProfile === 'function') {
-      await authApi.updateProfile({ fullName: name });
+      await authApi.updateProfile({
+        fullName: name,
+        studentCode: student_id,
+        major,
+        className: class_name
+      });
     } else if (typeof saveSession === 'function') {
-      saveSession({ ...session, user: { ...session.user, fullName: name } });
+      saveSession({ ...session, user: { ...session.user, fullName: name, studentCode: student_id, major, className: class_name } });
     }
   } catch (err) {
     const errMsg = err?.message || 'Không thể đồng bộ hồ sơ tài khoản!';

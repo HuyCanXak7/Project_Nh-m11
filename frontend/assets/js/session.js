@@ -245,14 +245,19 @@ const authApi = {
     },
 
     /** Cập nhật hồ sơ cá nhân của chính người dùng đang đăng nhập (PB-04 / T0694E3) */
-    async updateProfile({ fullName }) {
+    async updateProfile({ fullName, studentCode, major, className }) {
         const res = await apiFetch('/auth/profile', {
             method: 'PATCH',
-            body: { fullName },
+            body: { fullName, studentCode, major, className },
         });
         const session = getSession();
-        if (session && session.user && res?.fullName) {
-            saveSession({ ...session, user: { ...session.user, fullName: res.fullName } });
+        if (session && session.user) {
+            const nextUser = { ...session.user };
+            if (res?.fullName) nextUser.fullName = res.fullName;
+            if (res?.studentCode !== undefined) nextUser.studentCode = res.studentCode;
+            if (res?.major !== undefined) nextUser.major = res.major;
+            if (res?.className !== undefined) nextUser.className = res.className;
+            saveSession({ ...session, user: nextUser });
         }
         return res;
     },
@@ -420,26 +425,59 @@ const mockServer = (() => {
             return issueTokens(db, user);
         },
 
-        async 'PATCH /auth/profile'(db, { fullName }, token) {
+        async 'PATCH /auth/profile'(db, { fullName, studentCode, major, className }, token) {
             const user = userFromAccess(db, token);
             const cleanName = String(fullName || '').trim();
             if (cleanName.length < 2) {
                 fail(400, 'VALIDATION_ERROR', 'Họ và tên phải có ít nhất 2 ký tự.');
             }
             user.fullName = cleanName;
-            return { id: user.id, email: user.email, fullName: user.fullName };
+            if (studentCode !== undefined) user.studentCode = String(studentCode || '').trim() || null;
+            if (major !== undefined) user.major = String(major || '').trim() || null;
+            if (className !== undefined) user.className = String(className || '').trim() || null;
+            return {
+                id: user.id,
+                email: user.email,
+                fullName: user.fullName,
+                studentCode: user.studentCode ?? null,
+                major: user.major ?? null,
+                className: user.className ?? null,
+            };
         },
         async 'GET /admin/users'(db, body, token, query) {
             const me = userFromAccess(db, token);
             if ((me.role ?? 'STUDENT') !== 'ADMIN') fail(403, 'FORBIDDEN', 'Bạn không có quyền quản trị');
             const q = (query.get('q') || '').trim().toLowerCase();
+            const roleFilter = (query.get('role') || '').trim().toUpperCase();
+            const statusFilter = (query.get('status') || '').trim().toLowerCase();
             const items = db.users
-                .filter((u) => !q || u.email.toLowerCase().includes(q) || u.fullName.toLowerCase().includes(q))
+                .filter((u) => {
+                    const uRole = u.role ?? 'STUDENT';
+                    const uCode = (u.studentCode || '').toLowerCase();
+                    const uMajor = (u.major || '').toLowerCase();
+                    const matchQ = !q
+                        || u.email.toLowerCase().includes(q)
+                        || (u.fullName || '').toLowerCase().includes(q)
+                        || uCode.includes(q)
+                        || uMajor.includes(q);
+                    const matchRole = !roleFilter || roleFilter === 'ALL' || uRole === roleFilter;
+                    const matchStatus = !statusFilter || statusFilter === 'all'
+                        || (statusFilter === 'active' && u.isActive)
+                        || (statusFilter === 'locked' && !u.isActive);
+                    return matchQ && matchRole && matchStatus;
+                })
                 .map((u) => ({
-                    id: u.id, email: u.email, fullName: u.fullName, studentCode: u.studentCode ?? null, major: u.major ?? null, role: u.role ?? 'STUDENT',
-                    isActive: u.isActive, createdAt: u.createdAt ?? null, 
+                    id: u.id,
+                    email: u.email,
+                    fullName: u.fullName,
+                    studentCode: u.studentCode ?? null,
+                    major: u.major ?? null,
+                    className: u.className ?? null,
+                    role: u.role ?? 'STUDENT',
+                    isActive: u.isActive,
+                    createdAt: u.createdAt ?? null,
                 }));
-                return { items, total: items.length };
+            return { items, total: items.length, allTotal: db.users.length };
         },
 
         // PB-30: khóa/mở tài khoản, thu hồi mọi token khi khóa, ghi audit log
@@ -455,8 +493,32 @@ const mockServer = (() => {
                 Object.values(db.refreshTokens).forEach((e) => { if (e.userId === id) e.revoked = true; });
                 Object.keys(db.accessTokens).forEach((t) => { if (db.accessTokens[t].userId === id) delete db.accessTokens[t]; });
             }
-            (db.auditLogs ??= []).push({ actorId: me.id, action: isActive ? 'USER_UNLOCK' : 'USER_LOCK', targetId: id, at: new Date().toISOString() });
+            (db.auditLogs ??= []).push({
+                actorId: me.id,
+                actorEmail: me.email,
+                action: isActive ? 'USER_UNLOCK' : 'USER_LOCK',
+                targetId: id,
+                targetEmail: user.email,
+                targetName: user.fullName,
+                at: new Date().toISOString()
+            });
             return { id, isActive };
+        },
+
+        async 'GET /admin/audit-logs'(db, body, token) {
+            const me = userFromAccess(db, token);
+            if ((me.role ?? 'STUDENT') !== 'ADMIN') fail(403, 'FORBIDDEN', 'Bạn không có quyền quản trị');
+            const logs = (db.auditLogs || []).slice().reverse().map((log) => {
+                const actor = db.users.find((u) => u.id === log.actorId);
+                const target = db.users.find((u) => u.id === log.targetId);
+                return {
+                    ...log,
+                    actorEmail: log.actorEmail || actor?.email || 'Admin',
+                    targetEmail: log.targetEmail || target?.email || log.targetId,
+                    targetName: log.targetName || target?.fullName || ''
+                };
+            });
+            return { items: logs };
         }
     };
 
@@ -489,13 +551,38 @@ const mockServer = (() => {
             console.info(`${email}: is_active = ${active} - session.js:470`);
         },
         
-        setRole(email, role) {
+        setRole(email, role = 'ADMIN') {
             const db = load();
-            const user = db.users.find((u) => u.email === email);
-            if (!user) return console.warn('Không có tài khoản - session.js:476', email);
-            user.role = role;
+            const target = String(email || 'admin@example.com').trim().toLowerCase();
+            let user = db.users.find((u) => u.email.toLowerCase() === target);
+            if (!user) {
+                user = {
+                    id: randomToken(),
+                    email: email || 'admin@example.com',
+                    fullName: target.startsWith('admin') ? 'Quản trị viên (Admin)' : target.split('@')[0],
+                    passwordHash: 'seeded_admin',
+                    isActive: true,
+                    role,
+                    createdAt: new Date().toISOString()
+                };
+                db.users.push(user);
+                console.info(`Đã tự động tạo tài khoản mới: ${user.email} với quyền ${role}`);
+            } else {
+                user.role = role;
+            }
+
+            const currentSession = getSession();
+            if (!currentSession || !currentSession.user || currentSession.user.email?.toLowerCase() === target) {
+                const tokens = issueTokens(db, user);
+                const nextSession = toSession(tokens, { remember: true });
+                saveSession(nextSession);
+            }
             save(db);
-            console.info(`${email}: role = ${role} - session.js:479`);
+
+            if (typeof upgradeSidebarFigma === 'function') upgradeSidebarFigma();
+            if (typeof highlightActiveSidebar === 'function') highlightActiveSidebar();
+            if (typeof renderUser === 'function') renderUser(user);
+            console.info(`${user.email}: role = ${role} (Đã kích hoạt phiên ${role} trên trình duyệt)`);
         },
         
         /** Cho access token hết hạn ngay → lần gọi API tới sẽ tự refresh */
