@@ -196,6 +196,7 @@ function upgradeSidebarFigma() {
         btn.style.display = 'none';
     });
 
+    const isAdmin = typeof getSession === 'function' && getSession()?.user?.role === 'ADMIN';
     rightBox.innerHTML = `
         <span class="topbar-date">${formatTopbarDate()}</span>
         <button type="button" class="topbar-icon-btn" id="topbarSearchBtn" title="Tìm kiếm nhanh (Ctrl+K)" aria-label="Tìm kiếm nhanh" onclick="openGlobalSearchModal()">
@@ -207,6 +208,21 @@ function upgradeSidebarFigma() {
         </button>
         <div class="topbar-user-wrap" id="topbarUserWrap"></div>
         <button type="button" class="theme-toggle-icon-btn" id="themeToggleBtn" title="Bật giao diện tối (Dark Mode)" aria-label="Bật hoặc tắt giao diện tối" aria-pressed="false" onclick="toggleTheme()"></button>
+        <div class="topbar-quick-nav" id="topbarQuickNav">
+            <button type="button" class="topbar-quick-nav__btn" id="topbarQuickNavToggle" title="Danh sách trang điều hướng" aria-label="Mở danh sách trang điều hướng" aria-haspopup="menu" aria-expanded="false" aria-controls="topbarQuickNavList">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+            <ul class="topbar-quick-nav__list" id="topbarQuickNavList" role="menu" hidden>
+                <li role="none"><a href="dashboard.html" class="topbar-quick-nav__item" role="menuitem"><span class="topbar-quick-nav__num">01</span><span>Tổng quan</span></a></li>
+                <li role="none"><a href="courses.html" class="topbar-quick-nav__item" role="menuitem"><span class="topbar-quick-nav__num">02</span><span>Môn học</span></a></li>
+                <li role="none"><a href="semesters.html" class="topbar-quick-nav__item" role="menuitem"><span class="topbar-quick-nav__num">03</span><span>Học kỳ</span></a></li>
+                <li role="none"><a href="statistics.html" class="topbar-quick-nav__item" role="menuitem"><span class="topbar-quick-nav__num">04</span><span>Thống kê</span></a></li>
+                <li role="none"><a href="goals.html" class="topbar-quick-nav__item" role="menuitem"><span class="topbar-quick-nav__num">05</span><span>Mục tiêu</span></a></li>
+                <li role="none"><a href="import.html" class="topbar-quick-nav__item" role="menuitem"><span class="topbar-quick-nav__num">06</span><span>Nhập điểm</span></a></li>
+                <li role="none"><a href="transcript.html" class="topbar-quick-nav__item" role="menuitem"><span class="topbar-quick-nav__num">07</span><span>Bảng điểm</span></a></li>
+                ${isAdmin ? '<li role="none"><a href="admin-user.html" class="topbar-quick-nav__item" role="menuitem"><span class="topbar-quick-nav__num">08</span><span>Tài khoản</span></a></li>' : ''}
+            </ul>
+        </div>
     `;
 
     const wrap = rightBox.querySelector('#topbarUserWrap');
@@ -258,6 +274,8 @@ function upgradeSidebarFigma() {
     }
 
     applyTheme(getSavedTheme());
+    setupQuickNavMenu();
+    highlightActiveSidebar();
 }
 
 function refreshSidebarGoalWidget() {}
@@ -289,7 +307,7 @@ function renderUser(user) {
 /* ===== Tự động đánh dấu mục đang xem trên thanh điều hướng ===== */
 function highlightActiveSidebar() {
     const path = window.location.pathname.toLowerCase();
-    const items = document.querySelectorAll('.sidebar__nav .nav-item');
+    const items = document.querySelectorAll('.sidebar__nav .nav-item, .topbar-quick-nav__list .topbar-quick-nav__item');
     items.forEach(item => {
         const href = item.getAttribute('href')?.toLowerCase() || '';
         if (href && href !== '#' && (path.endsWith('/' + href) || path.endsWith(href))) {
@@ -298,6 +316,41 @@ function highlightActiveSidebar() {
         } else if (href && href !== '#') {
             item.classList.remove('is-active');
             item.removeAttribute('aria-current');
+        }
+    });
+}
+
+/* ===== Nút 3 gạch xổ dọc nhanh cạnh nút Sáng/Tối (chỉ hiện ở màn hình rộng > 900px) ===== */
+function setupQuickNavMenu() {
+    const wrap = $('topbarQuickNav');
+    const toggle = $('topbarQuickNavToggle');
+    const list = $('topbarQuickNavList');
+    if (!wrap || !toggle || !list || wrap.dataset.bound === 'true') return;
+    wrap.dataset.bound = 'true';
+
+    const setOpen = (open) => {
+        list.hidden = !open;
+        toggle.setAttribute('aria-expanded', String(open));
+    };
+
+    toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const userList = $('userMenuList');
+        if (userList && !userList.hidden) {
+            userList.hidden = true;
+            $('userMenuToggle')?.setAttribute('aria-expanded', 'false');
+        }
+        setOpen(list.hidden);
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!wrap.contains(e.target)) setOpen(false);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !list.hidden) {
+            setOpen(false);
+            toggle.focus();
         }
     });
 }

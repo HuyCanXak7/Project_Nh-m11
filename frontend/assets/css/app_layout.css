@@ -1245,6 +1245,132 @@ html.theme-dark .e-html-chart__svg-line polyline {
         border-left-color: #3EE09B;
     }
 }
+/* ===== Nút 3 gạch xổ dọc nhanh cạnh nút Sáng/Tối (chỉ hiện ở màn hình rộng > 900px) ===== */
+.topbar-quick-nav {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.topbar-quick-nav__btn {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--e-border, #CBD5E1);
+    background: #FFFFFF;
+    color: var(--e-navy, #0F1F38);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.topbar-quick-nav__btn:hover,
+.topbar-quick-nav__btn[aria-expanded="true"] {
+    background: #F1F5F9;
+}
+
+.topbar-quick-nav__btn svg {
+    width: 17px;
+    height: 17px;
+}
+
+.topbar-quick-nav__list {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 70;
+    min-width: 190px;
+    padding: 6px;
+    border-radius: 0;
+    background: #FFFFFF;
+    box-shadow: 0 12px 28px rgba(15, 31, 56, 0.16);
+    border: 1px solid var(--e-navy, #0F1F38);
+}
+
+.topbar-quick-nav__list[hidden] {
+    display: none !important;
+}
+
+.topbar-quick-nav__item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dash-text-body, #1E293B);
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.topbar-quick-nav__num {
+    font-size: 11px;
+    font-weight: 700;
+    color: #94A3B8;
+    font-variant-numeric: tabular-nums;
+    min-width: 18px;
+}
+
+.topbar-quick-nav__item:hover {
+    background: #F1F5F9;
+    color: var(--e-navy, #0F1F38);
+}
+
+.topbar-quick-nav__item.is-active {
+    background: var(--e-navy, #0F1F38);
+    color: #FFFFFF !important;
+    font-weight: 700;
+}
+
+.topbar-quick-nav__item.is-active .topbar-quick-nav__num {
+    color: var(--e-mint, #3EE09B) !important;
+}
+
+html.theme-dark .topbar-quick-nav__btn {
+    background: transparent !important;
+    border-color: #334155 !important;
+    color: #E2E8F0 !important;
+}
+
+html.theme-dark .topbar-quick-nav__btn:hover,
+html.theme-dark .topbar-quick-nav__btn[aria-expanded="true"] {
+    background: #1E293B !important;
+    color: #FFFFFF !important;
+}
+
+html.theme-dark .topbar-quick-nav__list {
+    background: #111827 !important;
+    border-color: #334155 !important;
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5);
+}
+
+html.theme-dark .topbar-quick-nav__item {
+    color: #E2E8F0 !important;
+}
+
+html.theme-dark .topbar-quick-nav__item:hover {
+    background: #1E293B !important;
+    color: #FFFFFF !important;
+}
+
+html.theme-dark .topbar-quick-nav__item.is-active {
+    background: #3EE09B !important;
+    color: #0F1F38 !important;
+}
+
+html.theme-dark .topbar-quick-nav__item.is-active .topbar-quick-nav__num {
+    color: #0F1F38 !important;
+}
+
+/* Khi thu hẹp màn hình (<= 900px), ẩn nút 3 gạch góc phải để giữ nguyên duy nhất nút thu hẹp cũ */
+@media (max-width: 900px) {
+    .topbar-quick-nav {
+        display: none !important;
+    }
+}
+
 /* Chuyển trang mượt giữa các trang bên trong: sidebar + header đứng yên, nội dung trượt (xem app_shell.js) */
 .dash > :not(.dash-header) { animation: page-enter .4s cubic-bezier(.2, .8, .2, 1) backwards; }
 .page-leaving .dash > :not(.dash-header) { animation: page-leave .2s ease-in forwards; }
