@@ -1,16 +1,23 @@
 /**
- * DỊCH VỤ LOCALSTORAGE LƯU TRỮ VÀ XỬ LÝ DỮ LIỆU CSDL (OFFLINE CLIENT-SIDE)
+ * DỊCH VỤ DỮ LIỆU: học kỳ / môn học / điểm lấy từ API backend; hồ sơ và mục tiêu vẫn lưu localStorage
  * Phụ trách: Phân hệ Quản lý Học kỳ, Môn học, Điểm (FE Nghiệp)
  * Đáp ứng tiêu chuẩn: PB-06..09 (Học kỳ), PB-10..17 (Môn học), PB-50 (Học lại), PB-46 (Cascade Delete)
  */
 
 const STORAGE_KEYS = {
   STUDENT: 'app_student_profile',
-  SEMESTERS: 'app_semesters',
-  COURSES: 'app_courses',
-  GOAL: 'app_gpa_goal',
-  ADMIN_USERS: 'app_admin_users'
+  GOAL: 'app_gpa_goal'
 };
+
+// shortcut: BE chỉ có 3 khối, 'Tự chọn & Thực tập' được lưu thành SPECIALIZED; thêm giá trị enum ở BE nếu cần tách riêng
+const CATEGORY_TO_API = { 'Đại cương': 'GENERAL', 'Cơ sở ngành': 'FOUNDATION', 'Chuyên ngành': 'SPECIALIZED', 'Tự chọn & Thực tập': 'SPECIALIZED' };
+const CATEGORY_FROM_API = { GENERAL: 'Đại cương', FOUNDATION: 'Cơ sở ngành', SPECIALIZED: 'Chuyên ngành' };
+
+const DEFAULT_COMPONENTS = [
+  { name: 'Chuyên cần', weight_percent: 10 },
+  { name: 'Giữa kỳ', weight_percent: 30 },
+  { name: 'Cuối kỳ', weight_percent: 60 }
+];
 
 const StorageService = {
   DEFAULT_STUDENT: {
@@ -246,7 +253,8 @@ const StorageService = {
     }
   ],
 
-  // ADMIN đang xem tài khoản khác (chọn ở trang Tài khoản) → đọc/ghi dữ liệu của tài khoản đó
+
+  // ADMIN đang xem tài khoản khác (chọn ở trang Tài khoản) → chỉ áp dụng cho dữ liệu còn lưu local (hồ sơ, mục tiêu)
   adminViewAs() {
     try {
       const target = JSON.parse(sessionStorage.getItem('adminViewAs'));
@@ -257,105 +265,116 @@ const StorageService = {
   currentUserId() {
     const viewAs = this.adminViewAs();
     if (viewAs) return String(viewAs.id);
-    if (typeof getSession === 'function') {
-      const u = getSession()?.user;
-      if (u?.id) return String(u.id);
-      if (u?.email) return String(u.email).toLowerCase();
-    }
-    for (const store of [sessionStorage, localStorage]) {
-      try {
-        const raw = store.getItem('session');
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed?.user?.id) return String(parsed.user.id);
-          if (parsed?.user?.email) return String(parsed.user.email).toLowerCase();
-        }
-      } catch { /* ignore */ }
-    }
+    const u = typeof getSession === 'function' ? getSession()?.user : null;
+    if (u?.id) return String(u.id);
+    if (u?.email) return String(u.email).toLowerCase();
     return 'guest';
   },
 
-  semestersKey() { return STORAGE_KEYS.SEMESTERS + '_' + this.currentUserId(); },
-  coursesKey()   { return STORAGE_KEYS.COURSES + '_' + this.currentUserId(); },
-  goalKey()      { return STORAGE_KEYS.GOAL + '_' + this.currentUserId(); },
-  studentKey()   { return STORAGE_KEYS.STUDENT + '_' + this.currentUserId(); },
+  goalKey()    { return STORAGE_KEYS.GOAL + '_' + this.currentUserId(); },
+  studentKey() { return STORAGE_KEYS.STUDENT + '_' + this.currentUserId(); },
 
-  init() {
-    try {
-      const rawCourses = localStorage.getItem(this.coursesKey());
-      const rawSems = localStorage.getItem(this.semestersKey());
-      if (rawCourses === null && rawSems === null) {
-        this.resetToDefault();
-        return;
-      }
-      if (rawCourses) {
-        const parsed = JSON.parse(rawCourses);
-        const isOld4 = Array.isArray(parsed) && parsed.length === 4 && parsed[0]?.id === 'c_1';
-        const isOld17 = Array.isArray(parsed) && parsed.length === 17 && parsed[0]?.id === 'c_101' && parsed[0]?.course_code === 'INT1001';
-        if (isOld4 || isOld17) {
-          this.resetToDefault();
-        }
-      }
-    } catch { /* ignore */ }
+  // === CACHE DỮ LIỆU TỪ BACKEND (học kỳ, môn học, thành phần điểm) ===
+  // Các trang đọc đồng bộ từ cache; trước lần render đầu phải `await StorageService.ready`.
+  _semesters: [],
+  _courses: [],
+  _ready: null,
+
+  get ready() {
+    this._ready ??= this.load().catch((err) => {
+      console.error('Lỗi tải dữ liệu từ máy chủ:', err);
+      if (typeof showToast === 'function') showToast(err.message || 'Không tải được dữ liệu từ máy chủ.', true);
+    });
+    return this._ready;
   },
 
-  resetToDefault() {
-    localStorage.setItem(this.semestersKey(), JSON.stringify(this.DEFAULT_SEMESTERS));
-    localStorage.setItem(this.coursesKey(), JSON.stringify(this.DEFAULT_COURSES));
+  async reload() {
+    this._ready = null;
+    await this.ready;
+  },
+
+  async load() {
+    const sems = await apiFetch('/semesters');
+    const courses = (await Promise.all(sems.map(s => apiFetch(`/semesters/${s.id}/courses`)))).flat();
+    // shortcut: 1 request/môn để lấy thành phần điểm; khi số môn lớn thì thêm API trả kèm components ở BE
+    const configs = await Promise.all(courses.map(c => apiFetch(`/courses/${c.id}/grade-components`)));
+
+    // BE trả học kỳ mới nhất trước; FE coi phần tử cuối là học kỳ gần nhất. Id ép về chuỗi để so với data-* trong DOM.
+    this._semesters = sems
+      .map(s => ({ ...s, id: String(s.id) }))
+      .sort((a, b) => a.start_date.localeCompare(b.start_date));
+    this._courses = courses.map((c, i) => ({
+      id: String(c.id),
+      semester_id: String(c.semester_id),
+      course_code: c.code,
+      course_name: c.name,
+      credits: c.credits,
+      category: CATEGORY_FROM_API[c.category] || c.category,
+      is_retake: c.is_retake,
+      components: configs[i].components.map(cp => ({
+        id: String(cp.id), name: cp.name, weight_percent: cp.weightPercent, score: cp.score
+      }))
+    }));
+  },
+
+  courseBody(c) {
+    return {
+      code: c.course_code,
+      name: c.course_name,
+      credits: Number(c.credits),
+      category: CATEGORY_TO_API[c.category] || c.category,
+      is_retake: !!c.is_retake
+    };
+  },
+
+  // Nạp lại bộ dữ liệu mẫu vào tài khoản hiện tại trên BE (xóa dữ liệu cũ của tài khoản)
+  async resetToDefault() {
+    await this.ready;
+    for (const s of this._semesters) await apiFetch(`/semesters/${s.id}`, { method: 'DELETE' });
+
+    for (const { id: semKey, ...semBody } of this.DEFAULT_SEMESTERS) {
+      const sem = await apiFetch('/semesters', { method: 'POST', body: semBody });
+      for (const c of this.DEFAULT_COURSES.filter(c => c.semester_id === semKey)) {
+        const course = await apiFetch(`/semesters/${sem.id}/courses`, { method: 'POST', body: this.courseBody(c) });
+        const scores = [];
+        for (const cp of c.components) {
+          const cfg = await apiFetch(`/courses/${course.id}/grade-components`, {
+            method: 'POST', body: { name: cp.name, weight_percent: cp.weight_percent }
+          });
+          const created = cfg.components[cfg.components.length - 1];
+          if (cp.score !== null) scores.push({ component_id: created.id, score: cp.score });
+        }
+        if (scores.length) await apiFetch(`/courses/${course.id}/scores`, { method: 'PUT', body: { scores } });
+      }
+    }
+
     localStorage.setItem(this.goalKey(), JSON.stringify({
       target_gpa: 3.60,
       target_date: '2027-06-30',
       remaining_credits: 30
     }));
-  },
-
-  clearAllData() {
-    localStorage.setItem(this.semestersKey(), JSON.stringify([]));
-    localStorage.setItem(this.coursesKey(), JSON.stringify([]));
-    localStorage.removeItem(this.goalKey());
+    await this.reload();
   },
 
   // === QUẢN LÝ HỌC KỲ (PB-06..09) ===
   getSemesters() {
-    try {
-      const raw = localStorage.getItem(this.semestersKey());
-      if (raw !== null) {
-        const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed : [];
-      }
-      return [];
-    } catch (err) {
-      console.error('Lỗi đọc dữ liệu học kỳ từ localStorage:', err);
-      return [];
-    }
+    return this._semesters;
   },
 
   getSemesterById(id) {
-    const list = this.getSemesters();
-    return list.find(s => s.id === id) || null;
+    return this._semesters.find(s => s.id === String(id)) || null;
   },
 
-  saveSemester(semesterData) {
-    const list = this.getSemesters();
-    if (semesterData.id) {
-      const idx = list.findIndex(s => s.id === semesterData.id);
-      if (idx !== -1) {
-        list[idx] = { ...list[idx], ...semesterData };
-      }
-    } else {
-      const newSem = {
-        ...semesterData,
-        id: 'sem_' + Date.now()
-      };
-      list.push(newSem);
-    }
-    localStorage.setItem(this.semestersKey(), JSON.stringify(list));
+  async saveSemester({ id, name, academic_year, start_date, end_date }) {
+    const body = { name, academic_year, start_date, end_date };
+    await apiFetch(id ? `/semesters/${id}` : '/semesters', { method: id ? 'PUT' : 'POST', body });
+    await this.reload();
     return true;
   },
 
   // Cảnh báo xóa dây chuyền (Cascade Details - PB-09, PB-46)
   getSemesterCascadeDetails(semesterId) {
-    const courses = this.getCourses().filter(c => c.semester_id === semesterId);
+    const courses = this.getCourses().filter(c => c.semester_id === String(semesterId));
     let totalComponents = 0;
     courses.forEach(c => {
       totalComponents += (c.components || []).length;
@@ -367,58 +386,33 @@ const StorageService = {
     };
   },
 
-  // Xóa dây chuyền học kỳ, môn học và thành phần điểm
-  deleteSemesterCascade(semesterId) {
-    let semesters = this.getSemesters();
-    semesters = semesters.filter(s => s.id !== semesterId);
-    localStorage.setItem(this.semestersKey(), JSON.stringify(semesters));
-
-    let courses = this.getCourses();
-    courses = courses.filter(c => c.semester_id !== semesterId);
-    localStorage.setItem(this.coursesKey(), JSON.stringify(courses));
+  // BE tự xóa dây chuyền môn học và thành phần điểm
+  async deleteSemesterCascade(semesterId) {
+    await apiFetch(`/semesters/${semesterId}`, { method: 'DELETE' });
+    await this.reload();
     return true;
   },
 
   // === QUẢN LÝ MÔN HỌC & ĐIỂM (PB-10..17, PB-50) ===
   getCourses() {
-    try {
-      const raw = localStorage.getItem(this.coursesKey());
-      if (raw !== null) {
-        const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed : [];
-      }
-      return [];
-    } catch (err) {
-      console.error('Lỗi đọc dữ liệu môn học từ localStorage:', err);
-      return [];
-    }
+    return this._courses;
   },
 
   getCourseById(id) {
-    const list = this.getCourses();
-    return list.find(c => c.id === id) || null;
+    return this._courses.find(c => c.id === String(id)) || null;
   },
 
-  saveCourse(courseData) {
-    const list = this.getCourses();
+  async saveCourse(courseData) {
+    const body = this.courseBody(courseData);
     if (courseData.id) {
-      const idx = list.findIndex(c => c.id === courseData.id);
-      if (idx !== -1) {
-        list[idx] = { ...list[idx], ...courseData };
-      }
+      await apiFetch(`/courses/${courseData.id}`, { method: 'PUT', body });
     } else {
-      const newCourse = {
-        ...courseData,
-        id: 'c_' + Date.now(),
-        components: courseData.components || [
-          { id: 'comp_' + Date.now() + '_1', name: 'Chuyên cần', weight_percent: 10, score: null },
-          { id: 'comp_' + Date.now() + '_2', name: 'Giữa kỳ', weight_percent: 30, score: null },
-          { id: 'comp_' + Date.now() + '_3', name: 'Cuối kỳ', weight_percent: 60, score: null }
-        ]
-      };
-      list.push(newCourse);
+      const course = await apiFetch(`/semesters/${courseData.semester_id}/courses`, { method: 'POST', body });
+      for (const comp of DEFAULT_COMPONENTS) {
+        await apiFetch(`/courses/${course.id}/grade-components`, { method: 'POST', body: comp });
+      }
     }
-    localStorage.setItem(this.coursesKey(), JSON.stringify(list));
+    await this.reload();
     return true;
   },
 
@@ -432,37 +426,43 @@ const StorageService = {
     };
   },
 
-  deleteCourseCascade(courseId) {
-    let courses = this.getCourses();
-    courses = courses.filter(c => c.id !== courseId);
-    localStorage.setItem(this.coursesKey(), JSON.stringify(courses));
+  async deleteCourseCascade(courseId) {
+    await apiFetch(`/courses/${courseId}`, { method: 'DELETE' });
+    await this.reload();
     return true;
   },
 
-  saveCourseComponents(courseId, components) {
-    const courses = this.getCourses();
-    const course = courses.find(c => c.id === courseId);
-    if (course) {
-      course.components = components;
-      localStorage.setItem(this.coursesKey(), JSON.stringify(courses));
-      return true;
+  // Đồng bộ danh sách thành phần lên BE: xóa cột bị bỏ, sửa cột cũ, thêm cột mới
+  async saveCourseComponents(courseId, components) {
+    const old = this.getCourseById(courseId)?.components || [];
+    const oldById = Object.fromEntries(old.map(o => [o.id, o]));
+    const keepIds = new Set(components.map(c => c.id));
+
+    for (const o of old) {
+      if (!keepIds.has(o.id)) await apiFetch(`/grade-components/${o.id}`, { method: 'DELETE' });
     }
-    return false;
+    // BE chặn tổng trọng số > 100% ở từng bước, nên giảm trọng số trước rồi mới tăng
+    const updates = components
+      .filter(c => oldById[c.id] && (oldById[c.id].name !== c.name || oldById[c.id].weight_percent !== c.weight_percent))
+      .sort((a, b) => (a.weight_percent - oldById[a.id].weight_percent) - (b.weight_percent - oldById[b.id].weight_percent));
+    for (const c of updates) {
+      await apiFetch(`/grade-components/${c.id}`, { method: 'PUT', body: { name: c.name, weight_percent: c.weight_percent } });
+    }
+    for (const c of components.filter(c => !oldById[c.id])) {
+      await apiFetch(`/courses/${courseId}/grade-components`, { method: 'POST', body: { name: c.name, weight_percent: c.weight_percent } });
+    }
+    await this.reload();
+    return true;
   },
 
-  saveCourseScores(courseId, scoreMap) {
-    const courses = this.getCourses();
-    const course = courses.find(c => c.id === courseId);
-    if (course && course.components) {
-      course.components.forEach(comp => {
-        if (scoreMap[comp.id] !== undefined) {
-          comp.score = scoreMap[comp.id];
-        }
-      });
-      localStorage.setItem(this.coursesKey(), JSON.stringify(courses));
-      return true;
-    }
-    return false;
+  async saveCourseScores(courseId, scoreMap) {
+    // shortcut: BE chưa có API xóa điểm, ô để trống giữ nguyên điểm cũ; thêm API xóa điểm ở BE nếu cần
+    const scores = Object.entries(scoreMap)
+      .filter(([, score]) => score !== null)
+      .map(([id, score]) => ({ component_id: Number(id), score }));
+    if (scores.length) await apiFetch(`/courses/${courseId}/scores`, { method: 'PUT', body: { scores } });
+    await this.reload();
+    return true;
   },
 
   // Phân tích trước khi import để báo cho người dùng biết học kỳ/môn nào sẽ được tạo mới (PB-25, PB-26)
@@ -498,71 +498,30 @@ const StorageService = {
     return { annotatedRows, newSemesterCount: newSemesters.size, newCourseCount: newCourses.size };
   },
 
-  // Batch import Upsert (PB-26, PB-46)
-  batchImportRows(validRows) {
-    const semesters = this.getSemesters();
-    const courses = this.getCourses();
-    let createdSemCount = 0;
-    let createdCourseCount = 0;
-    let updatedCompCount = 0;
-
-    validRows.forEach((row, idx) => {
-      let sem = semesters.find(s => s.name.trim().toLowerCase() === row.semester_name.trim().toLowerCase());
-      if (!sem) {
-        sem = {
-          id: 'sem_' + Date.now() + '_' + idx + '_' + Math.floor(Math.random() * 1000),
-          name: row.semester_name.trim(),
-          academic_year: '2025-2026',
-          start_date: '2025-09-01',
-          end_date: '2026-01-15'
-        };
-        semesters.push(sem);
-        createdSemCount++;
-      }
-
-      let course = courses.find(c => c.semester_id === sem.id && c.course_code.trim().toUpperCase() === row.course_code.trim().toUpperCase());
-      if (!course) {
-        course = {
-          id: 'c_' + Date.now() + '_' + idx + '_' + Math.floor(Math.random() * 1000),
-          semester_id: sem.id,
-          course_code: row.course_code.trim().toUpperCase(),
-          course_name: row.course_name.trim(),
-          credits: Number(row.credits),
-          category: (row.category || 'Đại cương').trim(),
-          is_retake: false,
-          components: []
-        };
-        courses.push(course);
-        createdCourseCount++;
-      }
-
-      let comp = (course.components || []).find(cp => cp.name.trim().toLowerCase() === row.component_name.trim().toLowerCase());
-      if (comp) {
-        comp.weight_percent = Number(row.weight_percent);
-        comp.score = Number(row.score);
-      } else {
-        if (!course.components) course.components = [];
-        course.components.push({
-          id: 'comp_' + Date.now() + '_' + idx + '_' + Math.floor(Math.random() * 1000),
-          name: row.component_name.trim(),
-          weight_percent: Number(row.weight_percent),
-          score: Number(row.score)
-        });
-      }
-      updatedCompCount++;
-    });
-
-    localStorage.setItem(this.semestersKey(), JSON.stringify(semesters));
-    localStorage.setItem(this.coursesKey(), JSON.stringify(courses));
+  // Batch import Upsert (PB-26, PB-46) — BE lưu cả lô trong 1 transaction
+  async batchImportRows(validRows) {
+    const rows = validRows.map(r => ({
+      row: r.row,
+      semester_name: r.semester_name,
+      course_code: r.course_code,
+      course_name: r.course_name,
+      credits: Number(r.credits),
+      category: CATEGORY_TO_API[(r.category || '').trim()] || r.category,
+      component_name: r.component_name,
+      weight_percent: Number(r.weight_percent),
+      score: Number(r.score)
+    }));
+    const res = await apiFetch('/import/grades', { method: 'POST', body: { rows } });
+    await this.reload();
     return {
       success: true,
-      createdSemCount,
-      createdCourseCount,
-      updatedCompCount
+      createdSemCount: res.createdSemesters,
+      createdCourseCount: res.createdCourses,
+      updatedCompCount: res.importedRows
     };
   },
 
-  // Profile & Goals
+  // Profile & Goals — BE chưa có API nên vẫn lưu localStorage
   getStudent() {
     try { return JSON.parse(localStorage.getItem(this.studentKey())) || { ...this.DEFAULT_STUDENT }; }
     catch { return { ...this.DEFAULT_STUDENT }; }
@@ -582,7 +541,6 @@ const StorageService = {
   },
 
   createGoal(goal) {
-    // Mô phỏng 409 Conflict của BE khi đã có mục tiêu
     if (this.getGoal()) throw new Error('GOAL_EXISTS');
     localStorage.setItem(this.goalKey(), JSON.stringify(goal));
   },
@@ -596,5 +554,3 @@ const StorageService = {
     localStorage.removeItem(this.goalKey());
   }
 };
-
-StorageService.init();

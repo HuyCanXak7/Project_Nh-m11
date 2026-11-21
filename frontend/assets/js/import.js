@@ -6,6 +6,7 @@
 let currentParsedValidRows = [];
 
 document.addEventListener('DOMContentLoaded', () => {
+  StorageService.ready; // nạp sẵn dữ liệu để phân tích file import
   setupFileDropzone();
 });
 
@@ -83,6 +84,7 @@ function showImportStatus(type, message) {
 
 async function handleSelectedFile(file) {
   if (!file) return;
+  await StorageService.ready;
 
   const lowerName = file.name.toLowerCase();
   const isCSV = lowerName.endsWith('.csv');
@@ -255,13 +257,22 @@ function resetImportPreview(keepBanner = false) {
   }
 }
 
-function executeBatchSave() {
+async function executeBatchSave() {
   if (currentParsedValidRows.length === 0) {
     showToast('Không có dòng dữ liệu hợp lệ nào để lưu!', true);
     return;
   }
 
-  const result = StorageService.batchImportRows(currentParsedValidRows);
+  let result;
+  try {
+    result = await StorageService.batchImportRows(currentParsedValidRows);
+  } catch (err) {
+    // session.js trải mảng details của BE thành object {0: {...}, 1: {...}}
+    const rowInfo = Object.values(err.details || {}).filter(d => d?.reason).slice(0, 3)
+      .map(d => d.row ? `dòng ${d.row}: ${d.reason}` : d.reason).join('; ');
+    showToast((err.message || 'Không lưu được dữ liệu import.') + (rowInfo ? ` (${rowInfo})` : ''), true);
+    return;
+  }
   const detailParts = [`${currentParsedValidRows.length} dòng điểm`];
   if (result.createdSemCount > 0) detailParts.push(`+${result.createdSemCount} học kỳ mới`);
   if (result.createdCourseCount > 0) detailParts.push(`+${result.createdCourseCount} môn học mới`);

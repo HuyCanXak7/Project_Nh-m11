@@ -1,10 +1,11 @@
 /*
  * LOGIC DASHBOARD TỔNG QUAN HỌC TẬP CHUẨN FIGMA MỚI (StudyTrack-E-03-tong-quan 1)
- * Đọc trực tiếp dữ liệu của người dùng hiện tại từ localStorage (StorageService)
+ * Đọc dữ liệu của người dùng hiện tại từ API backend (qua cache StorageService)
  * Hỗ trợ đầy đủ trạng thái Loading, Empty State và Error State (PB-40 / [T0694ED])
  */
 
 async function loadDashboardData() {
+    if (typeof StorageService !== 'undefined') await StorageService.ready;
     let currentStudent = null;
     if (typeof StorageService !== 'undefined') {
         currentStudent = StorageService.getStudent();

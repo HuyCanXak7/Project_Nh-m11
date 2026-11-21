@@ -6,7 +6,8 @@
  *  - PB-40 [T0694ED]: Trạng thái loading, rỗng, lỗi rõ ràng và không hiển thị dữ liệu lỗi như kết quả hợp lệ
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await StorageService.ready;
   initTranscriptPage();
 });
 

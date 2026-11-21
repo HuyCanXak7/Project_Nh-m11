@@ -11,7 +11,7 @@
  */
 
 const API_BASE = 'http://localhost:8000/api/v1';
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 const SESSION_KEY = 'session';
 const FLASH_KEY = 'authFlash';
@@ -47,14 +47,16 @@ function getSession() {
     return null;
 }
 
-/** tokens = phản hồi từ /auth/login hoặc /auth/refresh: { accessToken, refreshToken, expiresIn, refreshExpiresIn, user } */
+/** tokens = phản hồi từ /auth/login hoặc /auth/refresh: { accessToken, refreshToken, accessExpiresInSeconds, refreshExpiresInSeconds } (mock dùng expiresIn/refreshExpiresIn) */
 function toSession(tokens, previous = {}) {
     const now = Date.now();
+    const accessTtl = tokens.accessExpiresInSeconds ?? tokens.expiresIn;
+    const refreshTtl = tokens.refreshExpiresInSeconds ?? tokens.refreshExpiresIn;
     return {
         accessToken: tokens.accessToken,
-        accessExpiresAt: now + tokens.expiresIn * 1000,
+        accessExpiresAt: now + accessTtl * 1000,
         refreshToken: tokens.refreshToken ?? previous.refreshToken,
-        refreshExpiresAt: tokens.refreshExpiresIn ? now + tokens.refreshExpiresIn * 1000 : previous.refreshExpiresAt,
+        refreshExpiresAt: refreshTtl ? now + refreshTtl * 1000 : previous.refreshExpiresAt,
         user: tokens.user ?? previous.user,
         remember: previous.remember,
     };
@@ -213,14 +215,14 @@ async function apiFetch(path, options = {}) {
  * ========================================================= */
 const authApi = {
     async register({ email, fullName, password }) {
-        return request('/auth/register', { method: 'POST', body: { email, fullName, password } });
+        return request('/auth/register', { method: 'POST', body: { email, full_name: fullName, fullName, password } });
     },
 
     async login({ email, password, remember }) {
         const tokens = await request('/auth/login', { method: 'POST', body: { email, password } });
-        const session = toSession(tokens, { remember });
-        saveSession(session);
-        return session.user;
+        saveSession(toSession(tokens, { remember }));
+        // BE không trả user kèm token → hỏi /auth/me
+        return tokens.user ?? this.me();
     },
 
     /** Kiểm tra phiên còn hợp lệ không (token còn hạn, tài khoản chưa bị khóa) */

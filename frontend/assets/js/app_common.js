@@ -49,9 +49,14 @@ function handleLogout() {
   }
 }
 
-function handleResetData() {
+async function handleResetData() {
   if (confirm('Khôi phục lại toàn bộ dữ liệu mẫu ban đầu (Học kỳ, Môn học, Điểm số)?')) {
-    StorageService.resetToDefault();
+    try {
+      await StorageService.resetToDefault();
+    } catch (err) {
+      showToast(err.message || 'Không nạp được dữ liệu mẫu.', true);
+      return;
+    }
     showToast('Đã khôi phục dữ liệu mẫu ban đầu thành công!');
     setTimeout(() => {
       window.location.reload();

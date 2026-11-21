@@ -1,6 +1,6 @@
 /*
  * LOGIC TRANG THỐNG KÊ HỌC TẬP CHUẨN FIGMA STUDYTRACK-E (StudyTrack-E-05-thong-ke 1)
- * Đọc trực tiếp dữ liệu từ localStorage của người dùng hiện tại (StorageService)
+ * Đọc dữ liệu của người dùng hiện tại từ API backend (qua cache StorageService)
  * Hỗ trợ đầy đủ trạng thái Loading, Empty State và Error State (PB-40 / [T0694ED])
  */
 
@@ -47,6 +47,7 @@ async function loadStatisticsData(/* cohortId */) {
     const gradeCounts = { 'A': 0, 'B+': 0, 'B': 0, 'C+': 0, 'C': 0, 'D+': 0, 'D': 0, 'F': 0 };
 
     if (typeof StorageService !== 'undefined' && typeof GradeCalculator !== 'undefined') {
+        await StorageService.ready;
         const rawSemesters = StorageService.getSemesters();
         const rawCourses = StorageService.getCourses();
         const goal = StorageService.getGoal();

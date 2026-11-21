@@ -449,9 +449,14 @@ function handleResetData() {
         message: 'Bạn có muốn khôi phục bộ dữ liệu mẫu 4 học kỳ chuẩn thiết kế để trải nghiệm đầy đủ biểu đồ và bảng điểm không?',
         confirmText: 'Khôi phục',
         cancelText: 'Hủy',
-        onConfirm: () => {
-            if (typeof StorageService !== 'undefined') {
-                StorageService.resetToDefault();
+        onConfirm: async () => {
+            if (typeof StorageService === 'undefined') return;
+            showToast('Đang nạp dữ liệu mẫu lên máy chủ...');
+            try {
+                await StorageService.resetToDefault();
+            } catch (err) {
+                showToast(err.message || 'Không nạp được dữ liệu mẫu.', true);
+                return;
             }
             showToast('Đã khôi phục dữ liệu mẫu thành công!');
             setTimeout(() => {
@@ -727,6 +732,7 @@ function openGlobalSearchModal() {
 
     input.addEventListener('input', () => renderResults(input.value));
     renderResults('');
+    if (typeof StorageService !== 'undefined') StorageService.ready.then(() => renderResults(input.value));
     setTimeout(() => input.focus(), 30);
 }
 

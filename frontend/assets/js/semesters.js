@@ -6,7 +6,8 @@
 
 let currentDeletingSemId = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await StorageService.ready;
   renderSemesters();
 });
 
@@ -133,7 +134,7 @@ function openEditSemesterModal(semId) {
   openAppModal('semesterModal');
 }
 
-function handleSaveSemester(e) {
+async function handleSaveSemester(e) {
   e.preventDefault();
   const id = document.getElementById('semIdInput').value;
   const name = document.getElementById('semNameInput').value.trim();
@@ -152,13 +153,18 @@ function handleSaveSemester(e) {
     return;
   }
 
-  StorageService.saveSemester({
-    id: id || undefined,
-    name,
-    academic_year,
-    start_date,
-    end_date
-  });
+  try {
+    await StorageService.saveSemester({
+      id: id || undefined,
+      name,
+      academic_year,
+      start_date,
+      end_date
+    });
+  } catch (err) {
+    showToast(err.message || 'Không lưu được dữ liệu lên máy chủ.', true);
+    return;
+  }
 
   closeAppModal('semesterModal');
   renderSemesters();
@@ -201,10 +207,15 @@ function openDeleteSemesterModal(semId) {
   openAppModal('deleteConfirmModal');
 }
 
-function executeDeleteSemester() {
+async function executeDeleteSemester() {
   if (!currentDeletingSemId) return;
 
-  StorageService.deleteSemesterCascade(currentDeletingSemId);
+  try {
+    await StorageService.deleteSemesterCascade(currentDeletingSemId);
+  } catch (err) {
+    showToast(err.message || 'Không lưu được dữ liệu lên máy chủ.', true);
+    return;
+  }
   currentDeletingSemId = null;
   closeAppModal('deleteConfirmModal');
   renderSemesters();

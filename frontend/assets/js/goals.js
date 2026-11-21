@@ -5,7 +5,8 @@
 
 let simulationCourses = [];
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await StorageService.ready;
   initGoalsPage();
 });
 

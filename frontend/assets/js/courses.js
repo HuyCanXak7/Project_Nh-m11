@@ -9,7 +9,8 @@ let currentDeletingCourseId = null;
 let currentConfiguringCourse = null;
 let currentStatusFilter = 'ALL'; // ALL | PASSED | IN_PROGRESS | FAILED
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await StorageService.ready;
   initCoursesPage();
 });
 
@@ -455,6 +456,7 @@ function openCreateCourseModal() {
   document.getElementById('courseCreditsInput').value = '3';
   document.getElementById('courseCatSelect').value = 'Đại cương';
   document.getElementById('courseRetakeCheckbox').checked = false;
+  document.getElementById('courseSemSelect').disabled = false;
 
   const filterSemId = document.getElementById('filterSemester')?.value;
   if (filterSemId) {
@@ -474,6 +476,7 @@ function openEditCourseModal(courseId) {
   document.getElementById('courseCodeInput').value = course.course_code;
   document.getElementById('courseNameInput').value = course.course_name;
   document.getElementById('courseSemSelect').value = course.semester_id;
+  document.getElementById('courseSemSelect').disabled = true; // API sửa môn không đổi được học kỳ
   document.getElementById('courseCreditsInput').value = course.credits;
   document.getElementById('courseCatSelect').value = course.category;
   document.getElementById('courseRetakeCheckbox').checked = !!course.is_retake;
@@ -481,7 +484,7 @@ function openEditCourseModal(courseId) {
   openAppModal('courseModal');
 }
 
-function handleSaveCourse(e) {
+async function handleSaveCourse(e) {
   e.preventDefault();
   const id = document.getElementById('courseIdInput').value;
   const course_code = document.getElementById('courseCodeInput').value.trim().toUpperCase();
@@ -501,15 +504,20 @@ function handleSaveCourse(e) {
     return;
   }
 
-  StorageService.saveCourse({
-    id: id || undefined,
-    course_code,
-    course_name,
-    semester_id,
-    credits,
-    category,
-    is_retake
-  });
+  try {
+    await StorageService.saveCourse({
+      id: id || undefined,
+      course_code,
+      course_name,
+      semester_id,
+      credits,
+      category,
+      is_retake
+    });
+  } catch (err) {
+    showToast(err.message || 'Không lưu được dữ liệu lên máy chủ.', true);
+    return;
+  }
 
   closeAppModal('courseModal');
   renderSemesterTabs();
@@ -531,10 +539,15 @@ function openDeleteCourseModal(courseId) {
   openAppModal('deleteCourseModal');
 }
 
-function executeDeleteCourse() {
+async function executeDeleteCourse() {
   if (!currentDeletingCourseId) return;
 
-  StorageService.deleteCourseCascade(currentDeletingCourseId);
+  try {
+    await StorageService.deleteCourseCascade(currentDeletingCourseId);
+  } catch (err) {
+    showToast(err.message || 'Không lưu được dữ liệu lên máy chủ.', true);
+    return;
+  }
   currentDeletingCourseId = null;
   closeAppModal('deleteCourseModal');
   renderSemesterTabs();
@@ -555,7 +568,7 @@ function openComponentsModal(courseId) {
 function renderComponentsList(components) {
   const container = document.getElementById('componentsRowsContainer');
   container.innerHTML = components.map((comp, idx) => `
-    <div class="component-row" style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
+    <div class="component-row" data-comp-id="${comp.id || ''}" style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
       <input type="text" class="modal-input comp-name" value="${escapeHtml(comp.name)}" placeholder="Tên cột điểm (ví dụ: Giữa kỳ)" style="flex: 2; height: 42px;" required>
       <div style="display: flex; align-items: center; gap: 4px; flex: 1.2;">
         <input type="number" class="modal-input comp-weight" value="${comp.weight_percent}" min="1" max="100" oninput="updateTotalWeightBar()" placeholder="%" style="height: 42px; text-align: center;" required>
@@ -590,9 +603,9 @@ function getCurrentComponentInputValues() {
   rows.forEach((row, idx) => {
     const name = row.querySelector('.comp-name').value.trim();
     const weight = Number(row.querySelector('.comp-weight').value) || 0;
-    const oldComp = (currentConfiguringCourse?.components || [])[idx];
+    const oldComp = (currentConfiguringCourse?.components || []).find(c => c.id === row.dataset.compId);
     result.push({
-      id: oldComp?.id || 'comp_' + Date.now() + '_' + idx,
+      id: oldComp?.id || 'new_' + Date.now() + '_' + idx,
       name: name || 'Cột điểm',
       weight_percent: weight,
       score: oldComp?.score !== undefined ? oldComp.score : null
@@ -626,7 +639,7 @@ function updateTotalWeightBar() {
   }
 }
 
-function handleSaveComponents() {
+async function handleSaveComponents() {
   const comps = getCurrentComponentInputValues();
   const total = comps.reduce((s, c) => s + c.weight_percent, 0);
 
@@ -635,7 +648,12 @@ function handleSaveComponents() {
     return;
   }
 
-  StorageService.saveCourseComponents(currentConfiguringCourse.id, comps);
+  try {
+    await StorageService.saveCourseComponents(currentConfiguringCourse.id, comps);
+  } catch (err) {
+    showToast(err.message || 'Không lưu được dữ liệu lên máy chủ.', true);
+    return;
+  }
   closeAppModal('componentsModal');
   renderSemesterTabs();
   renderCourses();
@@ -700,7 +718,7 @@ function calculatePreviewScores() {
   if (el4) el4.textContent = calc.isComplete ? grade.scale4.toFixed(1) : '--';
 }
 
-function handleSaveScores() {
+async function handleSaveScores() {
   const inputs = document.querySelectorAll('.score-input-val');
   const scoreMap = {};
   let hasInvalid = false;
@@ -725,7 +743,12 @@ function handleSaveScores() {
     return;
   }
 
-  StorageService.saveCourseScores(currentScoreCourse.id, scoreMap);
+  try {
+    await StorageService.saveCourseScores(currentScoreCourse.id, scoreMap);
+  } catch (err) {
+    showToast(err.message || 'Không lưu được dữ liệu lên máy chủ.', true);
+    return;
+  }
   closeAppModal('scoreModal');
   renderSemesterTabs();
   renderCourses();
