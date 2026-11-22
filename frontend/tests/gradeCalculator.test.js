@@ -68,3 +68,19 @@ test('xếp loại theo ngưỡng RANKINGS của BE', () => {
   assert.equal(rank(5.5), 'Trung bình'); // 2.0
   assert.equal(rank(4.0), 'Yếu / Kém');  // 1.0
 });
+
+test('PB-31: cảnh báo GPA kỳ < 2.0 và môn rớt, tự mất khi hết điều kiện', () => {
+  const sems = [{ id: 's1', name: 'HK1', academic_year: '2025-2026' }, { id: 's2', name: 'HK2', academic_year: '2025-2026' }];
+  const inSem = (semester_id, c) => ({ ...c, semester_id });
+  const types = (courses) => [...GradeCalculator.getAcademicWarnings(sems, courses)].map(w => w.type).sort(); // spread: mảng từ vm khác realm
+
+  // Kỳ 1: điểm D (1.0) → GPA 1.00 < 2.0, không rớt
+  assert.deepEqual(types([inSem('s1', course('A1', 3, 4.5))]), ['LOW_GPA']);
+  // Kỳ 1: một môn F + một môn A (GPA 2.00) → chỉ cảnh báo rớt
+  assert.deepEqual(types([inSem('s1', course('A1', 3, 3.0)), inSem('s1', course('B1', 3, 9.0))]), ['FAILED']);
+  // Học lại đạt ở kỳ 2 → hết cảnh báo môn rớt; GPA kỳ 1 vẫn 2.00 nên không cảnh báo GPA
+  assert.deepEqual(types([inSem('s1', course('A1', 3, 3.0)), inSem('s1', course('B1', 3, 9.0)), inSem('s2', { ...course('A1', 3, 9.0), is_retake: true })]), []);
+  // Đủ điều kiện tốt / chưa có điểm → không có cảnh báo
+  assert.deepEqual(types([inSem('s1', course('A1', 3, 8.0))]), []);
+  assert.deepEqual(types([inSem('s1', course('A1', 3, null))]), []);
+});

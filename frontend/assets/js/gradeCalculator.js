@@ -207,5 +207,30 @@ const GradeCalculator = {
       courseCount: courseMap.size,
       countedCourseIds
     };
+  },
+
+  // PB-31: cảnh báo học kỳ có GPA < 2.0 và môn bị F (môn F đã học lại đạt thì không cảnh báo nữa)
+  getAcademicWarnings(semesters, courses) {
+    const warnings = [];
+    const semName = (s) => `${s.name}${s.academic_year ? ' (' + s.academic_year + ')' : ''}`;
+    const finalScore = (c) => this.calculateCourseFinalScore(c.components).finalScore10;
+    const passedCodes = new Set(courses
+      .filter(c => finalScore(c) !== null && this.convertScore10(finalScore(c)).scale4 > 0)
+      .map(c => c.course_code));
+
+    (semesters || []).forEach(s => {
+      const semCourses = (courses || []).filter(c => c.semester_id === s.id);
+      const calc = this.calculateSemesterGPA(semCourses);
+      if (calc.totalCredits > 0 && calc.gpa < 2.0) {
+        warnings.push({ type: 'LOW_GPA', semesterId: s.id, message: `GPA ${semName(s)} là ${calc.formattedGPA}, dưới 2.0.` });
+      }
+      semCourses.forEach(c => {
+        const score = finalScore(c);
+        if (score !== null && this.convertScore10(score).scale4 === 0 && !passedCodes.has(c.course_code)) {
+          warnings.push({ type: 'FAILED', courseId: c.id, message: `Môn ${c.course_code} - ${c.course_name} (${semName(s)}) bị điểm F (${score}).` });
+        }
+      });
+    });
+    return warnings;
   }
 };

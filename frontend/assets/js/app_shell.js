@@ -563,6 +563,26 @@ function renderAdminViewBanner() {
     main.querySelector('.dash-header')?.after(bar) ?? main.prepend(bar);
 }
 
+/* ===== PB-31: cảnh báo học tập (GPA kỳ < 2.0 hoặc có môn rớt) — vẽ lại mỗi lần dữ liệu tải lại ===== */
+function renderAcademicWarnings() {
+    document.getElementById('academicWarnings')?.remove();
+    const main = document.querySelector('main.dash');
+    if (!main || typeof StorageService === 'undefined' || typeof GradeCalculator === 'undefined') return;
+    const warnings = GradeCalculator.getAcademicWarnings(StorageService.getSemesters(), StorageService.getCourses());
+    if (warnings.length === 0) return;
+
+    const bar = document.createElement('div');
+    bar.id = 'academicWarnings';
+    bar.className = 'app-card no-print';
+    bar.setAttribute('role', 'alert');
+    bar.style.cssText = 'margin: 0 0 16px; padding: 12px 20px; border: 2px solid var(--error, #EF4444);';
+    bar.innerHTML = `<strong style="color: var(--error, #EF4444);">Cảnh báo học tập</strong>
+        <ul style="margin: 6px 0 0 18px;">${warnings.map(w => `<li>${escapeHtml(w.message)}</li>`).join('')}</ul>`;
+    const header = main.querySelector('.dash-header');
+    if (header) header.after(bar);
+    else main.prepend(bar);
+}
+
 function initAppShell() {
     if (typeof StorageService !== 'undefined' && typeof StorageService.init === 'function') {
         StorageService.init();
@@ -593,6 +613,10 @@ function initAppShell() {
     setupSidebar();
     setupUserMenu();
     highlightActiveSidebar();
+
+    if (session && typeof StorageService !== 'undefined') {
+        StorageService.ready.then(renderAcademicWarnings);
+    }
 
     if (session && typeof authApi !== 'undefined' && authApi.me) {
         authApi.me().then(renderUser).catch(() => {});

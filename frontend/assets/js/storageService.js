@@ -291,6 +291,8 @@ const StorageService = {
   async reload() {
     this._ready = null;
     await this.ready;
+    // PB-31: dữ liệu đổi thì cảnh báo xuất hiện/mất ngay, không cần tải lại trang
+    if (typeof renderAcademicWarnings === 'function') renderAcademicWarnings();
   },
 
   async load() {
