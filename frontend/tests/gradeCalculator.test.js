@@ -84,3 +84,19 @@ test('PB-31: cảnh báo GPA kỳ < 2.0 và môn rớt, tự mất khi hết đi
   assert.deepEqual(types([inSem('s1', course('A1', 3, 8.0))]), []);
   assert.deepEqual(types([inSem('s1', course('A1', 3, null))]), []);
 });
+
+test('PB-32: áp bảng quy đổi từ BE thay cho bảng mặc định', () => {
+  const calc = vm.runInNewContext(`${src}\nGradeCalculator`); // bản riêng để không ảnh hưởng test khác
+  calc.applyScale([
+    { minScore: 5.0, maxScore: 10.0, letter: 'P', gpa4: 4.0 },
+    { minScore: 4.5, maxScore: 4.9, letter: 'D', gpa4: 1.0 },
+    { minScore: 0.0, maxScore: 4.4, letter: 'F', gpa4: 0.0 }
+  ]);
+  assert.equal(calc.convertScore10(4.4).letter, 'F');
+  assert.equal(calc.convertScore10(4.5).letter, 'D');
+  assert.equal(calc.convertScore10(4.5).label, 'Yếu (Qua môn)'); // giữ nhãn cũ theo điểm chữ
+  assert.equal(calc.convertScore10(7).letter, 'P');
+  assert.equal(calc.convertScore10(7).status, 'Đạt');
+  calc.applyScale([]); // dữ liệu rỗng thì giữ bảng hiện tại
+  assert.equal(calc.convertScore10(7).letter, 'P');
+});

@@ -16,6 +16,22 @@ const GradeCalculator = {
     { min: 0.0, max: 3.9, letter: 'F', scale4: 0.0, status: 'Rớt', label: 'Kém (Học lại)', colorClass: 'badge-red' }
   ],
 
+  // PB-32: thay bảng mặc định bằng bảng admin cấu hình trên BE (GET /grade-scale, sắp điểm cao → thấp)
+  applyScale(rows) {
+    if (!Array.isArray(rows) || rows.length === 0) return;
+    const old = Object.fromEntries(this.GRADE_SCALE.map(g => [g.letter, g]));
+    this.GRADE_SCALE = rows.map(r => ({
+      label: r.letter,
+      colorClass: r.gpa4 > 0 ? 'badge-blue' : 'badge-red',
+      ...old[r.letter],
+      min: r.minScore,
+      max: r.maxScore,
+      letter: r.letter,
+      scale4: r.gpa4,
+      status: r.gpa4 > 0 ? 'Đạt' : 'Rớt'
+    }));
+  },
+
   // toPrecision(12) khử sai số số thực (8.45*10 = 84.4999…) để khớp Decimal ROUND_HALF_UP của BE
   roundHalfUp(val, factor) {
     return Math.round(Number((Number(val) * factor).toPrecision(12))) / factor;

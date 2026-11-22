@@ -159,6 +159,34 @@
                 </table>
             </div>
         </div>
+
+        <!-- BẢNG QUY ĐỔI ĐIỂM (PB-32) -->
+        <div class="app-card" style="margin-top: 20px;">
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
+                <h2 style="margin: 0; font-size: 18px;">Bảng quy đổi điểm</h2>
+                <span style="color: var(--text-gray); font-size: 13px;">Các khoảng phải liền nhau, không chồng lấn và phủ kín 0.0–10.0 (bước 0.1).</span>
+            </div>
+            <div class="table-wrap">
+                <table class="app-table">
+                    <thead>
+                        <tr>
+                            <th>Điểm chữ</th>
+                            <th>Từ (hệ 10)</th>
+                            <th>Đến (hệ 10)</th>
+                            <th>Hệ 4</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scaleTableBody"></tbody>
+                </table>
+            </div>
+            <p id="scaleError" role="alert" style="display: none; color: var(--error); font-size: 13px; margin: 12px 0 0;"></p>
+            <div style="display: flex; gap: 10px; margin-top: 16px;">
+                <button type="button" class="btn btn-secondary" id="scaleAddRow">+ Thêm mức</button>
+                <button type="button" class="btn btn-secondary" id="scaleReload">Hoàn tác</button>
+                <button type="button" class="btn btn-primary" id="scaleSave" style="margin-left: auto;">Lưu bảng quy đổi</button>
+            </div>
+        </div>
     </main>
 
     <!-- MODAL KHÓA / MỞ TÀI KHOẢN (PB-30) -->

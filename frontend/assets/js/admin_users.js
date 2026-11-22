@@ -28,7 +28,67 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     $('lockModalConfirm').addEventListener('click', confirmToggle);
     loadUsers();
+
+    $('scaleAddRow').addEventListener('click', () => $('scaleTableBody').insertAdjacentHTML('beforeend', scaleRowHtml()));
+    $('scaleReload').addEventListener('click', loadScale);
+    $('scaleSave').addEventListener('click', saveScale);
+    $('scaleTableBody').addEventListener('click', (e) => e.target.closest('[data-remove-scale]')?.closest('tr').remove());
+    loadScale();
 });
+
+/* ===== BẢNG QUY ĐỔI ĐIỂM (PB-32): BE kiểm tra hợp lệ (phủ kín, không chồng lấn), FE chỉ hiện lỗi BE trả về ===== */
+function scaleRowHtml(r = {}) {
+    const num = (field, max, label) => `<input type="number" class="modal-input" data-field="${field}" min="0" max="${max}" step="0.1"
+        value="${r[field] ?? ''}" aria-label="${label}" style="width: 110px; height: 38px;">`;
+    return `<tr>
+        <td><input type="text" class="modal-input" data-field="letter" maxlength="2" value="${escapeHtml(r.letter || '')}"
+            aria-label="Điểm chữ" style="width: 80px; height: 38px;"></td>
+        <td>${num('minScore', 10, 'Từ điểm')}</td>
+        <td>${num('maxScore', 10, 'Đến điểm')}</td>
+        <td>${num('gpa4', 4, 'Điểm hệ 4')}</td>
+        <td><button type="button" class="btn btn-danger btn-sm" data-remove-scale>Xóa</button></td>
+    </tr>`;
+}
+
+function showScaleError(message) {
+    $('scaleError').textContent = message;
+    $('scaleError').style.display = message ? 'block' : 'none';
+}
+
+async function loadScale() {
+    showScaleError('');
+    try {
+        const rows = await apiFetch('/grade-scale');
+        $('scaleTableBody').innerHTML = rows.map(scaleRowHtml).join('');
+    } catch (err) {
+        showScaleError(err.message || 'Không tải được bảng quy đổi điểm.');
+    }
+}
+
+async function saveScale() {
+    const items = [...$('scaleTableBody').rows].map((tr) => Object.fromEntries(
+        [...tr.querySelectorAll('[data-field]')].map((input) => [
+            input.dataset.field,
+            input.dataset.field === 'letter' ? input.value : (input.value === '' ? null : Number(input.value)),
+        ])
+    ));
+    const btn = $('scaleSave');
+    btn.disabled = true;
+    showScaleError('');
+    try {
+        const rows = await apiFetch('/grade-scale', { method: 'PUT', body: { items } });
+        $('scaleTableBody').innerHTML = rows.map(scaleRowHtml).join('');
+        showToast('Đã lưu bảng quy đổi. Điểm và GPA sẽ được tính theo bảng mới.');
+    } catch (err) {
+        if (err.status === 403) return window.location.replace('dashboard.html');
+        // session.js trải mảng details của BE thành object {0: {...}, 1: {...}}
+        const reasons = Object.values(err.details || {}).filter((d) => d?.reason)
+            .map((d) => (d.field ? `${d.field}: ${d.reason}` : d.reason));
+        showScaleError([err.message || 'Lưu bảng quy đổi thất bại.', ...reasons].join(' — '));
+    } finally {
+        btn.disabled = false;
+    }
+}
 
 let pendingTarget = null;
 

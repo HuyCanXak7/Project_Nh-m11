@@ -4,6 +4,7 @@
  */
 
 let currentParsedValidRows = [];
+let lastPreview = null; // { res, fileName } để vẽ lại khi BE báo lỗi theo dòng
 
 document.addEventListener('DOMContentLoaded', () => {
   StorageService.ready; // nạp sẵn dữ liệu để phân tích file import
@@ -165,6 +166,7 @@ function handleParseResult(parseResult, fileName) {
 
   showImportStatus(null);
   currentParsedValidRows = parseResult.validRows;
+  lastPreview = { res: parseResult, fileName };
   renderPreview(parseResult, fileName);
 }
 
@@ -268,9 +270,9 @@ async function executeBatchSave() {
     result = await StorageService.batchImportRows(currentParsedValidRows);
   } catch (err) {
     // session.js trải mảng details của BE thành object {0: {...}, 1: {...}}
-    const rowInfo = Object.values(err.details || {}).filter(d => d?.reason).slice(0, 3)
-      .map(d => d.row ? `dòng ${d.row}: ${d.reason}` : d.reason).join('; ');
-    showToast((err.message || 'Không lưu được dữ liệu import.') + (rowInfo ? ` (${rowInfo})` : ''), true);
+    const details = Object.values(err.details || {}).filter(d => d?.reason);
+    showToast(err.message || 'Không lưu được dữ liệu import.', true);
+    if (lastPreview && details.some(d => d.row)) markServerErrors(details);
     return;
   }
   const detailParts = [`${currentParsedValidRows.length} dòng điểm`];
@@ -282,6 +284,22 @@ async function executeBatchSave() {
   setTimeout(() => {
     window.location.href = 'courses.html';
   }, 900);
+}
+
+// Chuyển các dòng BE từ chối sang trạng thái lỗi trong bảng xem trước (FE chỉ kiểm tra từng dòng, BE kiểm tra cả lô)
+function markServerErrors(details) {
+  const byRow = {};
+  details.forEach(d => (byRow[d.row] ??= []).push(d.reason));
+  const { res, fileName } = lastPreview;
+  const failed = res.validRows.filter(r => byRow[r.row]);
+  const next = {
+    ...res,
+    validRows: res.validRows.filter(r => !byRow[r.row]),
+    errorRows: [...res.errorRows, ...failed.map(r => ({ row: r.row, data: r, message: byRow[r.row].join('; ') }))]
+  };
+  lastPreview = { res: next, fileName };
+  currentParsedValidRows = next.validRows;
+  renderPreview(next, fileName);
 }
 
 function escapeHtml(str) {

@@ -13,6 +13,13 @@ const STORAGE_KEYS = {
 const CATEGORY_TO_API = { 'Đại cương': 'GENERAL', 'Cơ sở ngành': 'FOUNDATION', 'Chuyên ngành': 'SPECIALIZED', 'Tự chọn & Thực tập': 'SPECIALIZED' };
 const CATEGORY_FROM_API = { GENERAL: 'Đại cương', FOUNDATION: 'Cơ sở ngành', SPECIALIZED: 'Chuyên ngành' };
 
+// Ô ngày trong Excel được đọc ra số serial (vd 45536) → đổi sang YYYY-MM-DD cho BE; chuỗi khác giữ nguyên
+function excelDate(value) {
+  if (!value) return null;
+  if (!/^\d+$/.test(value)) return value;
+  return new Date(Date.UTC(1899, 11, 30) + Number(value) * 86400000).toISOString().slice(0, 10);
+}
+
 const DEFAULT_COMPONENTS = [
   { name: 'Chuyên cần', weight_percent: 10 },
   { name: 'Giữa kỳ', weight_percent: 30 },
@@ -296,7 +303,8 @@ const StorageService = {
   },
 
   async load() {
-    const sems = await apiFetch('/semesters');
+    const [sems, scale] = await Promise.all([apiFetch('/semesters'), apiFetch('/grade-scale')]);
+    if (typeof GradeCalculator !== 'undefined') GradeCalculator.applyScale(scale);
     const courses = (await Promise.all(sems.map(s => apiFetch(`/semesters/${s.id}/courses`)))).flat();
     // shortcut: 1 request/môn để lấy thành phần điểm; khi số môn lớn thì thêm API trả kèm components ở BE
     const configs = await Promise.all(courses.map(c => apiFetch(`/courses/${c.id}/grade-components`)));
@@ -511,7 +519,10 @@ const StorageService = {
       category: CATEGORY_TO_API[(r.category || '').trim()] || r.category,
       component_name: r.component_name,
       weight_percent: Number(r.weight_percent),
-      score: Number(r.score)
+      score: Number(r.score),
+      semester_academic_year: r.semester_academic_year || null,
+      semester_start_date: excelDate(r.semester_start_date),
+      semester_end_date: excelDate(r.semester_end_date)
     }));
     const res = await apiFetch('/import/grades', { method: 'POST', body: { rows } });
     await this.reload();

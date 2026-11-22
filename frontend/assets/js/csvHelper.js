@@ -21,20 +21,27 @@ const CSVHelper = {
     'score'
   ],
 
+  // BE cần các cột này khi học kỳ chưa có (hoặc trùng tên) — không bắt buộc để file cũ vẫn đọc được
+  OPTIONAL_HEADERS: ['semester_academic_year', 'semester_start_date', 'semester_end_date'],
+
+  get TEMPLATE_HEADERS() {
+    return [...this.EXPECTED_HEADERS, ...this.OPTIONAL_HEADERS];
+  },
+
   SAMPLE_ROWS: [
-    ['Học kỳ 1', 'INT1001', 'Nhập môn lập trình', 3, 'Đại cương', 'Chuyên cần', 10, 9.0],
-    ['Học kỳ 1', 'INT1001', 'Nhập môn lập trình', 3, 'Đại cương', 'Giữa kỳ', 30, 8.0],
-    ['Học kỳ 1', 'INT1001', 'Nhập môn lập trình', 3, 'Đại cương', 'Cuối kỳ', 60, 8.5],
-    ['Học kỳ 1', 'MAT1010', 'Giải tích 1', 4, 'Đại cương', 'Chuyên cần', 10, 8.0],
-    ['Học kỳ 1', 'MAT1010', 'Giải tích 1', 4, 'Đại cương', 'Giữa kỳ', 30, 5.0],
-    ['Học kỳ 1', 'MAT1010', 'Giải tích 1', 4, 'Đại cương', 'Cuối kỳ', 60, 6.5],
-    ['Học kỳ 2', 'INT1002', 'Cấu trúc dữ liệu và giải thuật', 3, 'Cơ sở ngành', 'Chuyên cần', 10, 9.5],
-    ['Học kỳ 2', 'INT1002', 'Cấu trúc dữ liệu và giải thuật', 3, 'Cơ sở ngành', 'Bài tập lớn', 40, 8.5],
-    ['Học kỳ 2', 'INT1002', 'Cấu trúc dữ liệu và giải thuật', 3, 'Cơ sở ngành', 'Cuối kỳ', 50, 9.0]
+    ['Học kỳ 1', 'INT1001', 'Nhập môn lập trình', 3, 'Đại cương', 'Chuyên cần', 10, 9.0, '2024-2025', '2024-09-01', '2025-01-15'],
+    ['Học kỳ 1', 'INT1001', 'Nhập môn lập trình', 3, 'Đại cương', 'Giữa kỳ', 30, 8.0, '2024-2025', '2024-09-01', '2025-01-15'],
+    ['Học kỳ 1', 'INT1001', 'Nhập môn lập trình', 3, 'Đại cương', 'Cuối kỳ', 60, 8.5, '2024-2025', '2024-09-01', '2025-01-15'],
+    ['Học kỳ 1', 'MAT1010', 'Giải tích 1', 4, 'Đại cương', 'Chuyên cần', 10, 8.0, '2024-2025', '2024-09-01', '2025-01-15'],
+    ['Học kỳ 1', 'MAT1010', 'Giải tích 1', 4, 'Đại cương', 'Giữa kỳ', 30, 5.0, '2024-2025', '2024-09-01', '2025-01-15'],
+    ['Học kỳ 1', 'MAT1010', 'Giải tích 1', 4, 'Đại cương', 'Cuối kỳ', 60, 6.5, '2024-2025', '2024-09-01', '2025-01-15'],
+    ['Học kỳ 2', 'INT1002', 'Cấu trúc dữ liệu và giải thuật', 3, 'Cơ sở ngành', 'Chuyên cần', 10, 9.5, '2024-2025', '2025-02-01', '2025-06-15'],
+    ['Học kỳ 2', 'INT1002', 'Cấu trúc dữ liệu và giải thuật', 3, 'Cơ sở ngành', 'Bài tập lớn', 40, 8.5, '2024-2025', '2025-02-01', '2025-06-15'],
+    ['Học kỳ 2', 'INT1002', 'Cấu trúc dữ liệu và giải thuật', 3, 'Cơ sở ngành', 'Cuối kỳ', 50, 9.0, '2024-2025', '2025-02-01', '2025-06-15']
   ],
 
   get SAMPLE_CSV_CONTENT() {
-    const headerLine = this.EXPECTED_HEADERS.join(',');
+    const headerLine = this.TEMPLATE_HEADERS.join(',');
     const bodyLines = this.SAMPLE_ROWS.map(row =>
       row.map(cell => this.csvCell(cell, false)).join(',')
     );
@@ -79,7 +86,7 @@ const CSVHelper = {
    */
   downloadTemplateExcel() {
     const rows = [
-      this.EXPECTED_HEADERS,
+      this.TEMPLATE_HEADERS,
       ...this.SAMPLE_ROWS
     ];
     const blob = this.buildXLSXBlob('Mau_Nhap_Diem', rows);
