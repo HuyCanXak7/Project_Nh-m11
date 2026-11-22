@@ -39,7 +39,8 @@ app = FastAPI(title="Hệ thống quản lý chỉ số học tập", lifespan=l
 # Allow the local web origin to call the API while keeping other origins blocked.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[setting.FRONTEND_ORIGIN],
+    # FRONTEND_ORIGIN có thể chứa nhiều origin, cách nhau bằng dấu phẩy (vd: Docker 8080 + Live Server 5500).
+    allow_origins=[origin.strip() for origin in setting.FRONTEND_ORIGIN.split(",")],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
