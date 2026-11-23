@@ -1,4 +1,4 @@
-"""Nghiệp vụ đọc và áp dụng bảng quy đổi điểm theo PB-17."""
+"""Nghiệp vụ đọc, cập nhật và áp dụng bảng quy đổi điểm theo PB-17."""
 
 from decimal import Decimal
 
@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.models import Course, GradeScale
-from app.schemas.grade_scale import GradeScaleItem
+from app.schemas.grade_scale import GradeScaleUpdate
 
 
 # Bảng mặc định được chốt trong SRS; chỉ dùng khi database chưa có dữ liệu.
@@ -20,6 +20,130 @@ DEFAULT_GRADE_SCALE = (
     (Decimal("4.0"), Decimal("4.9"), "D", Decimal("1.0")),
     (Decimal("0.0"), Decimal("3.9"), "F", Decimal("0.0")),
 )
+
+SCORE_STEP = Decimal("0.1")
+
+
+def grade_scale_error(details: list[dict]) -> HTTPException:
+    """Trả lỗi 400 kèm danh sách lỗi theo từng dòng để FE hiển thị cạnh bảng."""
+    return HTTPException(
+        status_code=400,
+        detail={
+            "code": "INVALID_GRADE_SCALE",
+            "message": "Bảng quy đổi điểm không hợp lệ.",
+            "details": details,
+        },
+    )
+
+
+def validate_grade_scale(data: GradeScaleUpdate) -> list[dict]:
+    """Kiểm tra thứ tự, tính liên tục và độ phủ kín 0.0–10.0 của bảng mới."""
+    details: list[dict] = []
+    normalized: list[dict] = []
+    seen_letters: set[str] = set()
+
+    for index, item in enumerate(data.items):
+        prefix = f"items.{index}"
+        letter = item.letter.strip().upper()
+        if not letter:
+            details.append(
+                {"field": f"{prefix}.letter", "reason": "Điểm chữ không được để trống."}
+            )
+        elif letter in seen_letters:
+            details.append(
+                {
+                    "field": f"{prefix}.letter",
+                    "reason": f"Điểm chữ {letter} bị trùng trong bảng quy đổi.",
+                }
+            )
+        else:
+            seen_letters.add(letter)
+
+        if item.min_score > item.max_score:
+            details.append(
+                {
+                    "field": f"{prefix}.minScore",
+                    "reason": "Điểm bắt đầu không được lớn hơn điểm kết thúc.",
+                }
+            )
+
+        normalized.append(
+            {
+                "index": index,
+                "letter": letter,
+                "min_score": item.min_score,
+                "max_score": item.max_score,
+                "gpa4": item.gpa4,
+            }
+        )
+
+    normalized.sort(key=lambda item: item["min_score"])
+    first = normalized[0]
+    last = normalized[-1]
+    if first["min_score"] != Decimal("0.0"):
+        details.append(
+            {
+                "field": f"items.{first['index']}.minScore",
+                "reason": "Khoảng thấp nhất phải bắt đầu từ 0.0.",
+            }
+        )
+    if last["max_score"] != Decimal("10.0"):
+        details.append(
+            {
+                "field": f"items.{last['index']}.maxScore",
+                "reason": "Khoảng cao nhất phải kết thúc tại 10.0.",
+            }
+        )
+
+    for previous, current in zip(normalized, normalized[1:]):
+        expected_min = previous["max_score"] + SCORE_STEP
+        if current["min_score"] != expected_min:
+            details.append(
+                {
+                    "field": f"items.{current['index']}.minScore",
+                    "reason": (
+                        f"Khoảng phải nối tiếp mốc {expected_min}; "
+                        "không được chồng lấn hoặc để trống."
+                    ),
+                }
+            )
+
+    if details:
+        raise grade_scale_error(details)
+    return normalized
+
+
+def replace_grade_scale(db: Session, data: GradeScaleUpdate) -> list[GradeScale]:
+    """Thay toàn bộ bảng quy đổi và tính lại điểm hệ 4 đã lưu của mọi môn."""
+    items = validate_grade_scale(data)
+
+    for scale in db.query(GradeScale).all():
+        db.delete(scale)
+    db.flush()
+
+    db.add_all(
+        [
+            GradeScale(
+                min_score=item["min_score"],
+                max_score=item["max_score"],
+                letter=item["letter"],
+                gpa4=item["gpa4"],
+            )
+            for item in items
+        ]
+    )
+    db.flush()
+
+    # Điểm hệ 10 không đổi, nhưng điểm hệ 4 phụ thuộc bảng mới nên phải đồng bộ
+    # để GPA không tiếp tục dùng kết quả quy đổi của bảng cũ.
+    for course in db.query(Course).filter(Course.grade10.is_not(None)).all():
+        conversion = convert_grade(db, course.grade10)
+        course.grade4 = Decimal(str(conversion["grade4"]))
+
+    db.commit()
+    return (
+        db.query(GradeScale).order_by(GradeScale.min_score.desc()).all()
+    )
 
 
 def ensure_default_grade_scale(db: Session) -> None:
@@ -74,52 +198,3 @@ def convert_grade(db: Session, grade10: Decimal) -> dict:
         "grade4": float(scale.gpa4),
         "isPassed": grade10 >= Decimal("4.0"),
     }
-
-
-STEP = Decimal("0.1")  # điểm môn được làm tròn 1 chữ số thập phân
-
-
-def scale_error(message: str) -> HTTPException:
-    return HTTPException(
-        status_code=400, detail={"code": "INVALID_GRADE_SCALE", "message": message}
-    )
-
-
-def replace_grade_scale(db: Session, items: list[GradeScaleItem]) -> list[GradeScale]:
-    """PB-32: kiểm tra bảng mới phủ kín 0.0–10.0, không chồng lấn rồi thay bảng cũ."""
-    rows = sorted(items, key=lambda item: item.min_score)
-    letters = [row.letter for row in rows]
-    if len(set(letters)) != len(letters):
-        raise scale_error("Điểm chữ bị trùng.")
-    if rows[0].min_score != 0 or rows[-1].max_score != 10:
-        raise scale_error("Bảng quy đổi phải bao phủ từ 0.0 đến 10.0.")
-    # Gợi ý sửa theo thứ tự bảng trên giao diện (mức cao ở trên): "Từ" của mức trên = "Đến" của mức dưới + 0.1
-    for prev, cur in zip(rows, rows[1:]):
-        fix = (
-            f"Hãy đặt 'Từ' của {cur.letter} = {prev.max_score + STEP} "
-            f"hoặc 'Đến' của {prev.letter} = {cur.min_score - STEP}."
-        )
-        if cur.min_score <= prev.max_score:
-            raise scale_error(
-                f"{cur.letter} và {prev.letter} bị chồng lấn ở điểm "
-                f"{cur.min_score}–{min(cur.max_score, prev.max_score)}. {fix}"
-            )
-        if cur.min_score != prev.max_score + STEP:
-            raise scale_error(
-                f"Giữa {cur.letter} và {prev.letter} có khoảng trống: điểm "
-                f"{prev.max_score + STEP}–{cur.min_score - STEP} chưa thuộc mức nào. {fix}"
-            )
-
-    db.query(GradeScale).delete()
-    db.flush()  # xóa trước để không vướng unique(letter) khi thêm lại
-    db.add_all(
-        GradeScale(min_score=r.min_score, max_score=r.max_score, letter=r.letter, gpa4=r.gpa4)
-        for r in rows
-    )
-    # GPA đọc grade4 đã lưu ở môn → quy đổi lại để lần tính tiếp theo dùng bảng mới
-    for course in db.query(Course).filter(Course.grade10.is_not(None)):
-        course.grade4 = max(
-            (r for r in rows if r.min_score <= course.grade10), key=lambda r: r.min_score
-        ).gpa4
-    db.commit()
-    return get_grade_scale(db)

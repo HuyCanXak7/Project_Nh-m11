@@ -98,7 +98,7 @@
                 <h1 class="dash-header__title">
                     <span>Tài khoản</span>
                     <span class="dash-header__slash">/</span>
-                    <span class="dash-header__sub-inline">Danh sách, tìm kiếm & khóa/mở (chỉ ADMIN)</span>
+                    <span class="dash-header__sub-inline">Danh sách, hồ sơ, bảng điểm & khóa/mở (chỉ ADMIN)</span>
                 </h1>
             </div>
 
@@ -129,15 +129,28 @@
             </div>
         </header>
 
-        <!-- DANH SÁCH TÀI KHOẢN (PB-29) -->
+        <!-- DANH SÁCH SINH VIÊN (US-01) -->
         <div class="app-card" style="margin-top: 0;">
-            <div class="filter-bar" style="margin-bottom: 20px;">
+            <div class="filter-bar" style="margin-bottom: 20px; flex-wrap: wrap;">
                 <div class="filter-input-wrap">
                     <span class="filter-icon">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                     </span>
-                    <input type="search" id="userSearch" class="filter-input" placeholder="Tìm theo email hoặc họ tên..." aria-label="Tìm theo email hoặc họ tên">
+                    <input type="search" id="userSearch" class="filter-input" placeholder="Tìm theo email, họ tên hoặc MSSV..." aria-label="Tìm theo email, họ tên hoặc MSSV">
                 </div>
+                <select id="userSort" class="filter-select" aria-label="Sắp xếp danh sách sinh viên">
+                    <option value="createdAt:desc">Mới tạo trước</option>
+                    <option value="createdAt:asc">Cũ nhất trước</option>
+                    <option value="fullName:asc">Họ tên A → Z</option>
+                    <option value="fullName:desc">Họ tên Z → A</option>
+                    <option value="studentCode:asc">MSSV tăng dần</option>
+                    <option value="email:asc">Email A → Z</option>
+                </select>
+                <select id="userPageSize" class="filter-select" aria-label="Số sinh viên mỗi trang">
+                    <option value="10">10 / trang</option>
+                    <option value="20">20 / trang</option>
+                    <option value="50">50 / trang</option>
+                </select>
                 <span id="userCount" aria-live="polite" style="margin-left: auto;"></span>
             </div>
 
@@ -145,11 +158,10 @@
                 <table class="app-table">
                     <thead>
                         <tr>
-                            <th>Email</th>
-                            <th>Họ tên</th>
                             <th>MSSV</th>
+                            <th>Họ tên</th>
+                            <th>Email</th>
                             <th>Ngành</th>
-                            <th>Vai trò</th>
                             <th>Trạng thái</th>
                             <th>Ngày tạo</th>
                             <th>Thao tác</th>
@@ -157,6 +169,12 @@
                     </thead>
                     <tbody id="userTableBody"></tbody>
                 </table>
+            </div>
+
+            <div id="userPagination" style="display: none; align-items: center; justify-content: flex-end; gap: 12px; margin-top: 16px;">
+                <button type="button" class="btn btn-secondary btn-sm" id="userPrev">‹ Trang trước</button>
+                <span id="pageInfo" style="font-size: 13px; color: var(--text-gray);" aria-live="polite"></span>
+                <button type="button" class="btn btn-secondary btn-sm" id="userNext">Trang sau ›</button>
             </div>
         </div>
 
@@ -196,11 +214,26 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
             </div>
             <h3 class="modal__title" id="lockModalTitle" style="font-size: 20px;"></h3>
-            <p class="modal__message" id="lockModalMessage" style="font-size: 14px; margin-bottom: 20px;"></p>
+            <p class="modal__message" id="lockModalMessage" style="font-size: 14px; margin-bottom: 16px;"></p>
+            <label for="lockModalReason" style="display: block; text-align: left; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Lý do (không bắt buộc)</label>
+            <input type="text" id="lockModalReason" class="modal-input" maxlength="255" placeholder="Ví dụ: Vi phạm nội quy" style="width: 100%; margin-bottom: 16px;">
             <p id="lockModalError" role="alert" style="display: none; color: var(--error); font-size: 13px; margin-bottom: 16px;"></p>
             <div style="display: flex; gap: 10px;">
                 <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="closeAppModal('lockModal')">Hủy</button>
                 <button type="button" class="btn" id="lockModalConfirm" style="flex: 1;"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL HỒ SƠ & BẢNG ĐIỂM SINH VIÊN (US-02, US-05, US-06) -->
+    <div id="studentModal" class="modal-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="studentModalTitle">
+        <div class="modal" style="max-width: 980px; width: 100%; max-height: 92vh; overflow-y: auto; padding: 28px; text-align: left;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 18px;">
+                <h3 class="modal__title" id="studentModalTitle" style="font-size: 22px; margin: 0; flex: 1;">Hồ sơ sinh viên</h3>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeAppModal('studentModal')">Đóng</button>
+            </div>
+            <div id="studentDetailBody" style="text-align: left;">
+                <p style="color: var(--text-gray);">Đang tải hồ sơ sinh viên...</p>
             </div>
         </div>
     </div>

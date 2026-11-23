@@ -32,3 +32,10 @@ class ProfileUpdateRequest(BaseModel):
         if len(value) < 2:
             raise ValueError("Họ và tên phải có ít nhất 2 ký tự.")
         return value
+
+
+class ChangePasswordRequest(BaseModel):
+    """Đổi mật khẩu: phải xác thực mật khẩu hiện tại trước khi nhận mật khẩu mới."""
+
+    currentPassword: SecretStr = Field(min_length=1, max_length=72)
+    newPassword: SecretStr = Field(min_length=8, max_length=72)
