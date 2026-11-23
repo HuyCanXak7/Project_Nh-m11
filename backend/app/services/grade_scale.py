@@ -5,7 +5,8 @@ from decimal import Decimal
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.models import GradeScale
+from app.models import Course, GradeScale
+from app.schemas.grade_scale import GradeScaleItem
 
 
 # Bảng mặc định được chốt trong SRS; chỉ dùng khi database chưa có dữ liệu.
@@ -73,3 +74,41 @@ def convert_grade(db: Session, grade10: Decimal) -> dict:
         "grade4": float(scale.gpa4),
         "isPassed": grade10 >= Decimal("4.0"),
     }
+
+
+STEP = Decimal("0.1")  # điểm môn được làm tròn 1 chữ số thập phân
+
+
+def scale_error(message: str) -> HTTPException:
+    return HTTPException(
+        status_code=400, detail={"code": "INVALID_GRADE_SCALE", "message": message}
+    )
+
+
+def replace_grade_scale(db: Session, items: list[GradeScaleItem]) -> list[GradeScale]:
+    """PB-32: kiểm tra bảng mới phủ kín 0.0–10.0, không chồng lấn rồi thay bảng cũ."""
+    rows = sorted(items, key=lambda item: item.min_score)
+    letters = [row.letter for row in rows]
+    if len(set(letters)) != len(letters):
+        raise scale_error("Điểm chữ bị trùng.")
+    if rows[0].min_score != 0 or rows[-1].max_score != 10:
+        raise scale_error("Bảng quy đổi phải bao phủ từ 0.0 đến 10.0.")
+    for prev, cur in zip(rows, rows[1:]):
+        if cur.min_score <= prev.max_score:
+            raise scale_error(f"Khoảng {prev.letter} và {cur.letter} bị chồng lấn.")
+        if cur.min_score != prev.max_score + STEP:
+            raise scale_error(f"Có khoảng trống giữa {prev.letter} và {cur.letter}.")
+
+    db.query(GradeScale).delete()
+    db.flush()  # xóa trước để không vướng unique(letter) khi thêm lại
+    db.add_all(
+        GradeScale(min_score=r.min_score, max_score=r.max_score, letter=r.letter, gpa4=r.gpa4)
+        for r in rows
+    )
+    # GPA đọc grade4 đã lưu ở môn → quy đổi lại để lần tính tiếp theo dùng bảng mới
+    for course in db.query(Course).filter(Course.grade10.is_not(None)):
+        course.grade4 = max(
+            (r for r in rows if r.min_score <= course.grade10), key=lambda r: r.min_score
+        ).gpa4
+    db.commit()
+    return get_grade_scale(db)

@@ -7,7 +7,8 @@ from fastapi.testclient import TestClient
 
 from app.db.database import SessionLocal
 from app.main import app
-from app.models import Course
+from app.models import Course, User
+from app.services.grade_scale import DEFAULT_GRADE_SCALE
 
 
 def register_and_login(client: TestClient) -> dict:
@@ -129,3 +130,92 @@ def test_grade_conversion_boundaries_and_persistence():
             assert course is not None
             assert course.grade10 is None
             assert course.grade4 is None
+
+
+DEFAULT_ITEMS = [
+    {"minScore": float(lo), "maxScore": float(hi), "letter": letter, "gpa4": float(gpa4)}
+    for lo, hi, letter, gpa4 in DEFAULT_GRADE_SCALE
+]
+
+
+def make_admin(headers: dict) -> None:
+    """Đổi role trực tiếp trong DB; dependency đọc role mới ở mỗi request."""
+    with TestClient(app) as client:
+        user_id = client.get("/api/v1/auth/me", headers=headers).json()["data"]["id"]
+    with SessionLocal() as db:
+        db.get(User, user_id).role = "ADMIN"
+        db.commit()
+
+
+def test_only_admin_can_edit_grade_scale():
+    with TestClient(app) as client:
+        headers = register_and_login(client)
+        response = client.put("/api/v1/grade-scale", headers=headers, json={"items": DEFAULT_ITEMS})
+        assert response.status_code == 403
+        assert client.put("/api/v1/grade-scale", json={"items": DEFAULT_ITEMS}).status_code == 401
+
+
+def test_invalid_grade_scale_is_rejected_and_table_unchanged():
+    with TestClient(app) as client:
+        headers = register_and_login(client)
+        make_admin(headers)
+        before = client.get("/api/v1/grade-scale").json()["data"]
+
+        def with_changes(**changes):
+            items = [dict(item) for item in DEFAULT_ITEMS]
+            for index, fields in changes.items():
+                items[int(index[1:])].update(fields)
+            return items
+
+        invalid_tables = [
+            with_changes(i1={"maxScore": 8.5}),                    # B+ chồng lấn A
+            with_changes(i1={"maxScore": 8.3}),                    # hở 8.4
+            with_changes(i7={"minScore": 0.5}),                    # không phủ 0.0
+            with_changes(i0={"maxScore": 9.9}),                    # không phủ 10.0
+            with_changes(i1={"letter": "a"}),                      # trùng điểm chữ
+            with_changes(i0={"minScore": 9.0, "maxScore": 8.5}),   # min > max
+            with_changes(i0={"gpa4": 4.5}),                        # hệ 4 vượt 4
+            with_changes(i0={"maxScore": 10.05}),                  # quá 1 chữ số thập phân
+            [],
+        ]
+        for items in invalid_tables:
+            response = client.put("/api/v1/grade-scale", headers=headers, json={"items": items})
+            assert response.status_code == 400, items
+            assert response.json()["error"]["code"] in {"INVALID_GRADE_SCALE", "VALIDATION_ERROR"}
+
+        assert client.get("/api/v1/grade-scale").json()["data"] == before
+
+
+def test_new_grade_scale_applies_to_next_calculation():
+    with TestClient(app) as client:
+        headers = register_and_login(client)
+        course_id, component_id = create_course_with_one_component(client, headers)
+        client.put(
+            f"/api/v1/courses/{course_id}/scores",
+            headers=headers,
+            json={"scores": [{"component_id": component_id, "score": 4.2}]},
+        )
+        assert client.get("/api/v1/gpa/cumulative", headers=headers).json()["data"]["gpa4"] == 1.0
+
+        make_admin(headers)
+        stricter = [dict(item) for item in DEFAULT_ITEMS]
+        stricter[6].update(minScore=4.5)   # D: 4.5–4.9
+        stricter[7].update(maxScore=4.4)   # F: 0.0–4.4
+        try:
+            response = client.put("/api/v1/grade-scale", headers=headers, json={"items": stricter})
+            assert response.status_code == 200
+            assert response.json()["data"][-1] == {"id": response.json()["data"][-1]["id"], "minScore": 0.0, "maxScore": 4.4, "letter": "F", "gpa4": 0.0}
+
+            # GPA đã lưu được quy đổi lại theo bảng mới
+            assert client.get("/api/v1/gpa/cumulative", headers=headers).json()["data"]["gpa4"] == 0.0
+            # Lần nhập điểm tiếp theo cũng dùng bảng mới
+            data = client.put(
+                f"/api/v1/courses/{course_id}/scores",
+                headers=headers,
+                json={"scores": [{"component_id": component_id, "score": 4.4}]},
+            ).json()["data"]
+            assert data["letterGrade"] == "F"
+            assert data["grade4"] == 0.0
+        finally:
+            restored = client.put("/api/v1/grade-scale", headers=headers, json={"items": DEFAULT_ITEMS})
+            assert restored.status_code == 200

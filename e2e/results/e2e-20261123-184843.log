@@ -1,0 +1,17 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.14.5, pytest-9.2.0, pluggy-1.7.0 -- /private/tmp/claude-501/-Users-nguyen-quanlichisohoctap/7ab4212f-7a2d-4f75-b52d-f601735b4bba/scratchpad/venv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/nguyen/quanlichisohoctap/e2e
+plugins: anyio-4.16.0
+collecting ... collected 1 item
+
+test_main_flow.py::test_main_flow_shows_gpa_on_dashboard   ✔ Đăng nhập: e2e.4663423f@example.com
+  ✔ Tạo học kỳ: Học kỳ E2E (2025-2026)
+  ✔ Thêm môn: E2E101 - Kiểm thử tự động (3 TC)
+  ✔ Cấu hình thành phần: Giữa kỳ 40% + Cuối kỳ 60%
+  ✔ Nhập điểm: Giữa kỳ 7.0, Cuối kỳ 7.5 → điểm môn 7.3 (B)
+  ✔ Dashboard hiển thị GPA tích lũy 3.00
+PASSED
+
+-- generated xml file: /Users/nguyen/quanlichisohoctap/e2e/results/junit.xml ---
+============================== 1 passed in 12.77s ==============================
