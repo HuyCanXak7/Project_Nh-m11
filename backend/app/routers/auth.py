@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.dependencies import get_current_user
 from app.models import User
-from app.schemas.auth import LoginRequest, RefreshRequest, RegisterRequest
+from app.schemas.auth import LoginRequest, ProfileUpdateRequest, RefreshRequest, RegisterRequest
 from app.services.auth import login_user, logout_user, refresh_tokens, register_user
 from app.utils.responses import api_response
 
@@ -49,4 +49,22 @@ def me(request: Request, user: User = Depends(get_current_user)):
         "Thông tin tài khoản.",
         {"id": user.id, "email": user.email, "fullName": user.full_name,
          "role": user.role, "isActive": user.is_active},
+    )
+
+
+@router.patch("/profile")
+def update_profile(
+    data: ProfileUpdateRequest,
+    request: Request,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """PB-04: người dùng đang đăng nhập tự sửa họ tên của mình."""
+    user.full_name = data.full_name
+    db.commit()
+    return api_response(
+        request,
+        200,
+        "Cập nhật hồ sơ thành công.",
+        {"id": user.id, "email": user.email, "fullName": user.full_name},
     )

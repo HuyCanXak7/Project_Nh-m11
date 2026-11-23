@@ -93,11 +93,22 @@ def replace_grade_scale(db: Session, items: list[GradeScaleItem]) -> list[GradeS
         raise scale_error("Điểm chữ bị trùng.")
     if rows[0].min_score != 0 or rows[-1].max_score != 10:
         raise scale_error("Bảng quy đổi phải bao phủ từ 0.0 đến 10.0.")
+    # Gợi ý sửa theo thứ tự bảng trên giao diện (mức cao ở trên): "Từ" của mức trên = "Đến" của mức dưới + 0.1
     for prev, cur in zip(rows, rows[1:]):
+        fix = (
+            f"Hãy đặt 'Từ' của {cur.letter} = {prev.max_score + STEP} "
+            f"hoặc 'Đến' của {prev.letter} = {cur.min_score - STEP}."
+        )
         if cur.min_score <= prev.max_score:
-            raise scale_error(f"Khoảng {prev.letter} và {cur.letter} bị chồng lấn.")
+            raise scale_error(
+                f"{cur.letter} và {prev.letter} bị chồng lấn ở điểm "
+                f"{cur.min_score}–{min(cur.max_score, prev.max_score)}. {fix}"
+            )
         if cur.min_score != prev.max_score + STEP:
-            raise scale_error(f"Có khoảng trống giữa {prev.letter} và {cur.letter}.")
+            raise scale_error(
+                f"Giữa {cur.letter} và {prev.letter} có khoảng trống: điểm "
+                f"{prev.max_score + STEP}–{cur.min_score - STEP} chưa thuộc mức nào. {fix}"
+            )
 
     db.query(GradeScale).delete()
     db.flush()  # xóa trước để không vướng unique(letter) khi thêm lại
