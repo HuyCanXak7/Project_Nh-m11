@@ -1,4 +1,4 @@
-"""Endpoint cho frontend đọc bảng quy đổi điểm."""
+"""Endpoint cho frontend đọc và ADMIN cập nhật bảng quy đổi điểm."""
 
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
@@ -14,6 +14,16 @@ from app.utils.responses import api_response
 router = APIRouter(prefix="/api/v1", tags=["Grade scale"])
 
 
+def serialize_grade_scale(scales) -> list[dict]:
+    """Chuyển entity sang response camelCase dùng chung cho GET và PUT."""
+    return [
+        GradeScaleResponse.model_validate(scale).model_dump(
+            mode="json", by_alias=True
+        )
+        for scale in scales
+    ]
+
+
 @router.get("/grade-scale")
 def list_grade_scale(
     request: Request,
@@ -21,26 +31,23 @@ def list_grade_scale(
 ):
     """Bảng quy đổi là cấu hình đọc công khai, không chứa dữ liệu người dùng."""
     scales = get_grade_scale(db)
-    result = [
-        GradeScaleResponse.model_validate(scale).model_dump(
-            mode="json", by_alias=True
-        )
-        for scale in scales
-    ]
-    return api_response(request, 200, "Bảng quy đổi điểm.", result)
+    return api_response(
+        request, 200, "Bảng quy đổi điểm.", serialize_grade_scale(scales)
+    )
 
 
 @router.put("/grade-scale")
-def edit_grade_scale(
+def update_grade_scale(
     data: GradeScaleUpdate,
     request: Request,
     admin: User = Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
-    """PB-32: chỉ ADMIN thay bảng quy đổi; áp dụng cho các lần tính điểm/GPA tiếp theo."""
-    scales = replace_grade_scale(db, data.items)
-    result = [
-        GradeScaleResponse.model_validate(scale).model_dump(mode="json", by_alias=True)
-        for scale in scales
-    ]
-    return api_response(request, 200, "Cập nhật bảng quy đổi điểm thành công.", result)
+    """ADMIN thay toàn bộ bảng quy đổi; BE kiểm tra phủ kín và không chồng lấn."""
+    scales = replace_grade_scale(db, data)
+    return api_response(
+        request,
+        200,
+        "Đã cập nhật bảng quy đổi điểm.",
+        serialize_grade_scale(scales),
+    )

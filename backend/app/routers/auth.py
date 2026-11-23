@@ -6,8 +6,20 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.dependencies import get_current_user
 from app.models import User
-from app.schemas.auth import LoginRequest, ProfileUpdateRequest, RefreshRequest, RegisterRequest
-from app.services.auth import login_user, logout_user, refresh_tokens, register_user
+from app.schemas.auth import (
+    ChangePasswordRequest,
+    LoginRequest,
+    ProfileUpdateRequest,
+    RefreshRequest,
+    RegisterRequest,
+)
+from app.services.auth import (
+    change_password,
+    login_user,
+    logout_user,
+    refresh_tokens,
+    register_user,
+)
 from app.utils.responses import api_response
 
 router = APIRouter(prefix="/api/v1/auth", tags=["Auth"])
@@ -39,6 +51,23 @@ def refresh(data: RefreshRequest, request: Request, db: Session = Depends(get_db
 def logout(data: RefreshRequest, request: Request, db: Session = Depends(get_db)):
     logout_user(db, data.refreshToken.get_secret_value())
     return api_response(request, 200, "Đăng xuất thành công.")
+
+
+@router.post("/change-password")
+def update_password(
+    data: ChangePasswordRequest,
+    request: Request,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """PB-05: xác thực mật khẩu hiện tại rồi đổi sang mật khẩu mới."""
+    tokens = change_password(db, user, data)
+    return api_response(
+        request,
+        200,
+        "Đổi mật khẩu thành công. Các phiên đăng nhập cũ đã được thu hồi.",
+        tokens,
+    )
 
 
 @router.get("/me")

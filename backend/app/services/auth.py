@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 from app.core.config import setting
 from app.core.security import create_token, decode_token, hash_password, verify_password
 from app.models import AuthSession, User
-from app.schemas.auth import LoginRequest, RegisterRequest
+from app.schemas.auth import ChangePasswordRequest, LoginRequest, RegisterRequest
 
 
 # auto_error=False để dependencies tự trả về nội dung lỗi thống nhất.
@@ -100,6 +100,37 @@ def login_user(db: Session, data: LoginRequest, request: Request) -> dict:
         raise auth_error(401, "INVALID_CREDENTIALS", "Email hoặc mật khẩu không đúng.")
 
     tokens = create_tokens(db, require_active_user(user).id)
+    db.commit()
+    return tokens
+
+
+def change_password(db: Session, user: User, data: ChangePasswordRequest) -> dict:
+    """Xác thực mật khẩu hiện tại, băm mật khẩu mới và thu hồi mọi phiên cũ."""
+    current_password = data.currentPassword.get_secret_value()
+    new_password = data.newPassword.get_secret_value()
+
+    if not verify_password(current_password, user.password_hash):
+        raise auth_error(400, "INVALID_PASSWORD", "Mật khẩu hiện tại không đúng.")
+    if verify_password(new_password, user.password_hash):
+        raise auth_error(
+            400,
+            "PASSWORD_UNCHANGED",
+            "Mật khẩu mới không được trùng với mật khẩu hiện tại.",
+        )
+
+    try:
+        user.password_hash = hash_password(new_password)
+    except ValueError as error:
+        # Bcrypt giới hạn 72 byte; FE đếm ký tự nên BE phải kiểm tra lại.
+        raise auth_error(400, "VALIDATION_ERROR", str(error)) from None
+
+    # Thu hồi toàn bộ refresh token cũ; access token cũ cũng mất hiệu lực theo AuthSession.
+    db.query(AuthSession).filter(AuthSession.user_id == user.id).delete(
+        synchronize_session=False
+    )
+    db.flush()
+    # Cấp phiên mới để người dùng tiếp tục làm việc trên thiết bị hiện tại.
+    tokens = create_tokens(db, user.id)
     db.commit()
     return tokens
 
