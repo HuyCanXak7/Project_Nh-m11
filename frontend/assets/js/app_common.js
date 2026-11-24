@@ -21,11 +21,16 @@ function initAppUser() {
   if (idEl) idEl.textContent = student.student_id ? `MSSV: ${student.student_id}` : '';
   if (avatarEl) {
     if (student.avatar_url) {
-      avatarEl.innerHTML = `<img src="${student.avatar_url}" alt="Avatar" class="app-user__avatar-img">`;
+      // Dùng DOM thay vì nối chuỗi HTML để tránh chèn attribute qua avatar_url.
+      const img = document.createElement('img');
+      img.src = student.avatar_url;
+      img.alt = 'Avatar';
+      img.className = 'app-user__avatar-img';
+      avatarEl.replaceChildren(img);
     } else {
       const parts = (student.name || 'Sinh viên').trim().split(' ').filter(Boolean);
       const initials = parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : (parts[0] ? parts[0].slice(0, 2).toUpperCase() : 'SV');
-      avatarEl.innerHTML = initials;
+      avatarEl.textContent = initials;
     }
   }
 }
@@ -94,7 +99,8 @@ function showToast(msg, isError = false) {
   }
 
   toast.style.background = isError ? 'var(--error, #E53E3E)' : 'var(--primary, #3B82F6)';
-  toast.innerHTML = isError ? `${msg}` : `${msg}`;
+  // Thông báo chỉ là văn bản; dùng textContent để không chạy HTML từ lỗi server/người dùng.
+  toast.textContent = msg;
   toast.style.opacity = '1';
   toast.style.transform = 'translateY(0)';
 

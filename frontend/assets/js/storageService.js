@@ -285,6 +285,7 @@ const StorageService = {
   // Các trang đọc đồng bộ từ cache; trước lần render đầu phải `await StorageService.ready`.
   _semesters: [],
   _courses: [],
+  _cumulativeGpa: null,
   _ready: null,
 
   get ready() {
@@ -303,17 +304,20 @@ const StorageService = {
   },
 
   async load() {
-    const [sems, scale] = await Promise.all([apiFetch('/semesters'), apiFetch('/grade-scale')]);
-    if (typeof GradeCalculator !== 'undefined') GradeCalculator.applyScale(scale);
-    const courses = (await Promise.all(sems.map(s => apiFetch(`/semesters/${s.id}/courses`)))).flat();
-    // shortcut: 1 request/môn để lấy thành phần điểm; khi số môn lớn thì thêm API trả kèm components ở BE
-    const configs = await Promise.all(courses.map(c => apiFetch(`/courses/${c.id}/grade-components`)));
+    // PB-39: một request tổng hợp thay cho 1 + số học kỳ + số môn request.
+    // Với 40 môn, dashboard trước đây gọi 51 request; nay chỉ còn 1.
+    const data = await apiFetch('/learning-data');
+    const semesters = data.semesters || [];
+    if (typeof GradeCalculator !== 'undefined') {
+      GradeCalculator.applyScale(data.gradeScale || []);
+    }
+    this._cumulativeGpa = data.cumulativeGpa || null;
 
     // BE trả học kỳ mới nhất trước; FE coi phần tử cuối là học kỳ gần nhất. Id ép về chuỗi để so với data-* trong DOM.
-    this._semesters = sems
+    this._semesters = semesters
       .map(s => ({ ...s, id: String(s.id) }))
       .sort((a, b) => a.start_date.localeCompare(b.start_date));
-    this._courses = courses.map((c, i) => ({
+    this._courses = (data.courses || []).map(c => ({
       id: String(c.id),
       semester_id: String(c.semester_id),
       course_code: c.code,
@@ -321,7 +325,7 @@ const StorageService = {
       credits: c.credits,
       category: CATEGORY_FROM_API[c.category] || c.category,
       is_retake: c.is_retake,
-      components: configs[i].components.map(cp => ({
+      components: (c.components || []).map(cp => ({
         id: String(cp.id), name: cp.name, weight_percent: cp.weightPercent, score: cp.score
       }))
     }));
@@ -364,6 +368,11 @@ const StorageService = {
       remaining_credits: 30
     }));
     await this.reload();
+  },
+
+  // GPA tích lũy do BE tính trong cùng request bootstrap (đã xử lý môn F/học lại).
+  getCumulativeGpa() {
+    return this._cumulativeGpa;
   },
 
   // === QUẢN LÝ HỌC KỲ (PB-06..09) ===

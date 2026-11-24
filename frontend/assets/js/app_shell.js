@@ -127,7 +127,8 @@ function escapeHtml(str) {
     if (str === null || str === undefined) return '';
     const div = document.createElement('div');
     div.textContent = str;
-    return div.innerHTML;
+    // Mã hóa cả dấu nháy để an toàn khi giá trị được đặt trong attribute HTML.
+    return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 /** Hiển thị chênh lệch chuẩn Figma StudyTrack-E: +0.04 hoặc -0.04 */
@@ -275,7 +276,11 @@ function renderUser(user) {
     if (avatarEl) {
         let avatarUrl = user.avatar_url || student?.avatar_url;
         if (avatarUrl) {
-            avatarEl.innerHTML = `<img src="${avatarUrl}" alt="Avatar">`;
+            // Tạo phần tử ảnh bằng DOM để URL không thể phá vỡ cấu trúc HTML.
+            const img = document.createElement('img');
+            img.src = avatarUrl;
+            img.alt = 'Avatar';
+            avatarEl.replaceChildren(img);
         } else {
             const parts = name.trim().split(/\s+/).filter(Boolean);
             const initials = parts.length > 0

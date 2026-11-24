@@ -56,18 +56,16 @@ def semester_gpa(db: Session, user_id: int, semester_id: int):
     return {"semesterId": semester_id, **summarize_gpa(completed_courses)}
 
 
-def cumulative_gpa(db: Session, user_id: int):
-    """Tính GPA tích lũy, mỗi mã môn chỉ giữ lần học có điểm cao nhất."""
-    completed_courses = (
-        db.query(Course)
-        .join(Semester)
-        .filter(Semester.user_id == user_id, Course.grade4.is_not(None))
-        .order_by(Course.id)
-        .all()
-    )
+def summarize_cumulative_gpa(courses) -> dict:
+    """Tính GPA tích lũy từ danh sách môn đã tải sẵn.
 
+    Tách khỏi truy vấn để endpoint bootstrap dùng lại dữ liệu vừa eager-load,
+    tránh phát sinh thêm một truy vấn giống hệt.
+    """
     best_attempts = {}
-    for course in completed_courses:
+    for course in courses:
+        if course.grade4 is None:
+            continue
         code = course.code.strip().upper()
         best = best_attempts.get(code)
         if best is None or (course.grade4, course.grade10) > (
@@ -80,3 +78,15 @@ def cumulative_gpa(db: Session, user_id: int):
         **summarize_gpa(best_attempts.values()),
         "retakePolicy": "HIGHEST_GRADE_BY_COURSE_CODE",
     }
+
+
+def cumulative_gpa(db: Session, user_id: int):
+    """Tính GPA tích lũy, mỗi mã môn chỉ giữ lần học có điểm cao nhất."""
+    completed_courses = (
+        db.query(Course)
+        .join(Semester)
+        .filter(Semester.user_id == user_id, Course.grade4.is_not(None))
+        .order_by(Course.id)
+        .all()
+    )
+    return summarize_cumulative_gpa(completed_courses)

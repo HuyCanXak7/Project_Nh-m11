@@ -167,15 +167,14 @@ async function loadDashboardData() {
         }
     }
 
-    // PB-19: có BE thật thì lấy GPA + tín chỉ tích lũy từ server (đã xử lý môn F và học lại)
-    if (typeof USE_MOCK !== 'undefined' && !USE_MOCK) {
-        try {
-            const gpa = await apiFetch('/gpa/cumulative');
+    // PB-19/PB-39: GPA + tín chỉ tích lũy do BE tính trong request bootstrap,
+    // không phát sinh thêm request /gpa/cumulative khi mở Dashboard.
+    if (typeof USE_MOCK !== 'undefined' && !USE_MOCK && typeof StorageService !== 'undefined') {
+        const gpa = StorageService.getCumulativeGpa();
+        if (gpa) {
             data.stats.hasData ||= gpa.gpa4 !== null;
             data.stats.gpa = gpa.gpa4 ?? 0;
             data.stats.credits = gpa.passedCredits;
-        } catch (err) {
-            console.warn('Không lấy được GPA từ server, dùng số tính cục bộ:', err);
         }
     }
 

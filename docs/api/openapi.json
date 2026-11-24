@@ -38,6 +38,10 @@
     {
       "name": "Import",
       "description": "Lưu hàng loạt dữ liệu điểm sau bước xem trước (PB-26)."
+    },
+    {
+      "name": "Learning data",
+      "description": "Dữ liệu khởi tạo Dashboard trong một request (PB-39)."
     }
   ],
   "paths": {
@@ -1545,6 +1549,40 @@
             "description": "Lỗi máy chủ"
           }
         }
+      }
+    },
+    "/learning-data": {
+      "get": {
+        "tags": [
+          "Learning data"
+        ],
+        "summary": "Tải dữ liệu Dashboard trong một request",
+        "operationId": "getLearningData",
+        "description": "PB-39: trả học kỳ, môn học, thành phần điểm, bảng quy đổi và GPA tích lũy của người dùng hiện tại. Dùng eager loading nên số truy vấn không tăng theo số môn. Thay cho 1 + số học kỳ + số môn request mà frontend gọi trước đây.",
+        "x-backlog-id": "PB-39",
+        "responses": {
+          "200": {
+            "description": "Dữ liệu học tập của người dùng hiện tại",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LearningDataResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "500": {
+            "$ref": "#/components/responses/HTTP500"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
       }
     }
   },
@@ -3152,6 +3190,198 @@
           "path": {
             "type": "string",
             "example": "/api/v1/semesters"
+          }
+        },
+        "required": [
+          "success",
+          "statusCode",
+          "message",
+          "data",
+          "error",
+          "timestamp",
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "LearningDataSemester": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 3
+          },
+          "user_id": {
+            "type": "integer",
+            "example": 12
+          },
+          "name": {
+            "type": "string",
+            "example": "Học kỳ 1"
+          },
+          "academic_year": {
+            "type": "string",
+            "example": "2025-2026"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-09-01"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-01-15"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "name",
+          "academic_year",
+          "start_date",
+          "end_date"
+        ],
+        "additionalProperties": false
+      },
+      "LearningDataCourse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 12
+          },
+          "semester_id": {
+            "type": "integer",
+            "example": 3
+          },
+          "code": {
+            "type": "string",
+            "example": "INT1001"
+          },
+          "name": {
+            "type": "string",
+            "example": "Nhập môn lập trình"
+          },
+          "credits": {
+            "type": "integer",
+            "example": 3
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "GENERAL",
+              "FOUNDATION",
+              "SPECIALIZED"
+            ],
+            "example": "GENERAL"
+          },
+          "is_retake": {
+            "type": "boolean",
+            "example": false
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Component"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "semester_id",
+          "code",
+          "name",
+          "credits",
+          "category",
+          "is_retake",
+          "components"
+        ],
+        "additionalProperties": false
+      },
+      "LearningData": {
+        "type": "object",
+        "properties": {
+          "semesters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LearningDataSemester"
+            }
+          },
+          "courses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LearningDataCourse"
+            }
+          },
+          "gradeScale": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "minScore": {
+                  "type": "number"
+                },
+                "maxScore": {
+                  "type": "number"
+                },
+                "letter": {
+                  "type": "string"
+                },
+                "gpa4": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "cumulativeGpa": {
+            "$ref": "#/components/schemas/CumulativeGpa"
+          }
+        },
+        "required": [
+          "semesters",
+          "courses",
+          "gradeScale",
+          "cumulativeGpa"
+        ],
+        "additionalProperties": false
+      },
+      "LearningDataResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "statusCode": {
+            "type": "integer",
+            "example": 200
+          },
+          "message": {
+            "type": "string",
+            "example": "Dữ liệu học tập khởi tạo."
+          },
+          "data": {
+            "$ref": "#/components/schemas/LearningData"
+          },
+          "error": {
+            "type": "object",
+            "nullable": true,
+            "description": "Luôn là null khi thành công.",
+            "example": null
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-11-24T09:00:00+07:00"
+          },
+          "path": {
+            "type": "string",
+            "example": "/api/v1/learning-data"
           }
         },
         "required": [
