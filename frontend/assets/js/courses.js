@@ -137,7 +137,8 @@ function renderSemesterTabs() {
     return `
       <button type="button"
               class="course-sem-tab ${isActive ? 'is-active' : ''}"
-              onclick="selectSemesterTab('${escapeHtml(sem.id)}')"
+              data-semester-id="${escapeHtml(sem.id)}"
+              onclick="selectSemesterTab(this.dataset.semesterId)"
               title="${isActive ? 'Nhấn lần nữa để xem tất cả học kỳ' : 'Lọc theo ' + escapeHtml(sem.name)}">
         <span class="course-sem-tab__name">${escapeHtml(formatShortSemName(sem))}</span>
         <span class="course-sem-tab__gpa">${gpaText}</span>
@@ -411,9 +412,9 @@ function renderCourses() {
         </td>
         <td class="course-cat-cell">${escapeHtml(c.category || 'Đại cương')}</td>
         <td class="course-credits-cell">${c.credits}</td>
-        <td style="text-align: center; cursor: pointer;" onclick="openScoreModal('${c.id}')">${fmtCompScore(0)}</td>
-        <td style="text-align: center; cursor: pointer;" onclick="openScoreModal('${c.id}')">${fmtCompScore(1)}</td>
-        <td style="text-align: center; cursor: pointer;" onclick="openScoreModal('${c.id}')">${fmtCompScore(2)}</td>
+        <td style="text-align: center; cursor: pointer;" data-course-id="${escapeHtml(c.id)}" onclick="openScoreModal(this.dataset.courseId)">${fmtCompScore(0)}</td>
+        <td style="text-align: center; cursor: pointer;" data-course-id="${escapeHtml(c.id)}" onclick="openScoreModal(this.dataset.courseId)">${fmtCompScore(1)}</td>
+        <td style="text-align: center; cursor: pointer;" data-course-id="${escapeHtml(c.id)}" onclick="openScoreModal(this.dataset.courseId)">${fmtCompScore(2)}</td>
         <td class="${totalScoreClass}">
           ${scoreCalc.isComplete ? scoreCalc.finalScore10.toFixed(1) : '<span class="score-dash">—</span>'}
         </td>
@@ -421,16 +422,16 @@ function renderCourses() {
         <td>${statusHtml}</td>
         <td style="text-align: right; white-space: nowrap;">
           <div class="btn-action-group">
-            <button type="button" onclick="openScoreModal('${c.id}')" class="btn-action btn-action--score" title="Nhập / Sửa điểm thành phần">
+            <button type="button" data-course-id="${escapeHtml(c.id)}" onclick="openScoreModal(this.dataset.courseId)" class="btn-action btn-action--score" title="Nhập / Sửa điểm thành phần">
               <span>Điểm</span>
             </button>
-            <button type="button" onclick="openComponentsModal('${c.id}')" class="btn-action btn-action--edit" title="Cấu hình trọng số (${scoreCalc.totalWeight}%)">
+            <button type="button" data-course-id="${escapeHtml(c.id)}" onclick="openComponentsModal(this.dataset.courseId)" class="btn-action btn-action--edit" title="Cấu hình trọng số (${scoreCalc.totalWeight}%)">
               <span>${scoreCalc.totalWeight}%</span>
             </button>
-            <button type="button" onclick="openEditCourseModal('${c.id}')" class="btn-action btn-action--edit" title="Sửa môn học">
+            <button type="button" data-course-id="${escapeHtml(c.id)}" onclick="openEditCourseModal(this.dataset.courseId)" class="btn-action btn-action--edit" title="Sửa môn học">
               <span>Sửa</span>
             </button>
-            <button type="button" onclick="openDeleteCourseModal('${c.id}')" class="btn-action btn-action--delete" title="Xóa môn học">
+            <button type="button" data-course-id="${escapeHtml(c.id)}" onclick="openDeleteCourseModal(this.dataset.courseId)" class="btn-action btn-action--delete" title="Xóa môn học">
               <span>Xóa</span>
             </button>
           </div>
@@ -568,13 +569,13 @@ function openComponentsModal(courseId) {
 function renderComponentsList(components) {
   const container = document.getElementById('componentsRowsContainer');
   container.innerHTML = components.map((comp, idx) => `
-    <div class="component-row" data-comp-id="${comp.id || ''}" style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
+    <div class="component-row" data-comp-id="${escapeHtml(comp.id || '')}" style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
       <input type="text" class="modal-input comp-name" value="${escapeHtml(comp.name)}" placeholder="Tên cột điểm (ví dụ: Giữa kỳ)" style="flex: 2; height: 42px;" required>
       <div style="display: flex; align-items: center; gap: 4px; flex: 1.2;">
         <input type="number" class="modal-input comp-weight" value="${comp.weight_percent}" min="1" max="100" oninput="updateTotalWeightBar()" placeholder="%" style="height: 42px; text-align: center;" required>
         <span style="font-weight: 700; color: var(--text-gray);">%</span>
       </div>
-      <button type="button" onclick="removeComponentRow(${idx})" class="btn btn-danger btn-sm" style="padding: 6px 10px;">✕</button>
+      <button type="button" data-index="${idx}" onclick="removeComponentRow(Number(this.dataset.index))" class="btn btn-danger btn-sm" style="padding: 6px 10px;">✕</button>
     </div>
   `).join('');
 
@@ -685,7 +686,7 @@ function openScoreModal(courseId) {
       <div style="width: 110px;">
         <input type="number" step="0.1" min="0" max="10"
                class="modal-input score-input-val"
-               data-comp-id="${comp.id}"
+               data-comp-id="${escapeHtml(comp.id)}"
                value="${comp.score !== null && comp.score !== undefined ? comp.score : ''}"
                oninput="calculatePreviewScores()"
                placeholder="0.0 - 10"
@@ -757,5 +758,10 @@ async function handleSaveScores() {
 
 function escapeHtml(str) {
   if (!str) return '';
-  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }

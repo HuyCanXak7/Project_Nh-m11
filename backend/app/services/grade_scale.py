@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.models import Course, GradeScale
-from app.schemas.grade_scale import GradeScaleUpdate
+from app.schemas.grade_scale import GradeScaleResponse, GradeScaleUpdate
 
 
 # Bảng mặc định được chốt trong SRS; chỉ dùng khi database chưa có dữ liệu.
@@ -171,6 +171,16 @@ def get_grade_scale(db: Session) -> list[GradeScale]:
     ensure_default_grade_scale(db)
     db.commit()
     return db.query(GradeScale).order_by(GradeScale.min_score.desc()).all()
+
+
+def serialize_grade_scale(scales: list[GradeScale]) -> list[dict]:
+    """Chuyển entity sang response camelCase dùng chung cho các endpoint."""
+    return [
+        GradeScaleResponse.model_validate(scale).model_dump(
+            mode="json", by_alias=True
+        )
+        for scale in scales
+    ]
 
 
 def convert_grade(db: Session, grade10: Decimal) -> dict:

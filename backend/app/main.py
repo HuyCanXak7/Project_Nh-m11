@@ -20,6 +20,7 @@ from app.routers.gpa import router as gpa_router
 from app.routers.grade_import import router as grade_import_router
 from app.routers.grades import router as grade_router
 from app.routers.grade_scale import router as grade_scale_router
+from app.routers.learning_data import router as learning_data_router
 from app.routers.semesters import router as semester_router
 from app.utils.responses import api_response
 
@@ -109,3 +110,4 @@ app.include_router(grade_router)
 app.include_router(grade_scale_router)
 app.include_router(gpa_router)
 app.include_router(grade_import_router)
+app.include_router(learning_data_router)

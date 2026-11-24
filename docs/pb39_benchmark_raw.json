@@ -1,0 +1,105 @@
+{
+  "baseUrl": "http://127.0.0.1:8000/api/v1",
+  "dataset": {
+    "semesters": 8,
+    "courses": 40,
+    "gradeComponents": 120
+  },
+  "iterations": 20,
+  "requestsPerDashboard": {
+    "legacy": 51,
+    "optimized": 1
+  },
+  "apiLatency": {
+    "allLegacyRequests": {
+      "count": 1020,
+      "p50_ms": 23.07,
+      "p95_ms": 36.59,
+      "p99_ms": 52.07,
+      "max_ms": 77.32,
+      "mean_ms": 23.23
+    },
+    "byEndpoint": {
+      "GET /courses/{id}/grade-components": {
+        "count": 800,
+        "p50_ms": 23.97,
+        "p95_ms": 36.61,
+        "p99_ms": 52.07,
+        "max_ms": 77.32,
+        "mean_ms": 24.94
+      },
+      "GET /gpa/cumulative": {
+        "count": 20,
+        "p50_ms": 4.89,
+        "p95_ms": 17.11,
+        "p99_ms": 18.57,
+        "max_ms": 18.57,
+        "mean_ms": 7.66
+      },
+      "GET /grade-scale": {
+        "count": 20,
+        "p50_ms": 3.48,
+        "p95_ms": 15.63,
+        "p99_ms": 15.84,
+        "max_ms": 15.84,
+        "mean_ms": 6.01
+      },
+      "GET /learning-data": {
+        "count": 20,
+        "p50_ms": 10.34,
+        "p95_ms": 27.86,
+        "p99_ms": 28.05,
+        "max_ms": 28.05,
+        "mean_ms": 14.95
+      },
+      "GET /semesters": {
+        "count": 20,
+        "p50_ms": 4.41,
+        "p95_ms": 25.66,
+        "p99_ms": 31.27,
+        "max_ms": 31.27,
+        "mean_ms": 9.94
+      },
+      "GET /semesters/{id}/courses": {
+        "count": 160,
+        "p50_ms": 20.48,
+        "p95_ms": 37.35,
+        "p99_ms": 60.23,
+        "max_ms": 66.48,
+        "mean_ms": 20.44
+      }
+    },
+    "learningData": {
+      "count": 20,
+      "p50_ms": 10.34,
+      "p95_ms": 27.86,
+      "p99_ms": 28.05,
+      "max_ms": 28.05,
+      "mean_ms": 14.95
+    }
+  },
+  "dashboardDataLoad": {
+    "legacy": {
+      "count": 20,
+      "p50_ms": 223.17,
+      "p95_ms": 271.41,
+      "p99_ms": 289.66,
+      "max_ms": 289.66,
+      "mean_ms": 233.36
+    },
+    "optimized": {
+      "count": 20,
+      "p50_ms": 10.38,
+      "p95_ms": 27.94,
+      "p99_ms": 28.09,
+      "max_ms": 28.09,
+      "mean_ms": 15.0
+    }
+  },
+  "acceptance": {
+    "apiP95Under500ms": true,
+    "learningDataP95Under500ms": true,
+    "dashboardUnder2s": true
+  },
+  "performanceUserEmail": "perf.student@example.com"
+}

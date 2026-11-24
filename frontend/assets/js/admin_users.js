@@ -89,9 +89,9 @@ function formatDate(value) {
     return Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString('vi-VN');
 }
 
-/** escapeHtml() của app_shell không mã hóa dấu nháy, nên cần hàm riêng cho attribute. */
+/** escapeHtml() của app_shell đã mã hóa dấu nháy; giữ helper để các call-site attribute rõ nghĩa. */
 function escapeAttr(value) {
-    return escapeHtml(value).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    return escapeHtml(value);
 }
 
 function formatScore(value, digits = 1) {
@@ -321,11 +321,11 @@ function renderCourseRow(course) {
             <label style="display: flex; align-items: center; gap: 6px; margin: 2px 0; white-space: nowrap;">
                 <span style="font-size: 12px; color: var(--text-gray);">${escapeHtml(component.name)} (${formatWeight(component.weightPercent)}%)</span>
                 <input type="number" min="0" max="10" step="0.01" inputmode="decimal"
-                    class="modal-input" data-component-id="${component.id}" value="${component.score ?? ''}"
+                    class="modal-input" data-component-id="${escapeAttr(component.id)}" value="${component.score ?? ''}"
                     aria-label="Điểm ${escapeAttr(component.name)}" style="width: 82px; height: 32px; padding: 4px 8px;">
             </label>`).join('')
         : '<span style="font-size: 12px; color: var(--text-gray);">Chưa cấu hình thành phần điểm.</span>';
-    return `<tr data-course-id="${course.id}">
+    return `<tr data-course-id="${escapeAttr(course.id)}">
         <td>
             <strong>${escapeHtml(course.code)}</strong>
             <div style="font-size: 12px; color: var(--text-gray);">${escapeHtml(course.name)}${course.isRetake ? ' · Học lại' : ''}</div>
@@ -339,7 +339,7 @@ function renderCourseRow(course) {
             ? '—'
             : (course.isPassed ? '<span class="badge badge-green">Đạt</span>' : '<span class="badge badge-red">Chưa đạt</span>')}</td>
         <td>${course.components.length
-            ? `<button type="button" class="btn btn-primary btn-sm" data-action="save-course" data-course-id="${course.id}">Lưu điểm</button>`
+            ? `<button type="button" class="btn btn-primary btn-sm" data-action="save-course" data-course-id="${escapeAttr(course.id)}">Lưu điểm</button>`
             : '—'}</td>
     </tr>`;
 }

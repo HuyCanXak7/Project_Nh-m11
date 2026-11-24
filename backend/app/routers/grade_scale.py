@@ -6,22 +6,16 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.dependencies import get_current_admin
 from app.models import User
-from app.schemas.grade_scale import GradeScaleResponse, GradeScaleUpdate
-from app.services.grade_scale import get_grade_scale, replace_grade_scale
+from app.schemas.grade_scale import GradeScaleUpdate
+from app.services.grade_scale import (
+    get_grade_scale,
+    replace_grade_scale,
+    serialize_grade_scale,
+)
 from app.utils.responses import api_response
 
 
 router = APIRouter(prefix="/api/v1", tags=["Grade scale"])
-
-
-def serialize_grade_scale(scales) -> list[dict]:
-    """Chuyển entity sang response camelCase dùng chung cho GET và PUT."""
-    return [
-        GradeScaleResponse.model_validate(scale).model_dump(
-            mode="json", by_alias=True
-        )
-        for scale in scales
-    ]
 
 
 @router.get("/grade-scale")

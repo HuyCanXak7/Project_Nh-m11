@@ -175,7 +175,7 @@
                 const semesters = StorageService.getSemesters();
                 if (semSelect) {
                     semSelect.innerHTML = '<option value="ALL">Tất cả học kỳ</option>' +
-                        semesters.map(s => `<option value="${s.id}">${s.name} (${s.academic_year || ''})</option>`).join('');
+                        semesters.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} (${escapeHtml(s.academic_year || '')})</option>`).join('');
                     if (semesters.length > 0) {
                         semSelect.value = semesters[semesters.length - 1].id;
                     }
@@ -265,9 +265,9 @@
                                     </div>
                                 ` : d.items.map(it => `
                                     <div style="background: var(--e-card); border-left: 4px solid ${it.color}; border-radius: 12px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-                                        <div style="font-size: 11px; font-weight: 700; color: ${it.color};">${it.slot}</div>
-                                        <div style="font-size: 13.5px; font-weight: 700; color: var(--text-black); margin: 3px 0;">${it.name}</div>
-                                        <div style="font-size: 11.5px; color: var(--text-gray);">Mã: ${it.code} (${it.credits} TC) • Phòng: ${it.room}</div>
+                                        <div style="font-size: 11px; font-weight: 700; color: ${it.color};">${escapeHtml(it.slot)}</div>
+                                        <div style="font-size: 13.5px; font-weight: 700; color: var(--text-black); margin: 3px 0;">${escapeHtml(it.name)}</div>
+                                        <div style="font-size: 11.5px; color: var(--text-gray);">Mã: ${escapeHtml(it.code)} (${escapeHtml(it.credits)} TC) • Phòng: ${escapeHtml(it.room)}</div>
                                     </div>
                                 `).join('')}
                             </div>

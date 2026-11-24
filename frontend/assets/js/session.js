@@ -4,7 +4,7 @@
  *  - Lưu access/refresh token: "Nhớ tài khoản" → localStorage (giữ 7 ngày), không tick → sessionStorage.
  *  - apiFetch(): tự gắn access token; gặp 401 thì tự refresh rồi gửi lại; refresh hỏng → về trang đăng nhập.
  *  - 403 ACCOUNT_DISABLED (is_active = false) → xóa phiên, báo tài khoản bị khóa.
- *  - 429 TOO_MANY_ATTEMPTS → trả retryAfter để trang đăng nhập khóa nút.
+ *  - 429 TOO_MANY_REQUESTS → trả retryAfter để trang đăng nhập khóa nút.
  *  - requireAuth() / redirectIfLoggedIn(): chặn route.
  *
  * Khi BE xong: đổi USE_MOCK = false và chỉnh API_BASE. Định dạng lỗi theo PB-41: { code, message, details }.
@@ -358,7 +358,7 @@ const mockServer = (() => {
             const attempt = db.attempts[key] ?? { count: 0, firstAt: now(), lockedUntil: 0 };
 
             if (attempt.lockedUntil > now()) {
-                fail(429, 'TOO_MANY_ATTEMPTS', 'Bạn đã đăng nhập sai quá nhiều lần.', { retryAfter: Math.ceil((attempt.lockedUntil - now()) / 1000) });
+                fail(429, 'TOO_MANY_REQUESTS', 'Bạn đã đăng nhập sai quá nhiều lần.', { retryAfter: Math.ceil((attempt.lockedUntil - now()) / 1000) });
             }
 
             const user = db.users.find((u) => u.email.toLowerCase() === key);

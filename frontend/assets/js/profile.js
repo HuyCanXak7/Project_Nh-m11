@@ -30,8 +30,9 @@ function updateProfileAvatarDisplay(student) {
   const initials = parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : (parts[0] ? parts[0].slice(0, 2).toUpperCase() : 'SV');
 
   if (student.avatar_url) {
+    // escapeHtml đã mã hóa dấu nháy nên URL không thể chèn thêm attribute.
     avatarDisplay.innerHTML = `
-      <img src="${student.avatar_url}" alt="Avatar">
+      <img src="${escapeHtml(student.avatar_url)}" alt="Avatar">
       <div class="profile-avatar-overlay">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
         <span>Đổi ảnh</span>
@@ -40,7 +41,7 @@ function updateProfileAvatarDisplay(student) {
     if (btnRemove) btnRemove.style.display = 'inline-flex';
   } else {
     avatarDisplay.innerHTML = `
-      <span id="profileAvatarInitials">${initials}</span>
+      <span id="profileAvatarInitials">${escapeHtml(initials)}</span>
       <div class="profile-avatar-overlay">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
         <span>Đổi ảnh</span>
