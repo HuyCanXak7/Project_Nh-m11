@@ -78,3 +78,7 @@ Các khác biệt so với dự thảo v1 ở trên đã được liệt kê đ�
 ## Bổ sung triển khai FR-11 / PB-22
 
 POST/GET/PUT/DELETE `/goals` đã chuyển thành `x-implementation=implemented`; request vẫn giữ `targetGpa`, `targetDate`, `remainingCredits`. Swagger đồng bộ request với model đang chạy, bổ sung giới hạn số nguyên tín chỉ và mô tả ngày theo UTC+7. POST tạo trùng trả 409 `GOAL_EXISTS` và hướng dẫn dùng PUT; DB unique theo user bảo vệ request đồng thời. Chưa có mục tiêu trả 404; DELETE thành công trả 200 với data=null. Hướng dẫn tích hợp: `docs/guides/FR11-PB22-BE.md`. `/goals/required-score` giữ trạng thái contract-only cho chức năng riêng.
+
+## Bổ sung triển khai FR-18 / PB-33 · T0694F2
+
+`GET /api/v1/admin/statistics` chỉ cho ADMIN. Response chỉ có `totalUsers`, `totalCourses` và `averageGpa4`; không trả dữ liệu nhận diện cá nhân. GPA trung bình là trung bình cộng GPA tích lũy theo từng sinh viên có môn đủ điểm, áp dụng quy tắc học lại lấy điểm cao nhất theo mã môn; nếu chưa có GPA, trả `null`.
