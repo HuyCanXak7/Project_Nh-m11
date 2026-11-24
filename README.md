@@ -6,7 +6,7 @@ Bàn giao BE Huy (T0694D7/T0694DB/T0694DC/T0694DE): [API và minh chứng](docs/
 
 Tài liệu này **chốt các nguyên tắc làm việc và quy tắc nghiệp vụ chung** của cả nhóm (theo PB-46 trong Product Backlog). Mọi thành viên FE và BE làm theo đúng tài liệu này. Khi cần thay đổi, phải thảo luận trong nhóm, cập nhật README và SRS trước rồi mới code.
 
-> Đặc tả chi tiết từng yêu cầu: xem `docs/SRS_Nhom11_QuanLyChiSoHocTap.docx`.
+> Đặc tả chi tiết từng yêu cầu: xem [`docs/SRS.docx`](docs/SRS.docx).
 
 ---
 
@@ -412,70 +412,47 @@ Một card trên Trello chỉ được chuyển sang **Done** khi:
 
 ## 12. Chạy dự án
 
-Ghi đè (Upsert) để sinh viên cập nhập được điểm khi có kết quả thi
+Yêu cầu: Docker Desktop hoặc Docker Engine có Docker Compose v2. Các lệnh bên dưới chạy từ thư mục chứa `docker-compose.yaml`.
 
 ```bash
 git clone <repo-url>
-cd <repo>
-cp .env.example .env      # điền giá trị thật, KHÔNG commit .env
-docker compose up         # khởi chạy FE + BE + PostgreSQL
+cd Project_Nh-m11
+cp .env.example .env
 ```
 
-Tài khoản demo: xem [hướng dẫn seed tài khoản PB-48](#seed-tài-khoản-demo-pb-48).
+`.env.example` có thông tin DB chỉ dùng cho local. Trước khi chạy, thay `SECRET_KEY` bằng chuỗi ngẫu nhiên riêng (tối thiểu 32 byte); không dùng các giá trị mẫu trên production và không commit `.env`.
+
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+docker compose up --build -d
+docker compose ps
+```
+
+Compose chạy MySQL, migration Alembic, API và giao diện. Mở FE tại http://localhost:8080, Swagger tại http://localhost:8000/docs và health check tại http://localhost:8000/api/v1/health. Lần đầu build cần có kết nối Internet để tải image và package.
+
+### Tài khoản demo
+
+Đặt `SEED_ADMIN_PASSWORD` và `SEED_STUDENT_PASSWORD` trong `.env` (ít nhất 8 ký tự, tối đa 72 byte UTF-8), rồi seed:
+
+```bash
+docker compose up -d
+docker compose exec backend python -m scripts.seed_accounts
+```
+
+Tài khoản được tạo là `admin@example.com` (ADMIN) và `student@example.com` (STUDENT); mật khẩu lấy từ hai biến môi trường tương ứng. Script không đặt lại thông tin tài khoản đã tồn tại. Đăng nhập qua `POST /api/v1/auth/login`; dùng `data.accessToken` để Authorize trong Swagger. Giao diện hiện vẫn dùng đăng nhập giả lập.
+
+### Dừng và xử lý lỗi
+
+```bash
+docker compose logs -f backend
+docker compose down
+```
+
+Nếu cổng 3306, 8000 hoặc 8080 đang được dùng, giải phóng cổng rồi chạy lại. Nếu backend không kết nối được DB, kiểm tra các biến `MYSQL_*` và `DATABASE_URL` trong `.env` có cùng user, mật khẩu và tên database. Giữ nguyên volume `mysql_data` khi cần dữ liệu; `docker compose down -v` sẽ xóa database local.
 
 ---
 
 *Nhóm 11 · Phiên bản 1.0 · 09/11/2026*
-
-# Hướng dẫn dựng môi trường Dev Backend & Database MySQL (Docker)
-
-Môi trường phát triển đã được đóng gói bằng Docker Compose. Hệ thống sẽ tự động khởi chạy MySQL, Backend và tự động chạy Database Migration (Alembic) chỉ bằng một lệnh duy nhất.
-
-## Yêu cầu
-* Đã cài đặt [Docker](https://www.docker.com/) và Docker Compose trên máy.
-
-## Các bước chạy dự án
-
-**Bước 1: Thiết lập file biến môi trường**
-Copy file `.env.example` và đổi tên thành `.env`:
-```bash
-cp .env.example .env
-```
-Giá trị MySQL mẫu dùng được ở local. Đặt `JWT_SECRET` thành chuỗi ngẫu nhiên ít nhất 32 byte. Có thể tạo chuỗi bằng `python -c "import secrets; print(secrets.token_urlsafe(32))"`.
-
-**Bước 2: Khởi chạy toàn bộ hệ thống**
-Tại thư mục gốc của dự án (nơi chứa file `docker-compose.yaml`), mở terminal và chạy lệnh sau:
-```bash
-docker compose up --build
-```
-
-## Kết quả
-Sau khi Terminal báo quá trình khởi động hoàn tất, hệ thống sẽ có sẵn:
-* **API Backend:** Chạy tại `http://localhost:8000` (Frontend dùng URL này để gọi API).
-* **Tài liệu API (Swagger UI):** Truy cập tại `http://localhost:8000/docs`
-* **Cơ sở dữ liệu MySQL:** Chạy ở port `3306` (Dùng tài khoản user đã cấu hình trong file `.env` để kết nối và kiểm tra dữ liệu qua DBeaver, DataGrip hoặc MySQL Workbench).
-
-## Seed tài khoản demo (PB-48)
-
-Trong `.env`, điền `SEED_ADMIN_PASSWORD` và `SEED_STUDENT_PASSWORD`. Mỗi mật khẩu cần ít nhất 8 ký tự và tối đa 72 byte UTF-8. Giữ file `.env` trên máy.
-
-Chạy các lệnh từ thư mục gốc của repo. Compose chờ MySQL sẵn sàng và backend áp dụng migration khi khởi động.
-
-```bash
-docker compose up -d --build
-docker compose exec backend python seed_accounts.py
-```
-
-Nếu vừa sửa `.env` khi container đã chạy, chạy lại `docker compose up -d` để nạp cấu hình mới trước khi seed.
-
-| Email | Vai trò | Biến môi trường chứa mật khẩu |
-|---|---|---|
-| `admin@example.com` | `ADMIN` | `SEED_ADMIN_PASSWORD` |
-| `student@example.com` | `STUDENT` | `SEED_STUDENT_PASSWORD` |
-
-Chạy lại script sẽ giữ nguyên tài khoản đã có, kể cả mật khẩu và trạng thái. Nếu một email mẫu đã thuộc vai trò khác, script báo lỗi và hủy giao dịch.
-
-Để kiểm tra, mở Swagger UI tại `http://localhost:8000/docs`. Gọi `POST /api/v1/auth/login` với email và mật khẩu mẫu. Dùng `data.accessToken` để **Authorize**, rồi gọi `GET /api/v1/auth/me` và xem `data.role`. Giao diện HTML hiện dùng đăng nhập giả lập, vì vậy hãy kiểm tra các tài khoản này qua Swagger.
 
 ## Dữ liệu GPA (PB-18, PB-19)
 

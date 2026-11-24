@@ -753,9 +753,9 @@
         ],
         "summary": "Thống kê toàn hệ thống (ADMIN)",
         "operationId": "getAdminStatistics_admin_statistics",
-        "description": "Chỉ ADMIN; đếm tài khoản, tài khoản active, học kỳ và mọi lần học; không trả điểm cá nhân.",
-        "x-task-id": "T0694D7",
-        "x-implementation": "contract-only",
+        "description": "Chỉ ADMIN; đếm tài khoản và mọi lần học; GPA trung bình là trung bình cộng GPA tích lũy theo từng sinh viên có điểm hoàn tất; không trả dữ liệu cá nhân.",
+        "x-task-id": "T0694F2",
+        "x-implementation": "implemented",
         "responses": {
           "200": {
             "description": "Thành công",
@@ -770,9 +770,8 @@
                   "message": "Thành công",
                   "data": {
                     "totalUsers": 10,
-                    "activeUsers": 9,
-                    "totalSemesters": 20,
-                    "totalCourses": 100
+                    "totalCourses": 100,
+                    "averageGpa4": 3.12
                   },
                   "error": null,
                   "timestamp": "2026-11-17T09:00:00+07:00",
@@ -5673,24 +5672,23 @@
             "type": "integer",
             "minimum": 0
           },
-          "activeUsers": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "totalSemesters": {
-            "type": "integer",
-            "minimum": 0
-          },
           "totalCourses": {
             "type": "integer",
             "minimum": 0
+          },
+          "averageGpa4": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 4,
+            "nullable": true,
+            "description": "Trung bình cộng GPA tích lũy của sinh viên có điểm hoàn tất; null nếu chưa có."
           }
         },
         "required": [
           "totalUsers",
-          "activeUsers",
-          "totalSemesters",
-          "totalCourses"
+          "totalCourses",
+          "averageGpa4"
         ],
         "additionalProperties": false
       },
