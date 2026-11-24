@@ -33,15 +33,24 @@ def auth_error(status: int, code: str, message: str) -> HTTPException:
 
 def require_active_user(user: User | None) -> User:
     if user is None:
-        raise auth_error(401, "INVALID_TOKEN", "Phiên đăng nhập không hợp lệ.")
+        raise auth_error(401, "UNAUTHORIZED", "Phiên đăng nhập không hợp lệ.")
     if not user.is_active:
         raise auth_error(403, "ACCOUNT_LOCKED", "Tài khoản đã bị khóa.")
     return user
 
 
+def _login_attempt_key(request: Request) -> str:
+    """Khóa bộ đếm theo IP; dùng chung cho bước kiểm tra và ghi nhận lỗi."""
+    return request.client.host if request.client else "unknown"
+
+
 def check_login_limit(request: Request) -> None:
-    """Giới hạn số lần thử đăng nhập theo IP trong một phút."""
-    address = request.client.host if request.client else "unknown"
+    """Chặn khi IP đã sai đủ số lần trong cửa sổ hiện tại.
+
+    Hàm này chỉ kiểm tra và giữ cửa sổ thời gian; số lần sai thực tế được
+    tăng bởi ``record_login_failure`` để đăng nhập thành công không bị tính.
+    """
+    address = _login_attempt_key(request)
     with login_lock:
         count, reset_at = login_attempts.get(address, (0, 0))
         now = time.monotonic()
@@ -51,12 +60,29 @@ def check_login_limit(request: Request) -> None:
             raise HTTPException(
                 status_code=429,
                 detail={
-                    "code": "TOO_MANY_ATTEMPTS",
+                    "code": "TOO_MANY_REQUESTS",
                     "message": "Bạn đã thử đăng nhập quá nhiều lần.",
                 },
                 headers={"Retry-After": str(max(1, int(reset_at - now + 0.999)))},
             )
+        login_attempts[address] = (count, reset_at)
+
+
+def record_login_failure(request: Request) -> None:
+    """Tăng bộ đếm sau một lần xác thực thất bại (sai mật khẩu/tài khoản khóa)."""
+    address = _login_attempt_key(request)
+    with login_lock:
+        count, reset_at = login_attempts.get(address, (0, 0))
+        now = time.monotonic()
+        if now >= reset_at:
+            count, reset_at = 0, now + LOGIN_WINDOW_SECONDS
         login_attempts[address] = (count + 1, reset_at)
+
+
+def clear_login_limit(request: Request) -> None:
+    """Xóa bộ đếm sau khi đăng nhập thành công để không ảnh hưởng người dùng hợp lệ."""
+    with login_lock:
+        login_attempts.pop(_login_attempt_key(request), None)
 
 
 def register_user(db: Session, data: RegisterRequest) -> User:
@@ -97,9 +123,19 @@ def login_user(db: Session, data: LoginRequest, request: Request) -> dict:
     password_hash = user.password_hash if user else dummy_hash
 
     if not verify_password(data.password.get_secret_value(), password_hash) or user is None:
+        record_login_failure(request)
         raise auth_error(401, "INVALID_CREDENTIALS", "Email hoặc mật khẩu không đúng.")
 
-    tokens = create_tokens(db, require_active_user(user).id)
+    try:
+        user = require_active_user(user)
+    except HTTPException:
+        # Tài khoản bị khóa vẫn là một lần đăng nhập không thành công.
+        record_login_failure(request)
+        raise
+
+    # Đăng nhập hợp lệ: trả bộ đếm về 0 để người dùng không bị khóa oan.
+    clear_login_limit(request)
+    tokens = create_tokens(db, user.id)
     db.commit()
     return tokens
 
@@ -142,10 +178,10 @@ def refresh_tokens(db: Session, refresh_token: str) -> dict:
         auth_session = find_active_session(db, payload)
         user = db.get(User, int(payload["sub"]))
     except (jwt.InvalidTokenError, KeyError, TypeError, ValueError):
-        raise auth_error(401, "INVALID_TOKEN", "Phiên đăng nhập không hợp lệ.") from None
+        raise auth_error(401, "UNAUTHORIZED", "Phiên đăng nhập không hợp lệ.") from None
 
     if auth_session is None:
-        raise auth_error(401, "INVALID_TOKEN", "Phiên đăng nhập không hợp lệ.")
+        raise auth_error(401, "UNAUTHORIZED", "Phiên đăng nhập không hợp lệ.")
 
     user = require_active_user(user)
     db.delete(auth_session)
@@ -161,10 +197,10 @@ def logout_user(db: Session, refresh_token: str) -> None:
         payload = read_token(refresh_token, "refresh")
         auth_session = find_active_session(db, payload)
     except (jwt.InvalidTokenError, TypeError, ValueError):
-        raise auth_error(401, "INVALID_TOKEN", "Phiên đăng nhập không hợp lệ.") from None
+        raise auth_error(401, "UNAUTHORIZED", "Phiên đăng nhập không hợp lệ.") from None
 
     if auth_session is None:
-        raise auth_error(401, "INVALID_TOKEN", "Phiên đăng nhập không hợp lệ.")
+        raise auth_error(401, "UNAUTHORIZED", "Phiên đăng nhập không hợp lệ.")
     db.delete(auth_session)
     db.commit()
 

@@ -13,7 +13,7 @@ from app.services.auth import bearer_scheme, find_active_session, read_token
 def authentication_error() -> HTTPException:
     return HTTPException(
         status_code=401,
-        detail={"code": "INVALID_TOKEN", "message": "Phiên đăng nhập không hợp lệ."},
+        detail={"code": "UNAUTHORIZED", "message": "Phiên đăng nhập không hợp lệ."},
         headers={"WWW-Authenticate": "Bearer"},
     )
 

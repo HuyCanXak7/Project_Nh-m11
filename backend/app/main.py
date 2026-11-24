@@ -88,6 +88,18 @@ async def handle_database_error(request: Request, error: SQLAlchemyError):
     )
 
 
+@app.exception_handler(Exception)
+async def handle_unexpected_error(request: Request, error: Exception):
+    # Không trả stack trace/chi tiết nội bộ ra client; chỉ ghi log phía server.
+    logger.exception("Unexpected error during %s", request.url.path)
+    return api_response(
+        request,
+        500,
+        "Đã xảy ra lỗi máy chủ.",
+        error={"code": "INTERNAL_ERROR", "details": []},
+    )
+
+
 # Main chỉ liên kết router; endpoint và nghiệp vụ nằm ở tầng riêng.
 app.include_router(auth_router)
 app.include_router(admin_router)
