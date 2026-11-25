@@ -10,7 +10,22 @@
  * Khi BE xong: đổi USE_MOCK = false và chỉnh API_BASE. Định dạng lỗi theo PB-41: { code, message, details }.
  */
 
-const API_BASE = 'http://localhost:8000/api/v1';
+function resolveApiBase() {
+    if (typeof window !== 'undefined') {
+        if (window.__API_BASE__) return String(window.__API_BASE__).replace(/\/+$/, '');
+        const loc = window.location || {};
+        if (loc.protocol === 'http:' || loc.protocol === 'https:') {
+            const isLocal = loc.hostname === 'localhost' || loc.hostname === '127.0.0.1';
+            if (!isLocal) {
+                if (loc.port === '8080') return `${loc.protocol}//${loc.hostname}:8000/api/v1`;
+                return `${loc.origin}/api/v1`;
+            }
+        }
+    }
+    return 'http://localhost:8000/api/v1';
+}
+
+const API_BASE = resolveApiBase();
 const USE_MOCK = false;
 
 const SESSION_KEY = 'session';

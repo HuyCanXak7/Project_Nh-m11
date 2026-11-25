@@ -4,15 +4,17 @@ import logging
 from contextlib import asynccontextmanager
 from secrets import token_urlsafe
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
 from app.core.security import hash_password
 from app.core.config import setting
-from app.db.database import Base, engine
-from app.models import AuthSession, Course, GradeComponent, GradeScale, Semester, User
+from app.db.database import Base, engine, get_db
+from app.models import AuditLog, AuthSession, Course, Goal, GradeComponent, GradeScale, Semester, User
 from app.routers.admin import router as admin_router
 from app.routers.auth import router as auth_router
 from app.routers.courses import router as course_router
@@ -36,7 +38,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Hệ thống quản lý chỉ số học tập", lifespan=lifespan)
+app = FastAPI(title="Hệ thống quản lý chỉ số học tập", version="1.0.0", lifespan=lifespan)
 
 # Allow the local web origin to call the API while keeping other origins blocked.
 app.add_middleware(
@@ -113,3 +115,23 @@ app.include_router(grade_scale_router)
 app.include_router(gpa_router)
 app.include_router(grade_import_router)
 app.include_router(learning_data_router)
+
+
+@app.get("/api/v1/health", tags=["Health"])
+def healthcheck(request: Request, db: Session = Depends(get_db)):
+    """Endpoint healthcheck cho production/staging/local (PB-45, PB-62)."""
+    try:
+        db.execute(text("SELECT 1"))
+    except SQLAlchemyError:
+        return api_response(
+            request,
+            503,
+            "Cơ sở dữ liệu chưa sẵn sàng.",
+            error={"code": "SERVICE_UNAVAILABLE", "details": []},
+        )
+    return api_response(
+        request,
+        200,
+        "Hệ thống sẵn sàng.",
+        {"status": "ok", "database": "ok", "version": app.version},
+    )

@@ -41,12 +41,12 @@ services:
       sh -c "alembic upgrade head &&
              uvicorn app.main:app --host 0.0.0.0 --port 8000"
     healthcheck:
-      # OpenAPI is served only after the API process has started successfully.
+      # Healthcheck verifies both FastAPI and MySQL database connectivity.
       test:
         - CMD
         - python
         - -c
-        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/openapi.json', timeout=3)"
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=3)"
       interval: 10s
       timeout: 5s
       retries: 10
