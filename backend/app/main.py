@@ -43,6 +43,8 @@ app.add_middleware(
     CORSMiddleware,
     # FRONTEND_ORIGIN có thể chứa nhiều origin, cách nhau bằng dấu phẩy (vd: Docker 8080 + Live Server 5500).
     allow_origins=[origin.strip() for origin in setting.FRONTEND_ORIGIN.split(",")],
+    # Máy dev mở FE ở cổng nào cũng được (Live Server, http.server...) mà không phải sửa .env.
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],

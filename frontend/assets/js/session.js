@@ -3,7 +3,7 @@
  *
  *  - Lưu access/refresh token: "Nhớ tài khoản" → localStorage (giữ 7 ngày), không tick → sessionStorage.
  *  - apiFetch(): tự gắn access token; gặp 401 thì tự refresh rồi gửi lại; refresh hỏng → về trang đăng nhập.
- *  - 403 ACCOUNT_DISABLED (is_active = false) → xóa phiên, báo tài khoản bị khóa.
+ *  - 403 ACCOUNT_LOCKED (is_active = false) → xóa phiên, báo tài khoản bị khóa.
  *  - 429 TOO_MANY_REQUESTS → trả retryAfter để trang đăng nhập khóa nút.
  *  - requireAuth() / redirectIfLoggedIn(): chặn route.
  *
@@ -185,7 +185,7 @@ async function refreshOrEnd() {
         return await refreshTokens();
     } catch (err) {
         if (err.status === 0) throw err; // mất mạng: giữ phiên, báo lỗi bình thường
-        return endSession(err.code === 'ACCOUNT_DISABLED' ? MESSAGES.disabled : MESSAGES.expired);
+        return endSession(err.code === 'ACCOUNT_LOCKED' ? MESSAGES.disabled : MESSAGES.expired);
     }
 }
 
@@ -203,7 +203,7 @@ async function apiFetch(path, options = {}) {
     try {
         return await request(path, { ...options, token });
     } catch (err) {
-        if (err.status === 403 && err.code === 'ACCOUNT_DISABLED') return endSession(MESSAGES.disabled);
+        if (err.status === 403 && err.code === 'ACCOUNT_LOCKED') return endSession(MESSAGES.disabled);
         if (err.status !== 401) throw err;
         token = await refreshOrEnd();
         return request(path, { ...options, token });
@@ -340,7 +340,7 @@ const mockServer = (() => {
         if (!entry || entry.expiresAt <= now()) fail(401, 'TOKEN_EXPIRED', 'Access token hết hạn');
         const user = db.users.find((u) => u.id === entry.userId);
         if (!user) fail(401, 'TOKEN_INVALID', 'Token không hợp lệ');
-        if (!user.isActive) fail(403, 'ACCOUNT_DISABLED', MESSAGES.disabled);
+        if (!user.isActive) fail(403, 'ACCOUNT_LOCKED', MESSAGES.disabled);
         return user;
     }
 
@@ -377,7 +377,7 @@ const mockServer = (() => {
 
             delete db.attempts[key];
             // Chỉ báo khóa SAU khi đúng mật khẩu, để không lộ thông tin tài khoản
-            if (!user.isActive) fail(403, 'ACCOUNT_DISABLED', MESSAGES.disabled);
+            if (!user.isActive) fail(403, 'ACCOUNT_LOCKED', MESSAGES.disabled);
             return issueTokens(db, user);
         },
 
@@ -386,7 +386,7 @@ const mockServer = (() => {
             if (!entry || entry.revoked || entry.expiresAt <= now()) fail(401, 'REFRESH_INVALID', MESSAGES.expired);
             const user = db.users.find((u) => u.id === entry.userId);
             if (!user) fail(401, 'REFRESH_INVALID', MESSAGES.expired);
-            if (!user.isActive) fail(403, 'ACCOUNT_DISABLED', MESSAGES.disabled);
+            if (!user.isActive) fail(403, 'ACCOUNT_LOCKED', MESSAGES.disabled);
             entry.revoked = true; // xoay vòng: refresh token cũ chỉ dùng được 1 lần
             return issueTokens(db, user);
         },
