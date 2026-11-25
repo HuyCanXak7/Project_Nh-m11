@@ -202,10 +202,21 @@ function upgradeSidebarFigma() {
         <button type="button" class="topbar-icon-btn" id="topbarSearchBtn" title="Tìm kiếm nhanh (Ctrl+K)" aria-label="Tìm kiếm nhanh" onclick="openGlobalSearchModal()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7.5"/><line x1="20" y1="20" x2="16.2" y2="16.2"/></svg>
         </button>
-        <button type="button" class="topbar-icon-btn" title="Thông báo" onclick="showToast('Không có thông báo mới')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M6 17V11a6 6 0 0 1 12 0v6l2 2H4Z"/><path d="M10 21a2.5 2.5 0 0 0 4 0"/></svg>
-            <span class="topbar-icon-btn__dot"></span>
-        </button>
+        <div class="topbar-notif" id="topbarNotif">
+            <button type="button" class="topbar-icon-btn" id="topbarNotifBtn" title="Không có thông báo mới" aria-label="Thông báo, không có thông báo mới" aria-haspopup="true" aria-expanded="false" aria-controls="topbarNotifPanel">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M6 17V11a6 6 0 0 1 12 0v6l2 2H4Z"/><path d="M10 21a2.5 2.5 0 0 0 4 0"/></svg>
+                <span class="topbar-icon-btn__dot" id="topbarNotifDot" hidden></span>
+            </button>
+            <div class="topbar-notif__panel" id="topbarNotifPanel" role="region" aria-label="Danh sách thông báo" hidden>
+                <div class="topbar-notif__head">
+                    <span>Thông báo</span>
+                    <span class="topbar-notif__count" id="topbarNotifCount" hidden>0</span>
+                </div>
+                <div class="topbar-notif__body" id="topbarNotifBody">
+                    <p class="topbar-notif__empty">Không có thông báo mới.</p>
+                </div>
+            </div>
+        </div>
         <div class="topbar-user-wrap" id="topbarUserWrap"></div>
         <button type="button" class="theme-toggle-icon-btn" id="themeToggleBtn" title="Bật giao diện tối (Dark Mode)" aria-label="Bật hoặc tắt giao diện tối" aria-pressed="false" onclick="toggleTheme()"></button>
     `;
@@ -337,7 +348,15 @@ function setupUserMenu() {
     const setOpen = (open) => {
         list.hidden = !open;
         toggle.setAttribute('aria-expanded', open);
-        if (open) list.querySelector('[role="menuitem"]')?.focus();
+        if (open) {
+            const notifPanel = $('topbarNotifPanel');
+            const notifBtn = $('topbarNotifBtn');
+            if (notifPanel && !notifPanel.hidden) {
+                notifPanel.hidden = true;
+                notifBtn?.setAttribute('aria-expanded', 'false');
+            }
+            list.querySelector('[role="menuitem"]')?.focus();
+        }
     };
 
     toggle.addEventListener('click', (e) => {
@@ -568,12 +587,130 @@ function renderAdminViewBanner() {
     main.querySelector('.dash-header')?.after(bar) ?? main.prepend(bar);
 }
 
+/* ===== Thông báo trên Topbar: chỉ sáng đèn khi có thông báo/cảnh báo chưa xem ===== */
+let currentTopbarNotifications = [];
+
+function getNotifSeenKey() {
+    const uid = (typeof StorageService !== 'undefined' && typeof StorageService.currentUserId === 'function')
+        ? StorageService.currentUserId()
+        : (typeof getSession === 'function' ? (getSession()?.user?.id || 'guest') : 'guest');
+    return `studytrack_notif_seen_${uid}`;
+}
+
+function getNotifSignature(items) {
+    return (items || []).map(w => `${w.type || ''}:${w.message || ''}`).join('|');
+}
+
+function readSeenNotifSignature() {
+    try {
+        return typeof sessionStorage !== 'undefined' ? (sessionStorage.getItem(getNotifSeenKey()) || '') : '';
+    } catch {
+        return '';
+    }
+}
+
+function saveSeenNotifSignature(signature) {
+    try {
+        if (typeof sessionStorage === 'undefined') return;
+        if (signature) sessionStorage.setItem(getNotifSeenKey(), signature);
+        else sessionStorage.removeItem(getNotifSeenKey());
+    } catch { /* ignore */ }
+}
+
+function updateNotificationBell(warnings = []) {
+    currentTopbarNotifications = Array.isArray(warnings) ? warnings : [];
+    const count = currentTopbarNotifications.length;
+    const signature = getNotifSignature(currentTopbarNotifications);
+
+    if (count === 0) {
+        saveSeenNotifSignature('');
+    }
+
+    const hasUnread = count > 0 && readSeenNotifSignature() !== signature;
+    const btn = $('topbarNotifBtn');
+    const dot = $('topbarNotifDot');
+    const countEl = $('topbarNotifCount');
+    const bodyEl = $('topbarNotifBody');
+
+    if (dot) dot.hidden = !hasUnread;
+    if (btn) {
+        btn.classList.toggle('has-unread', hasUnread);
+        btn.title = count > 0 ? `Thông báo (${count} cảnh báo học tập)` : 'Không có thông báo mới';
+        btn.setAttribute('aria-label', count > 0 ? `Thông báo, có ${count} cảnh báo học tập` : 'Thông báo, không có thông báo mới');
+    }
+    if (countEl) {
+        countEl.textContent = String(count);
+        countEl.hidden = count === 0;
+    }
+    if (bodyEl) {
+        if (count === 0) {
+            bodyEl.innerHTML = '<p class="topbar-notif__empty">Không có thông báo mới.</p>';
+        } else {
+            bodyEl.innerHTML = `<ul class="topbar-notif__list">${currentTopbarNotifications.map(w => `
+                <li class="topbar-notif__item">
+                    <a href="${w.type === 'FAILED' ? 'courses.html' : 'dashboard.html'}" class="topbar-notif__link">
+                        <span class="topbar-notif__badge">Cảnh báo</span>
+                        <span>${escapeHtml(w.message)}</span>
+                    </a>
+                </li>
+            `).join('')}</ul>`;
+        }
+    }
+}
+
+function setupNotificationMenu() {
+    const wrap = $('topbarNotif');
+    const btn = $('topbarNotifBtn');
+    const panel = $('topbarNotifPanel');
+    if (!wrap || !btn || !panel || btn.dataset.notifBound === 'true') return;
+    btn.dataset.notifBound = 'true';
+
+    const setOpen = (open) => {
+        panel.hidden = !open;
+        btn.setAttribute('aria-expanded', String(open));
+        if (open) {
+            const userList = $('userMenuList');
+            const userToggle = $('userMenuToggle');
+            if (userList && !userList.hidden) {
+                userList.hidden = true;
+                userToggle?.setAttribute('aria-expanded', 'false');
+            }
+            if (currentTopbarNotifications.length > 0) {
+                saveSeenNotifSignature(getNotifSignature(currentTopbarNotifications));
+                const dot = $('topbarNotifDot');
+                if (dot) dot.hidden = true;
+                btn.classList.remove('has-unread');
+            }
+        }
+    };
+
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setOpen(panel.hidden);
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!wrap.contains(e.target)) setOpen(false);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !panel.hidden) {
+            setOpen(false);
+            btn.focus();
+        }
+    });
+}
+
 /* ===== PB-31: cảnh báo học tập (GPA kỳ < 2.0 hoặc có môn rớt) — vẽ lại mỗi lần dữ liệu tải lại ===== */
 function renderAcademicWarnings() {
     document.getElementById('academicWarnings')?.remove();
     const main = document.querySelector('main.dash');
-    if (!main || typeof StorageService === 'undefined' || typeof GradeCalculator === 'undefined') return;
+    if (!main || typeof StorageService === 'undefined' || typeof GradeCalculator === 'undefined') {
+        updateNotificationBell([]);
+        return;
+    }
     const warnings = GradeCalculator.getAcademicWarnings(StorageService.getSemesters(), StorageService.getCourses());
+    updateNotificationBell(warnings);
     if (warnings.length === 0) return;
 
     const bar = document.createElement('div');
@@ -616,7 +753,9 @@ function initAppShell() {
     renderUser(user);
     renderAdminViewBanner();
     setupSidebar();
+    setupNotificationMenu();
     setupUserMenu();
+    updateNotificationBell([]);
     highlightActiveSidebar();
 
     if (session && typeof StorageService !== 'undefined') {

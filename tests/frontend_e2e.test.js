@@ -259,3 +259,109 @@ test('7. Session API_BASE (PB-45 / P0-02): tự nhận diện localhost, LAN má
     'https://api.studylims.example.com/api/v1'
   );
 });
+
+test('8. Nút thông báo Topbar: tắt chấm đèn khi không có thông báo, bật khi có cảnh báo chưa xem và tắt khi đã mở xem', () => {
+  const localStorage = createStorageMock();
+  const sessionStorage = createStorageMock();
+  const docListeners = {};
+
+  function makeEl(id) {
+    const classes = new Set();
+    const attrs = {};
+    const listeners = {};
+    return {
+      id,
+      hidden: false,
+      title: '',
+      textContent: '',
+      innerHTML: '',
+      dataset: {},
+      classList: {
+        toggle: (c, f) => (f ? classes.add(c) : classes.delete(c)),
+        add: (c) => classes.add(c),
+        remove: (c) => classes.delete(c),
+        contains: (c) => classes.has(c)
+      },
+      setAttribute: (k, v) => { attrs[k] = v; },
+      getAttribute: (k) => attrs[k],
+      addEventListener: (ev, fn) => { (listeners[ev] ??= []).push(fn); },
+      dispatch: (ev, payload = { stopPropagation() {} }) => (listeners[ev] || []).forEach((fn) => fn(payload)),
+      contains: () => false,
+      focus: () => {}
+    };
+  }
+
+  const els = {
+    topbarNotif: makeEl('topbarNotif'),
+    topbarNotifBtn: makeEl('topbarNotifBtn'),
+    topbarNotifDot: makeEl('topbarNotifDot'),
+    topbarNotifPanel: makeEl('topbarNotifPanel'),
+    topbarNotifCount: makeEl('topbarNotifCount'),
+    topbarNotifBody: makeEl('topbarNotifBody')
+  };
+  els.topbarNotifDot.hidden = true;
+  els.topbarNotifPanel.hidden = true;
+  els.topbarNotifCount.hidden = true;
+
+  const sandbox = {
+    localStorage,
+    sessionStorage,
+    getSession: () => ({ user: { id: 3, email: 'demo.student01@example.com' } }),
+    document: {
+      documentElement: { classList: { toggle: () => {}, add: () => {}, remove: () => {}, contains: () => false }, setAttribute: () => {} },
+      body: { classList: { toggle: () => {} }, appendChild: () => {} },
+      createElement: () => ({
+        textContent: '',
+        get innerHTML() { return this.textContent; },
+        style: { setProperty: () => {} },
+        setAttribute: () => {},
+        appendChild: () => {},
+        remove: () => {}
+      }),
+      getElementById: (id) => els[id] || null,
+      addEventListener: (ev, fn) => { (docListeners[ev] ??= []).push(fn); }
+    },
+    window: { location: { pathname: '/pages/dashboard.html' }, addEventListener: () => {} },
+    setTimeout: (fn) => { fn(); return 0; },
+    console
+  };
+
+  const src = fs.readFileSync(path.join(JS_DIR, 'app_shell.js'), 'utf8');
+  const api = vm.runInNewContext(`${src}\n;({ updateNotificationBell, setupNotificationMenu })`, sandbox);
+
+  api.setupNotificationMenu();
+
+  // 1. Không có thông báo -> chấm đèn phải ẩn
+  api.updateNotificationBell([]);
+  assert.equal(els.topbarNotifDot.hidden, true);
+  assert.equal(els.topbarNotifBtn.classList.contains('has-unread'), false);
+  assert.equal(els.topbarNotifCount.hidden, true);
+  assert.match(els.topbarNotifBody.innerHTML, /Không có thông báo mới/);
+
+  // 2. Có cảnh báo học tập -> chấm đèn bật sáng
+  const warn1 = [{ type: 'FAILED', message: 'Môn INT1001 bị điểm F (3.9).' }];
+  api.updateNotificationBell(warn1);
+  assert.equal(els.topbarNotifDot.hidden, false);
+  assert.equal(els.topbarNotifBtn.classList.contains('has-unread'), true);
+  assert.equal(els.topbarNotifCount.textContent, '1');
+  assert.equal(els.topbarNotifCount.hidden, false);
+
+  // 3. Bấm mở nút chuông -> panel mở ra và chấm đèn tắt vì đã xem
+  els.topbarNotifBtn.dispatch('click');
+  assert.equal(els.topbarNotifPanel.hidden, false);
+  assert.equal(els.topbarNotifDot.hidden, true);
+  assert.equal(els.topbarNotifBtn.classList.contains('has-unread'), false);
+
+  // 4. Nạp lại đúng cảnh báo cũ -> chấm đèn vẫn tắt
+  api.updateNotificationBell(warn1);
+  assert.equal(els.topbarNotifDot.hidden, true);
+
+  // 5. Phát sinh thêm cảnh báo mới -> chấm đèn sáng lại
+  const warn2 = [...warn1, { type: 'LOW_GPA', message: 'GPA Học kỳ 1 là 1.80, dưới 2.0.' }];
+  api.updateNotificationBell(warn2);
+  assert.equal(els.topbarNotifDot.hidden, false);
+
+  // 6. Hết cảnh báo -> chấm đèn tự tắt
+  api.updateNotificationBell([]);
+  assert.equal(els.topbarNotifDot.hidden, true);
+});
