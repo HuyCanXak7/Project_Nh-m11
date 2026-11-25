@@ -110,6 +110,12 @@ def test_cors_allows_only_configured_frontend_origin():
     blocked = client.get("/openapi.json", headers={"Origin": "https://evil.example"})
     assert blocked.headers.get("access-control-allow-origin") is None
 
+    local_dev = client.get("/openapi.json", headers={"Origin": "http://127.0.0.1:5501"})
+    assert local_dev.headers.get("access-control-allow-origin") == "http://127.0.0.1:5501"
+
+    lookalike = client.get("/openapi.json", headers={"Origin": "http://localhost.evil.example"})
+    assert lookalike.headers.get("access-control-allow-origin") is None
+
     preflight = client.options(
         "/api/v1/auth/login",
         headers={
