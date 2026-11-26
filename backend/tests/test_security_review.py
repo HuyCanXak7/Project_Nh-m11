@@ -116,6 +116,14 @@ def test_cors_allows_only_configured_frontend_origin():
     lookalike = client.get("/openapi.json", headers={"Origin": "http://localhost.evil.example"})
     assert lookalike.headers.get("access-control-allow-origin") is None
 
+    # Máy khác trong mạng LAN mở FE từ máy chạy backend
+    for lan in ("http://192.168.1.10:5500", "http://10.0.0.5:8080", "http://172.20.3.4"):
+        response = client.get("/openapi.json", headers={"Origin": lan})
+        assert response.headers.get("access-control-allow-origin") == lan
+    for outside in ("http://8.8.8.8", "http://172.32.0.1", "http://192.168.1.10.evil.example"):
+        response = client.get("/openapi.json", headers={"Origin": outside})
+        assert response.headers.get("access-control-allow-origin") is None
+
     preflight = client.options(
         "/api/v1/auth/login",
         headers={

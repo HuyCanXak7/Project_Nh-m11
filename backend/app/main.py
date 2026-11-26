@@ -46,7 +46,11 @@ app.add_middleware(
     # FRONTEND_ORIGIN có thể chứa nhiều origin, cách nhau bằng dấu phẩy (vd: Docker 8080 + Live Server 5500).
     allow_origins=[origin.strip() for origin in setting.FRONTEND_ORIGIN.split(",")],
     # Máy dev mở FE ở cổng nào cũng được (Live Server, http.server...) mà không phải sửa .env.
-    allow_origin_regex=r"http://(localhost|127\.0\.0\.1)(:\d+)?",
+    # Thêm IP mạng LAN riêng (192.168.x.x, 10.x.x.x, 172.16–31.x.x) để máy khác trong nhóm mở FE từ máy chạy backend.
+    allow_origin_regex=(
+        r"http://(localhost|127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}"
+        r"|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(:\d+)?"
+    ),
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],

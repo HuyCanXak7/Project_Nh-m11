@@ -76,10 +76,10 @@ def page(servers):
     with sync_playwright() as p:
         browser = p.chromium.launch(channel="chrome", headless=os.getenv("HEADED") != "1")
         page = browser.new_page()
-        # FE gọi cứng http://localhost:8000 → chuyển sang backend của test
+        # FE gọi API ở cổng 8000 cùng host với trang → chuyển sang backend của test
         page.route(
-            "http://localhost:8000/**",
-            lambda route: route.continue_(url=route.request.url.replace("http://localhost:8000", servers[0])),
+            "http://127.0.0.1:8000/**",
+            lambda route: route.continue_(url=route.request.url.replace("http://127.0.0.1:8000", servers[0])),
         )
         yield page
         page.screenshot(path=RESULTS / "last_page.png", full_page=True)
